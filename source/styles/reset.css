@@ -1,0 +1,67 @@
+body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend,button,input,textarea,th,td,a {margin: 0;padding: 0}
+body,button,input,select,textarea,a{font:14px/24px  "Microsoft YaHei",Tahoma,Helvetica,Arial,sans-serif;}
+h1,h2,h3,h4,h5,h6 {font-size: 100%;font-weight:normal;}
+a,span,b,i,em {  display: inline-block;  font-style: normal;}
+ul, ol,li {list-style: none; }
+a {text-decoration: none;color: #333;outline: 0;}
+a, button, input{  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);}
+input:-webkit-autofill {-webkit-box-shadow: 0 0 0 1000px white inset;border: 1px solid #CCC!important;}
+button,input,select,textarea {font-size: 100%;outline: none;border:none;  }
+table {border-collapse: collapse;  border-spacing: 0  }
+input::-webkit-input-placeholder {color: #4b4b4b;}
+/*=========common.js===========*/
+.tl{text-align: left}
+.tc {text-align: center;}
+.tr{text-align: right;}
+.textover{text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+.fl{float: left;}
+.fr{float: right;}
+.hide{display: none;}
+.show{display: block;}
+.relative{position: relative;}
+.absolute{position: absolute;}
+.clearfix:after{content:"";display:block;clear:both;height: 0;overflow: hidden;}
+.fs-12{font-size: 12px;}
+.fs-14{font-size: 14px;}
+.fs-16{font-size: 16px;}
+.bold{font-weight: bold;}
+.red{color: #f00;}
+.ml--30{margin-left: -30px;}
+.ml--15{margin-left: -15px;}
+.m-0-auto{margin: 0 auto}
+.mt-5{margin-top: 5px;}
+.mb-5{margin-bottom: 5px;}
+.ml-5{margin-left: 5px;}
+.mr-5{margin-right: 5px;}
+.mt-10{margin-top: 10px;}
+.ml-10{margin-left: 10px;}
+.mr-10{margin-right: 10px;}
+.mb-10{margin-bottom: 10px;}
+.mb-15{margin-bottom: 15px;}
+.mt-15{margin-top: 15px;}
+.ml-15{margin-left: 15px;}
+.mr-15{margin-right: 15px;}
+.mr-16{margin-right: 16px;}
+.ml-20{margin-left: 20px;}
+.mt-20{margin-top: 20px;}
+.mr-20{margin-right: 20px;}
+.mb-20{margin-bottom: 20px;}
+.ml-25{margin-left: 25px;}
+.mt-25{margin-top: 25px;}
+.mr-25{margin-right: 25px;}
+.mb-25{margin-bottom: 25px;}
+.mt-30{margin-top: 30px;}
+.mr-30{margin-right: 30px;}
+.ml-30{margin-left: 30px;}
+.mb-30{margin-bottom: 30px;}
+.ml-40{margin-left: 40px;}
+.ml-45{margin-left: 45px;}
+.mt-45{margin-top: 45px;}
+.ml-50{margin-left: 50px;}
+.mt-50{margin-top: 50px;}
+.ml-55{margin-left: 55px;}
+.mt-60{margin-top: 60px;}
+.c-999{color:#999;}
+.c-ccc{color: #ccc;}
+.c-theme-color{color: #1e7cd9;}
+

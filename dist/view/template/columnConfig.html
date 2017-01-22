@@ -1,0 +1,44 @@
+<div class="ConfigMain columnContent">
+    <div class="fl ml-45">
+        <h6 class="mt-15 ml-20 fs-16">二级页面显示项配置</h6>
+        <div id="all-item" class="table-sort-itemList" onselectstart="return false">
+            <div class="provide-item">
+                <h6 class="sort-title">未显示项</h6>
+                <nav>
+                    <ul id="provide-item">
+                        <li ng-repeat="data in userConfigData" class="normal mt-5" data-select="option" data-keyname={{data.valueContent.replace(":desc","")}} data-order="up"><div>{{ data.valueAlias }}</div></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="middleBtn">
+                <span class="toggleBtn addAllItem"></span>
+                <span class="toggleBtn removeAllItem"></span>
+            </div>
+            <div class="sort-item">
+                <h6 class="sort-title">已显示项<span class="order up-order"></span><span class="order down-order"></span></h6>
+                <nav>
+                    <ul id="sort-item">
+                        <li ng-repeat="data in userSelectConfigData" data-select="select" class="normal mt-5" data-keyname={{data.valueContent.replace(":desc","")}} data-order={{data.order}}><div>{{ data.valueAlias }}</div></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div id="columnWorkshop" class="location-list fl location-show">
+            <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+                <ul>
+                    <li class="all-location">
+                        <i class="select-status" data-location-id="01"></i>
+                        <span class="ml-10 active open">
+                            <s class="open-btn mr-10"></s>
+                            春风车间
+                        </span>
+                        <folder-tree current-folder="folder"></folder-tree>
+                    </li>
+                </ul>
+        </div>
+        <div class="m-0-auto mt-80 mb-20 tc clearfix">
+            <a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveColumnContent()">应用</a>
+            <a class="ml-15 reset-config" href="javascript:void(0);" ng-click="resetColumnConfig()">还原</a>
+        </div>
+    </div>
+</div>

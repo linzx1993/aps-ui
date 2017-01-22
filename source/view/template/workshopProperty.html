@@ -1,0 +1,25 @@
+<div class="ConfigMain adminContent" >
+    <h1 class="config-content-title">管理员配置页</h1>
+    <div class="mt-20 ml-55">
+        <dl class="clearfix">
+            <dt class="fl">车间属性设置 ：</dt>
+            <dd class="fl relative ml-5">
+                <span data-value=""></span>
+                <ul class="scheduleDrag">
+                    <li ng-repeat="data in adminOptionList" data-valueAlias={{data.valueAlias}} value={{data.valueContent}}>{{data.valueAlias}}</li>
+                </ul>
+                <select ng-model="carHouseSelected" class="carHouse">
+                    <option ng-repeat="data in adminOptionList" data-valueAlias={{data.valueAlias}} value={{data.valueContent}}>{{data.valueAlias}}</option>
+                </select>
+            </dd>
+        </dl>
+    </div>
+    <div class="rightLocation location-show" style="position: absolute;top: 50px;right: 100px;">
+        <h6 class="tc mb-5">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+        <div id="columnWorkshop" class="locationList ul-box"></div>
+    </div>
+    <div style="margin-top: 500px;" class="m-0-auto mt-30 mb-20 tc clearfix">
+        <a class="mr-15 save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveAdminConfig()>应用</a>
+        <a class="ml-15 reset-config " href="javascript:void(0);" ng-click=resetAdminConfig()>还原</a>
+    </div>
+</div>

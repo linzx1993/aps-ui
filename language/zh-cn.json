@@ -1,0 +1,23 @@
+{
+  "configOption": "配置选项栏",
+  "VersionNav" : "版本信息",
+  "showConfiguration" : "显示项配置",
+  "ColumnInformationConfiguration" : "列信息配置",
+  "Multi-columnSortConfiguration" : "多列排序配置",
+  "ScheduleRuleSetting" : "排程规则设定",
+  "SchedulingSchemeSettings" : "排程方案设定",
+  "PAPRuleSetting" : "PAP规则设定",
+  "AdministratorConfigurationItem" : "管理员配置",
+  "workshopSelectRule" : "请为排程车间选择排程规则",
+  "dragWorkshopOrder" : "上下拖动调整车间顺序",
+  "selectWorkShop" : "车间选择栏 ",
+  "selectWorkShopTip" : "点击下方选择车间 ",
+  "workshopProperties" : "车间属性",
+  "defaultDisplayItem" : "默认显示项",
+  "displayConfiguration" : "显示项配置",
+  "levelPage" : "一级页面",
+  "secondaryPage" : "二级页面",
+  "threePages" : "三级页面",
+  "100001": "登录",
+  "100002": "注册"
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+test page
+
+<script src="../scripts/lib/tool.js"></script>
+<script>
+    function getDateStr(date){
+        var year=date.getFullYear();
+        var month=date.getMonth()+1;
+        if(month<10){
+            month="0"+month;
+        }
+        var day=date.getDate();
+        if(day<10){
+            day="0"+day;
+        }
+        return year+"-"+month+"-"+day;
+    }
+
+    alert(getDateStr(new Date()));
+</script>
+
+<script>
+//备用代码1.
+//以后可以做成后台线程在每个页面都查询，做成线程比较复杂，暂不考虑
+
+//排程状态表
+//$rootScope.aps_state_name = {
+//    "error":99,//异常状态
+//    "unstart":0,//未开始
+//    "progress":1,//进行中
+//    "result":2//排程结束
+//};
+//排程状态
+//$rootScope.aps_state = $rootScope.aps_state_name.unstart;
+
+//switch($rootScope.aps_state){
+//    case $rootScope.aps_state_name.unstart :
+//        $scope.progress_info = "排程未开始";
+//        break;
+//    case $rootScope.aps_state_name.progress :
+//        $scope.progress_info = "排程进行中";
+//        break;
+//    case $rootScope.aps_state_name.result :
+//        $scope.progress_info = "排程已结束";
+//        break;
+//}
+</script>
+</body>
+</html>

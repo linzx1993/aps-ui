@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<span class="aaa"></span>
+<script>
+    function a(){
+        console.log(1111);
+        var arr = [],value;
+        setTimeout(function () {
+            value = 1;
+            arr.forEach(function (item) {
+                item(value);
+            })
+            arr = undefined;
+        });
+        return {
+            then : function(callback){
+                if(arr){
+                    arr.push(callback)
+                }else{
+                    callback(value)
+                }
+            }
+        }
+    }
+    function b(){
+        console.log(2222);
+    }
+    function c(){
+        console.log(3333);
+    }
+//    a().then(b).then(c);
+    var defer = function(){
+        var pending = [],value;
+        return {
+            resolve : function (_value) {
+                value = _value;
+                pending.forEach(function(item){
+                    item(value)
+                })
+                pending = undefined;
+            },
+            then : function(callback){
+                if(pending){
+                    pending.push(callback)
+                }   else{
+                    callback(value);
+                }
+            }
+        }
+    }
+    var oneLater = function(){
+        var result = defer();
+        setTimeout(function () {
+            result.resolve(1);
+        }, 1000);
+        return result;
+    };
+    oneLater().then(b)
+    //
+    var defer1 = function(){
+        var pending = [],value;
+        return {
+            resolve : function(_value){
+                if(pending){
+                    value = _value;
+                    pending.forEach(function(item){
+                        item(value);
+                    })
+                    pending = undefined;
+                }else{
+                    throw new Error("A promise can only be resolved once.");
+                }
+            },
+            then : function(callback){
+                if(pending){
+                    pending.push(callback)
+                }else{
+                    callback(value);
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<div class="ConfigMain scheduleContent">
+    <h1 class="config-content-title">排程方案设定</h1>
+    <p class="mt-20 ml-50 c-999" ng-show="!planList.length">暂无方案，请点击<a href="javascript:;" class="c-theme-color bold" ng-click="openPlanWindow()">添加方案</a></p>
+    <div id="planContent" class="clearfix planContent" ng-show="planList.length" >
+        <div class="fl leftPlan">
+            <nav ng-if="planList.length" class="check-rule-nav check-scheme-nav">
+                <ul class="clearfix">
+                    <li><span class="addRule" ng-click="openPlanWindow()"></span><span class="nav-manage" ng-click="startMange()"></span></li>
+                    <li ng-repeat="data in planList" class="schedulePlanLi" ng-click="lookPlan(data.schemeId,$index)" data-tempory={{data.tempory}} data-scheme-id={{data.schemeId}} ng-init="delete = false" ng-class="$first ? 'active' : ''">
+                        <span ng-show="!showManage">{{data.schemeName}}</span>
+                        <input maxlength="10" ng-show="showManage" ng-model="data.schemeName" val={{data.schemeName}}/>
+                        <b ng-class="{'delete' : showManage}" ng-click="deletePlan(data.schemeId,$event)"></b>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="fl middleWorkshop">
+            <h6 class="mt-15 mb-15 tc">{{"workshopSelectRule" | translate}}<span>（{{"dragWorkshopOrder" | translate}}）</span></h6>
+            <nav id="workshopRule" class="" onselectstart="return false">
+                <ul class="ml-30 gridly relative">
+                    <li ng-repeat="data in locationRuleList" data-locationId={{data.locationId}} class="mt-20">
+                        <a data-locationId={{data.locationId}} href="javascript:void(0)">{{data.locationName}}</a>
+                        <div class="workshop-ruleNav" >
+                            <a class="ml-30 select-rule" data-rule-id={{data.ruleId}} href="javascript:void(0)">{{data.ruleName}}</a>
+                            <ul>
+                                <li ng-repeat="data in ruleList" class="" ng-click="" data-rule-id={{data.ruleId}}>{{data.ruleName}}<span class="viewRule" ng-click="viewRule(data.ruleId,data.ruleName,$event)"></span></li>
+                            </ul>
+                        </div>
+                        <!--<a class="ml-30" data-ruleId={{data.ruleId}} href="javascript:void(0)">{{data.ruleName}}</a>-->
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="fl location-list rightLocation location-show">
+            <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+            <ul>
+                <li class="all-location">
+                    <i class="select-status" data-location-id="01"></i>
+                    <span class="ml-10 active open">
+                            <s class="open-btn mr-10"></s>
+                            春风车间
+                        </span>
+                    <folder-tree current-folder="folder"></folder-tree>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <p class="tc" ng-show="planList.length"><a class="mr-15 save-sort saveSchedulePlan" href="javascript:void(0);" ng-click=saveSchedulePlan()>应用</a></p>
+</div>

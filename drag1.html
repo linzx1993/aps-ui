@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>kpdragsort</title>
+    <script src="scripts/lib/jquery-min.js" type="text/javascript"></script>
+    <style type="text/css">
+        *{margin:0;padding:0}
+        .link_cont{border:1px solid red;width:400px;float:left;margin-left:5px;}
+        .a{height:50px;border:1px solid blue;margin-bottom:10px}
+    </style>
+</head>
+<body>
+<div class="link_cont">
+    <li class="a">1111</li>
+    <li class="a">2222</li>
+    <li class="a">3333</li>
+    <li class="a">4444</li>
+    <li class="a">5555</li>
+</div>
+<div class="link_cont">
+    <li class="a">1111</li>
+    <li class="a">2222</li>
+    <li class="a">3333</li>
+    <li class="a">4444</li>
+    <li class="a">5555</li>
+</div>
+<div class="link_cont">
+    <li class="a">1111</li>
+    <li class="a">2222</li>
+    <li class="a">3333</li>
+    <li class="a">4444</li>
+    <li class="a">5555</li>
+</div>
+<script>
+    $.fn.kpdragsort = function(){
+        var container = this;
+        $(container).children().off("mousedown").mousedown(function(e){
+            if(e.which != 1 || $(e.target).is("input,textarea") || window.kp_only) return;
+            e.preventDefault();
+            var x = e.pageX;
+            var y = e.pageY;
+            var _this = $(this);
+            var w = _this.width();
+            var h = _this.height();
+            var w2 = w/2;
+            var h2 = h/2;
+            var p = _this.offset();
+            var left = p.left;
+            var top = p.top;
+            window.kp_only = true;//按下
+
+            //添加虚线框
+            _this.before('<div id="kp_widget_holder"></div>');
+            var wid = $("#kp_widget_holder");
+            wid.css({"border": "2px solid #ccc","height" : _this.outerHeight(true) - 4});
+            //保持原来的宽高
+            _this.css({"width": w,"height" : h,"position" : "absolute",opacity : 0.8,"z-index" : 999,"left" : left,"top" : top});
+//return;
+            $(document).mousemove(function(e){
+                e.preventDefault();
+                //选中移动块
+                var l= left + e.pageX - x;
+                var t = top + e.pageY - y;
+                _this.css({"left" : l,"top" : t});
+
+                // 选中块的中心坐标
+                var ml = l + w2;
+                var mt = t + h2;
+
+                $(container).children().not(_this).not(wid).each(function(){
+                    var obj = $(this);
+                    var p = obj.offset();
+                    //当前块的坐标
+                    var a1 = p.left;
+                    var a2 = p.left + obj.width();
+                    var a3 = p.top;
+                    var a4 = p.top + obj.height();
+
+                    if( a1 < ml && ml < a2 && ml < a2 && a3 < mt && mt < a4){
+                        console.log(obj.next("#kp_widget_holder").length);
+                        if(!obj.next("#kp_widget_holder").length){
+                            wid.insertAfter(this);
+                        }else{
+                            wid.insertBefore(this);
+                        }
+                        return;
+                    }
+                })
+            })
+            $(document).mouseup(function(){
+                $(document).off("mouseup").off("mousemove");
+                $(container).each(function () {
+                    var obj = $(this).children();
+                    var len = obj.length;
+                    if(len == 1 && obj.is(_this)){
+                        $("<div></div>").appendTo(this).attr("class","kp_widget_block").css({"height" : 100});
+                    }else{
+                        $(this).children(".kp_widget_block").remove();
+                    }
+                });
+
+                // 拖拽回位，并删除虚线框
+                var p = wid.offset();
+                _this.animate({"left" : p.left ,"top" : p.top},100,function(){
+                    _this.removeAttr("style");
+                    wid.replaceWith(_this);
+                    window.kp_only = null;
+                })
+            })
+        })
+    }
+    $(".link_cont").kpdragsort();
+</script>
+<script>
+//    function insertAfter(newEl, targetEl)
+//    {
+//        var parentEl = targetEl.parentNode;
+//
+//        if(parentEl.lastChild == targetEl)
+//        {
+//            parentEl.appendChild(newEl);
+//        }else
+//        {
+//            parentEl.insertBefore(newEl,targetEl.nextSibling);
+//        }
+//    }
+//    Object.defineProperty(Object,"insertAfter",function(){
+//        alert(1);
+//    })
+//    var span = document.createElement("span");
+//    $("body")[0].insertAfter(span);
+</script>
+</body>
+</html>

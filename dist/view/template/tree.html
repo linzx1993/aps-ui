@@ -1,0 +1,9 @@
+<ul>
+    <b class="column-border"></b>
+    <!--<li ng-repeat="subfolder in currentFolder.children" ng-include="'template/tree.html'" ng-init="currentFolder = subfolder">-->
+    <li ng-repeat="subfolder in currentFolder.children">
+        <i class="select-status" data-location-id={{subfolder.locationId}} ng-click="addId(subfolder.locationId)"></i>
+        <span ng-class="{'title-open' : subfolder.children}" class="ml-10"><s ng-show="subfolder.children" class="open-btn mr-10"></s>{{subfolder.name}}</span>
+        <folder-tree current-folder="subfolder"></folder-tree>
+    </li>
+</ul>

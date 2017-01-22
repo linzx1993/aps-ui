@@ -1,0 +1,36 @@
+<!--右上角按钮区-->
+<div class="top-right-button">
+    <span class="out-login">退出</span>
+</div>
+<div class="relative m-0-auto mt-50 config-box">
+    <nav class="config-nav fl">
+        <h1 class="configNavTitle">{{"configOption" | translate}}</h1>
+            <ul>
+                <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index">
+                    <a class="" href="javascript:;" ui-sref={{configLi.sref}} ng-click=selectLi(configLi.url,$event)>{{configLi.text | translate}}</a>
+                    <i class="nav-angle" ng-if="configLi.children"></i>
+                    <ul ng-if="configLi.children">
+                        <li class="second-nav" ng-repeat="child in configLi.children track by $index">
+                            <a href="javascript:;" ui-sref={{child.sref}}>{{child.text | translate}}</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        <!--<accordion>-->
+            <!--<exli ng-class='showMe ? active : ""' ng-repeat='li in configLis'>-->
+                <!--{{expander.text}}-->
+            <!--</exli>-->
+        <!--</accordion>-->
+    </nav>
+    <!--<div class="config-content" ui-view=""/>-->
+    <div class="config-content" ui-view></div>
+    <!--<div class="config-content fl" ui-view></div>-->
+    <!--<div class="config-content fl" ng-include="dataUrl"></div>-->
+    <div class="info-mask" ng-class="infoObj.mask ? 'active' : ''">
+        <div class="info-box" ng-class="infoObj.errorInfo ? 'error' : ''">
+            <!--<h6 class="info-title"><i>提示</i><b class="fr mt-15 mr-20 delete-mask" ng-click="hideInfo()"></b></h6>-->
+            <!--<div class="info-content tc">-->
+            <p class="tc"><span class="mr-15"></span>{{infoObj.text}}</p>
+        </div>
+    </div>
+</div>

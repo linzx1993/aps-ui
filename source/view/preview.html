@@ -1,0 +1,416 @@
+<!--右上角按钮区-->
+<div class="top-right-button">
+	<span ng-click="aps_start()">开始排程</span>
+	<span ng-click="edit_again()">再编辑</span>
+	<span class="user-info">
+		<ul class="user-info-box">
+			<li><a href="#/config">参数配置</a></li>
+			<li><a href="#/help">帮助</a></li>
+			<li class="out-login">退出</li>
+		</ul>
+		{{userName||"用户"}}</span>
+</div>
+<!--右上角按钮区 END-->
+
+<!--右边栏-->
+<div class="right-menu">
+	<!--<div class="cache-button">
+		<i class="cache-button-icon"></i>
+		暂存间
+	</div>-->
+	<div class="search-btn search-btn-normal right-menu-button" title="查询">
+		<i class="search-btn-icon"></i>
+		<div class="search-box">
+			<div class="sale-order">
+				<span>订单号：</span>
+				<input type="text" />
+			</div>
+			<div class="material-name">
+				<span>物料名：</span>
+				<input type="text" />
+			</div>
+			<div class="material-code">
+				<span>物料编码：</span>
+				<input type="text" />
+			</div>
+			<div class="start-search" ng-click="search()">查询</div>
+		</div>
+		<div class="tip">搜索</div>
+	</div>
+	<div class="turn-to-back right-menu-button" ng-click="turn_to_back()" title="翻转">
+		<i class="turn-to-back-icon"></i>
+		<div class="tip">翻转</div>
+	</div>
+	<div class="to-fact right-menu-button to-fact-normal change-one"  title="预转排实际"><!--ng-click="to_fact()"-->
+		<div class="cover_i" ng-click="open_tofact()"><i class="to-fact-icon" ></i></div>
+		<div class="to-fact-box">
+			<div class="fact-days">
+				<span>预排天数：</span>
+				<input  type="text" /><!--type="text"-->
+				<span class="days-tip">（最多可预排&nbsp;&nbsp;"{{maxdays}}"&nbsp;天）</span>
+			</div>
+			<span class="device-title">设备名称</span>
+			<div class="select_all"><label for="chooseall"><input id="chooseall" name="factPnameAll" type="checkbox" checked="checked"/><span class="check"></span>全选</label></div>
+			<div class="select_single">
+				<div ng-repeat="punitName in punitNameList track by $index" class="each-pName-div" id="eachPname{{$index}}}">
+					<label for="chooseSinle{{$index}}" class="single_label"><input id="chooseSinle{{$index}}" name="factPnameSingle" type="checkbox" checked="checked"/><span class="check" ></span></label>
+					<span>{{punitName}}</span>
+						<span class="sa_icon sub normal_sub"></span>
+						<input  type="text" class="each_days_input"/>
+						<span class="sa_icon add normal_add"></span>
+									
+				</div>				
+			</div>
+
+			<div class="start-to-fact" ng-click="to_fact()">确定</div>
+		</div>
+		<div class="tip">预转排实际</div>
+	</div>
+	
+	<div class="edit-again right-menu-button" ng-click="exter_differ()" title="外部差异">
+		<i class="external-differ-icon"></i>
+		<span class="external-diff-num">{{differAllNum}}</span>		
+		<div class="tip">外部差异</div>
+	</div>
+	
+	
+	
+</div>
+<div class="right-menu-switch"></div>
+
+<div class="pbody-wrap"><!-- 页面表格相关部分 -->
+    <div class="wrap-content"><!-- 页面主体内容 -->
+    	
+        <div class="table"><!-- 表格 -->
+            <div class="table-head"><!-- 表头部分 -->
+            	<div style="display: flex;">
+            		<div></div>
+	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">
+	            		<span>{{date.thisDate.substring(5,7)}}</span>月
+	            		<span>{{date.thisDate.substring(8,10)}}</span>日
+	            	</div>
+            	</div>
+	            	
+            </div><!-- .table-head END -->
+
+            <div class="table-body"><!-- 表格主体部分 -->
+            	<div class="table-content">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index">
+            			<div ng-repeat="cell in row track by $index" class="{{cell[0].frontClass}} table-td" ng-style="{opacity:cell[0].opacity}">
+            				<!--反面-->
+            				<div class="td-back">
+	            				<p>{{cell[0].changeModelNumber}}</p>
+	            				<p>{{cell[0].workTime}}</p>
+	            				<p>{{cell[0].cell_tasknum}}</p>
+	            				<p>{{cell[0].timePercent}}</p>
+	            			</div>
+	            			<!--正面-->
+            				<div class="td-front" ng-click="unit_click(cell)" ng-style="{cursor: cell[0].cursor}">
+            					<div ng-repeat="unit in cell track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
+	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
+	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
+	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+	            				</div>
+            				</div>
+	      
+	            			<!--图标放在这一层，加浮动到指定位置-->
+	            			<div class="freeze_info"></div>
+	            			<div class="over-Capability"></div>
+            			</div>
+            		</div>
+            	</div>
+            </div><!-- .table-body END -->
+			
+			<!--上一页和下一页-->
+			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
+            <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
+        </div><!-- .table END -->
+    </div><!-- .wrap-content END -->
+
+</div><!-- .pbody-wrap END -->
+
+
+
+<div id="do_detail_dialog" title="派工单详细信息">
+    <div class="do_detail_dialog" ng-style="{display : do_detail_dialog_show?'block':'none'}">
+        <!--<p>销售订单：{{do_detail.saleOrderCode}}</p>
+        <p>自制件计划：{{do_detail.moCode}}</p>
+        <p>作业计划：{{do_detail.doCode}}</p>
+        <p>物料编码：{{do_detail.materialCode}}</p>
+        <p>物料名称：{{do_detail.materialName}}</p>
+        <p>物料规格：{{do_detail.materialSpec}}</p>
+        <p>工序编码：{{do_detail.processCode}}</p>
+        <p>工序名称：{{do_detail.processName}}</p>
+        <p>开始时间：{{do_detail.startTime}}</p>
+        <p>结束时间：{{do_detail.endTime}}</p>
+        <p>计划数：{{do_detail.taskNum}}</p>-->
+        
+        
+        <!--详细信息弹出框建议格式-->
+        <table>
+        	<tr>
+				<td>销售订单</td>
+				<td>:</td>
+				<td>{{do_detail.saleOrderCode}}</td>
+			</tr>
+			<!--生产主计划号（缺）-->
+			<tr>
+				<td>自制件计划号</td>
+				<td>:</td>
+				<td>{{do_detail.moCode}}</td>
+			</tr>
+			<!--车间计划号（缺）-->
+			<tr class="do-code">
+				<td>派工单号</td>
+				<td>:</td>
+				<td>{{do_detail.doCode}}</td>
+			</tr>
+			<tr>
+				<td>物料编码</td>
+				<td>:</td>
+				<td>{{do_detail.materialCode}}</td>
+			</tr>
+			<tr>
+				<td>物料助记码</td>
+				<td>:</td>
+				<td>{{do_detail.materialMnem}}</td>
+			</tr>
+			<tr>
+				<td>物料名称</td>
+				<td>:</td>
+				<td>{{do_detail.materialName}}</td>
+			</tr>
+			<tr>
+				<td>物料规格</td>
+				<td>:</td>
+				<td>{{do_detail.materialSpec}}</td>
+			</tr>
+			<tr>
+				<td>物料单位</td>
+				<td>:</td>
+				<td>{{do_detail.materialUnit}}</td>
+			</tr>
+			
+			<tr>
+				<td>工序编码</td>
+				<td>:</td>
+				<td>{{do_detail.processCode}}</td>
+			</tr>
+			<tr>
+				<td>工序名称</td>
+				<td>:</td>
+				<td>{{do_detail.processName}}</td>
+			</tr>
+			
+			<tr>
+				<td>开始时间</td>
+				<td>:</td>
+				<td>{{do_detail.startTime}}</td>
+			</tr>
+			<tr>
+				<td>结束时间</td>
+				<td>:</td>
+				<td>{{do_detail.endTime}}</td>
+			</tr>
+			<tr>
+				<td>计划数</td>
+				<td>:</td>
+				<td>{{do_detail.taskNum}}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+
+<!--二级页面-->
+		
+<div class="table-dialog-window table-window">
+	<div class="dialog-window-head">
+		<i class="close-window"></i>
+	</div>
+	<div class="dialog-window-body">
+		<div class="info-show">
+			<div class="window-search-box">
+				<span>开始时间</span>
+					<input id="windowStartTime" class="Wdate" type="text" onClick="WdatePicker({maxDate:'#F{$dp.$D(\'windowEndTime\')}'})">	
+			</div>
+			<div class="window-search-box">
+				<span>结束时间</span>
+					<input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">	
+			</div>	
+			<div class="window-search-box">
+				<span>设备</span>
+				<!--<input type="text">-->
+				<input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
+			</div>	
+			<div class="window-search-box">
+				<span>订单号</span>
+				<input type="text">	
+			</div>	
+			<div class="window-search-box">
+				<span>物料名</span>
+				<input type="text">	
+			</div>	
+			<div class="window-search-box">
+				<span>物料编码</span>
+				<input type="text">	
+			</div>	
+			<div class="window-search-button" ng-click="change_window_table()">查询</div>
+		</div>
+		<div class="info-icon-btn tr">
+			<div class="table-sort-show">
+				<span class="set-order" ng-click="set_order()" title="排序"></span>
+				<div class="table-sort" ng-show="orderShow" onselectstart="return false">
+					<div class="countSortTitle">多级列表排序配置</div>
+					<div id="all-item" class="table-sort-itemList">
+						<div class="provide-item">
+							<h6 class="sort-title">可用字段</h6>
+							<nav>
+								<ul id="provide-item">
+									<li ng-repeat="data in columnOptionList track by $index" class="normal mt-5" data-keyname={{data.valueContent}} data-select="option" data-order="{{data.valueContent.slice(-1,-5) == 'desc' ? down : up}}"><div>{{ data.valueAlias }}</div><span class="itemOrder"></span></li>
+								</ul>
+							</nav>
+						</div>
+						<div class="middleBtn">
+							<span class="toggleBtn addAllItem"></span>
+							<span class="toggleBtn removeAllItem"></span>
+						</div>
+						<div class="sort-item">
+							<h6 class="sort-title">已排序字段 </h6>
+							<nav onselectstart="return false">
+								<ul id="sort-item">
+									<li ng-repeat="data in columnSelectList track by $index" class="normal mt-5" data-keyname={{data.valueContent}} data-select="select" data-order={{data.order}}><div>{{ data.valueAlias }}</div><span class="itemOrder"></span></li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+					<div class="combine-item">
+						<dl class="relative"><dt class="fl">合并项：</dt>
+							<dd class="fl combine-menu">
+								<p></p>
+								<ul class="combine-drag">
+									<li data-value="数量">数量</li>
+								</ul>
+							</dd>
+						</dl>
+					</div>
+					<div class="m-0-auto mt-20 mb-20 tc clearfix">
+						<a href="javascript:;" class="save-sort" ng-click="refresh_order()">保存</a>
+					</div>
+				</div>
+			</div>
+			<span class="split"></span>
+			<span class="output-excel" ng-click="output_excel()" title="导出"></span>
+			<span class="split"></span>
+			<span class="print-table" ng-click="print()" title="打印"></span>
+		</div>
+		<div class="show-table">
+		
+			<div class="table-space">
+				<table>
+					<thead>
+						<tr>
+							<th ng-repeat="title in headDataView track by $index">{{title}}
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="tableRow in tableDataView track by $index">
+							<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}
+							</td>
+							<td>
+								<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span>
+								<span class="sale-order-change" ng-style="{display:tableRow[0].canChange}">修改</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="cover-head">
+				<div ng-repeat="title in headDataView track by $index">{{title}}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--二级页面结束-->
+
+<!--地点选择-->
+<div class="out-bg"><span class="point-click" ></span></div>
+<div class="location-choose">
+	<div class="read-show">
+		<h1 class="location-title">请选择需要显示的地点</h1>
+		<!--<div class="ul-box"></div>-->
+		<div class="wrap-preview">
+			<div class="location-list location-preview">
+	        	<folder-tree current-folder="folder"></folder-tree>
+	        </div>
+		</div>
+	</div>
+	<div class="location-btn">
+		<span class="btn-save" ng-click="sure()">确定</span>
+	</div>
+</div>
+
+<!--开始排程-->
+<div style="display: none;" class="aps-case">
+	<span  class="in-but"></span>
+	<h3 ><span></span>请选择要排程的方案</h3>
+	<span class="case-name">选择方案：</span>
+	<span class="case-tri" ></span>
+	<p class="case-header"></p>
+	<ul class="case-content">
+		<li ng-repeat="x in schemeName track by $index" ng-click="case_btn(x.schemeId)" data-schmeid={{x.schemeId}}>{{x.schemeName}}</li>
+	</ul>
+	<div class="wrap-box">
+		<table class="wrap-content">
+			<tr ng-repeat="y in locationRule track by $index">
+				<td class="box-aps">{{y.locationName}}</td>
+				<td class="rule-aps">{{y.ruleName}}</td>
+			</tr>
+		</table>
+	</div>
+	<span class="aps-confirm aps-btn" ng-click="start_aps()">确定</span>
+	<span class="aps-continue aps-btn" ng-click="aps_continue()">确定</span>
+</div>
+
+<!--外部差异开始-->
+<div class="exDiffer-window" >
+	<div class="dialog-window-head">外部差异
+		<i class="close-window"></i>
+	</div>
+	<div class="null-data">暂无差异</div>
+	<div class="dialog-window-body">
+		<ul class="external-diff-tab">
+			<li ng-repeat = "tabInfo in tabList" ng-click="exteriffer_tab(tabInfo,$event)" type="{{tabInfo.changeType}}">{{tabInfo.changeTypeName}}
+			<span class="each-diff-num">{{tabInfo.each_differ_num}}</span>	
+			</li>
+		</ul>		
+		<div class="show-table">
+			<div class="table-space">
+				<table>
+					<thead>
+						<tr>
+							<!--<th>选择</th>-->
+							<th ng-repeat="title in headData track by $index">{{title}}
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="tableRow in changedBodyData" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
+							<!--<td class="check-box"><label for="Storage{{$index}}"><input id="Storage{{$index}}" name="StorageSingle" type="checkbox" /><span class="check"></span></label></td>-->
+							<td ng-repeat="tableCell in tableRow "  ng-class="tableCell.now==tableCell.old?'':'brightColor'" data-old = "{{tableCell.old}}">{{tableCell.now}}
+								<!--<span ng-style="{color:tableCell.now==tableCell.old?'#333333':'red'}">{{tableCell.old}}</span>ng-style="{color:tableCell.now==tableCell.old?'#333333':'red'}"-->
+							</td> 
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="cover-head">
+				<!--<div><label for="headtrChoose"><input id="headtrChoose" name="StorageAll" type="checkbox" /><span class="check"></span></label></div>-->
+				<div ng-repeat="title in headData track by $index">{{title}}</div>
+			</div>
+		</div>
+		<!--<div class="add-to-APS" ng-click="add_to_APS()">加入排程计划</div>-->
+	</div>
+</div>
+<!--外部差异结束-->

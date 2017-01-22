@@ -1,0 +1,23 @@
+{
+  "configOption": "Configure the options bar",
+  "VersionNav" : "Version Information",
+  "showConfiguration" : "Display Item Configuration",
+  "ColumnInformationConfiguration" : "Column information configuration",
+  "Multi-columnSortConfiguration" : "Multi-column sort configuration",
+  "ScheduleRuleSetting" : "Schedule rule setting",
+  "SchedulingSchemeSettings" : "Scheduling scheme settings",
+  "PAPRuleSetting" : "PAP rule setting",
+  "AdministratorConfigurationItem" : "Administrator configuration item",
+  "workshopSelectRule" : "Please select a schedule rule for the schedule shop",
+  "dragWorkshopOrder" : "Drag up and down to adjust the shop order",
+  "selectWorkShop" : "Shop Selection Bar ",
+  "selectWorkShopTip" : "Click below to select the workshop ",
+  "workshopProperties" : "Workshop properties",
+  "defaultDisplayItem" : "The default display item",
+  "displayConfiguration" : "display configuration",
+  "levelPage" : "level page",
+  "secondaryPage" : "secondary page",
+  "threePages" : "three pages",
+  "100001": "Login",
+  "100002": "Register"
+}

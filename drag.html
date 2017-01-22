@@ -1,0 +1,277 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--<script src="js/drag_drop.js" type="text/javascript"></script>-->
+    <title>简洁版拖放</title>
+    <script src="scripts/lib/jquery-min.js"></script>
+    <!--<link rel="stylesheet" href="css/drag_drop.css" type="text/css" media="screen" />-->
+    <style>
+        .dragManager{
+            float:left;
+            margin:10px;
+            border:3px #1d953f solid;
+            background:#abc88b;
+            min-height: 30px;
+            width:214px;
+        }
+        .dragItem{
+            width:200px;
+            height:35px;
+            margin:4px;
+            background:#7fb80e;
+            border:3px #9F3 solid;
+            text-align:center;
+            font-size:25px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="dragContainer">
+    <div class="dragManager" id="manager-0">
+        <div class="dragItem">dragItem1</div>
+        <div class="dragItem">dragItem2</div>
+        <div class="dragItem">dragItem3</div>
+        <div class="dragItem">dragItem4</div>
+    </div>
+    <div class="dragManager" id="manager-1">
+        <div class="dragItem">dragItem5</div>
+        <div class="dragItem">dragItem6</div>
+        <div class="dragItem">dragItem7</div>
+        <div class="dragItem">dragItem8</div>
+    </div>
+    <div class="dragManager" id="manager-2">
+        <div class="dragItem">dragItem9</div>
+        <div class="dragItem">dragItem10</div>
+        <div class="dragItem">dragItem11</div>
+        <div class="dragItem">dragItem12</div>
+    </div>
+</div>
+<script>
+    var dragManager     = [];       //可拖动元素的管理器
+    var curItem         = null;     //正在拖动的元素
+    var itemCopy        = null;     //拖动元素时展现动态拖动效果的辅助元素，元素的镜像
+    var isMouseDown     = false;    //鼠标是否按下
+    var mouseOffset     = null;     //鼠标相对亦指定元素的相对位置
+    var mousePosition   = null;     //鼠标的位置
+    var activeManager   = null;     //拖动元素所在的manager容器
+    var activeItem      = null;     //被激活的元素（被拖动元素所经过的元素）
+
+    /*
+     * 初始化管理器
+     */
+    function initManager(obj){
+        for(var i = 0;i < obj.children.length;i++){
+            dragManager.push(obj.children[i]);
+        }
+    }
+
+    /*
+     * 保存个元素的
+     */
+    function updatePosition(){
+        for(var i = 0;i < dragManager.length;i++){
+            with(dragManager[i]){
+                setAttribute("startLeft",offsetLeft);
+                setAttribute("startTop",offsetTop);
+                setAttribute("startWidth",offsetWidth);
+                setAttribute("startHeight",offsetHeight);
+            }
+
+            for(var j = 0;j < dragManager[i].children.length;j++){
+                with(dragManager[i].children[j]){
+                    setAttribute("startLeft",offsetLeft);
+                    setAttribute("startTop",offsetTop);
+                    setAttribute("startWidth",offsetWidth);
+                    setAttribute("startHeight",offsetHeight);
+                }
+            }
+        }
+    }
+
+    /*
+     * 准备移动瞬间（鼠标在对应元素处被按下），执行该方法。
+     */
+    function startDrag(obj){
+        itemCopy.appendChild(obj.cloneNode(true));
+        obj.style.opacity       = "0";
+        itemCopy.style.opacity  = "0.5";
+        itemCopy.style.left     = obj.getAttribute("startLeft");
+        itemCopy.style.top      = obj.getAttribute("startTop");
+        itemCopy.style.display  = "block";
+    }
+
+    /*
+     * 元素被拖动时执行该方法，主要是根据鼠标的坐标改变元素镜像的坐标，模拟拖动效果
+     */
+    function drag(obj,mousePosition){
+        itemCopy.style.left  = mousePosition.x - mouseOffset.offsetLeft;
+        itemCopy.style.top   = mousePosition.y - mouseOffset.offsetTop;
+    }
+
+    /*
+     * 判断obj1的中点是否在obj2内部
+     */
+    function isIn(obj1,obj2){
+        /*center是obj1中点的坐标*/
+        var center = {
+            x : obj1.offsetLeft + (obj1.offsetWidth)/2,
+            y : obj1.offsetTop + (obj1.offsetHeight)/2
+        };
+        if(center.x > obj2.offsetLeft &&
+                center.y > obj2.offsetTop &&
+                center.x < (obj2.offsetLeft+obj2.offsetWidth) &&
+                center.y < (obj2.offsetTop + obj2.offsetHeight)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /*
+     * 判断obj1（的中点）是在obj2之前还是之后。用于决定curItem应该插在activeItem之前还是之后
+     */
+    function beforeOrAfter(obj1,obj2){
+        var center = {
+            y : obj1.offsetTop + (obj1.offsetHeight)/2
+        };
+        if(center.y < (obj2.offsetTop + (obj2.offsetHeight)/2)){
+            return "before";
+        }else{
+            return "after";
+        }
+    }
+
+    /*
+     * 返回下一个兄弟“元素”节点（跳过文本节点），为了应付非ie浏览器将换行符视为文本节点的想象。
+     */
+    function nextElement(node){
+        for(var nextNode = node.nextSibling;nextNode;nextNode = nextNode.nextSibling){
+            if(nextNode.nodeType == 1){
+                return nextNode;
+            }
+        }
+        return null;
+    }
+    /*
+     * 返回上一个兄弟“元素”节点（跳过文本节点），为了应付非ie浏览器将换行符视为文本节点的想象。
+     */
+    function previousElement(node){
+        for(var previousNode = node.previousSibling;previousNode;previousNode = previousNode.previousSibling){
+            if(previousNode.nodeType == 1){
+                return previousNode;
+            }
+        }
+        return null;
+    }
+
+    /*
+     * 鼠标移动事件函数
+     */
+    function mouseMove(ev){
+        activeManager = null;
+        activeItem    = null;
+        updatePosition();   //每次拖放完后，元素的位置可能会变化，所以要更新
+        /*开始拖动*/
+        if(isMouseDown && curItem){
+            mousePosition = MouseCoords(ev);
+            drag(curItem,mousePosition);
+
+            /*以下主要是进行坐标判断，有点象2D游戏里的碰撞检测*/
+            for(var i = 0;i<dragManager.length;i++){
+                if(isIn(itemCopy,dragManager[i])){
+                    activeManager = dragManager[i];
+                    break;
+                }
+            }
+
+            if(activeManager){
+                for(var i = 0;i < activeManager.children.length;i++){
+                    if(curItem != activeManager.children[i] && isIn(itemCopy,activeManager.children[i])){
+                        activeItem = activeManager.children[i];
+                        break;
+                    }
+                }
+            }
+            /*将元素“放”在合适的地方*/
+            if(activeItem){
+                if(beforeOrAfter(itemCopy,activeItem) == "before" && activeItem != nextElement(curItem)){
+                    activeManager.insertBefore(curItem,activeItem);
+                }else if(beforeOrAfter(itemCopy,activeItem) == "after" && activeItem != previousElement(curItem)){
+                    activeManager.insertBefore(curItem,nextElement(activeItem));
+                }
+            }
+//            else if(activeManager.children.length == 0){
+//                activeManager.appendChild(curItem);
+//            }
+        }
+    }
+
+    /*
+     * 鼠标按下事件函数
+     */
+    function mouseDown(ev){
+        var target = ev.target;
+
+        if(target.className == "dragItem"){
+            curItem = target;
+            mouseOffset = MouseOffsetElement(curItem,ev);
+            startDrag(curItem);
+        }
+        isMouseDown = true;
+        if (target.className=="dragItem") {
+            return false;
+        }
+    }
+
+    function mouseUp(ev){
+        curItem.style.opacity   = "1";
+        itemCopy.innerHTML      = "";
+        itemCopy.style.display  = "none";
+        curItem                 = null;
+        isMouseDown             = false;
+    }
+
+    document.onmousedown    = mouseDown;
+    document.onmousemove    = mouseMove;
+    document.onmouseup      = mouseUp;
+
+    window.onload = function(){
+        initManager(document.getElementById("dragContainer"));
+        itemCopy = document.createElement("div");
+        itemCopy.style.cssText = "position:absolute;display:none;zindex:100;";
+        document.body.appendChild(itemCopy);
+    }
+
+    /*
+     * 鼠标相对元素（左上角）的位置
+     */
+    function MouseOffsetElement(obj,ev){
+        return {
+            offsetLeft : ev.pageX - obj.offsetLeft,
+            offsetTop : ev.pageY - obj.offsetTop
+        };
+    }
+
+    /*
+     * 元素位置类。该位置是相对于父元素的左上角计算得到。
+     */
+    function ElementPosition(obj){
+        return {
+            left : obj.offsetLeft,
+            top : obj.offsetTop
+        };
+    }
+
+    /*
+     * 鼠标位置类
+     */
+    function MouseCoords(ev){
+        return {
+            x : ev.pageX,
+            y : ev.pageY
+        };
+    }
+</script>
+</body>
+</html>

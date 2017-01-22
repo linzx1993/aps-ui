@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div ng-app="APP">
+    <h2>angularjs sample</h2>
+    <div ng-controller="userController">
+        <div>{{golbal_sitename}}</div>
+        <div>{{controllerName}}</div>
+        <div><button ng-click="sayHello()">sayHello</button></div>
+    </div>
+    <hr />
+    <div ng-controller="customerController">
+        <div>{{golbal_sitename}}</div>
+        <div>{{controllerName}}</div>
+        <div><button ng-click="sayHello()">sayHello</button></div>
+    </div>
+</div>
+<script src="../dist/scripts/lib/angular.js"></script>
+<script>
+    var APP = angular.module('APP',[]).
+    controller('userController', ['$scope','dataService',function($scope,dataService) {
+        $scope.controllerName='userController';
+        $scope.golbal_sitename=dataService.golbal_sitename;
+        $scope.sayHello =function(){
+            dataService.sayHello(dataService.golbal_sitename);
+        }
+    }]).
+    controller('customerController',['$scope','dataService', function($scope,dataService) {
+        $scope.controllerName='customerController';
+        $scope.golbal_sitename = dataService.golbal_sitename;
+        dataService.golbal_sitename = "1232";
+        $scope.sayHello =function(){
+            dataService.sayHello(dataService.golbal_sitename);
+        }
+    }]).
+    factory('dataService',function(){
+        return {
+            golbal_sitename:"this is the shared value",
+            sayHello:function(msg){
+                alert(msg);
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="ConfigMain" ng-controller="displayCombineController">
+    <div class="mt-20 ml-55 relative display-combine">
+        <p>请选择一级页面合并规则</p>
+        <label class="ml-20 mt-10 display-combine-line" for={{data.valueContent}} ng-repeat="data in firstPage.combineItemList"><input id={{data.valueContent}} value={{data.valueContent}} name="combine-item" type="radio" ng-model="selectValue"><span class="mr-15 column-content-checkbox input-radio"></span>{{data.valueAlias}}</label>
+    </div>
+    <div  class="m-0-auto mt-30 mb-20 tc clearfix">
+        <a class="mr-15 save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveDisplayCombine()>应用</a>
+        <a class="ml-15 reset-config" href="javascript:void(0);" ng-click=resetDisplayCombine()>还原</a>
+    </div>
+</div>

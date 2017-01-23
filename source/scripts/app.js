@@ -177,6 +177,8 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 	            "checkData" :  "http://" + $rootScope.api_domain + "/api/aps/rule/1",
 	            //清除后端缓存
 	            "clearCatch" : "http://" + $rootScope.api_domain + "/api/aps/cache/routing",
+				//一级页面显示天数
+				"firstPage_display_days" : "http://" + $rootScope.api_domain + "/api/aps/config/user/schedule/view/schedule-day-number?locationId=",
 	            //列信息配置
 	            "column_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column?locationId=",
 	            //多列排序信息配置

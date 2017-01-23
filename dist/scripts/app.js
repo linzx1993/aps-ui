@@ -138,6 +138,10 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 	            "plan_to_fact" : "http://" + $rootScope.api_domain + "/api/adjust/dispatchorder/preschedule/confirm",
 	            //清除后端缓存
 	            "clearCatch" : "http://" + $rootScope.api_domain + "/api/aps/cache/routing",
+				//一级页面显示天数
+				"firstPage_display_days" : "http://" + $rootScope.api_domain + "/api/aps/config/user/schedule/view/schedule-day-number?locationId=",
+				//一级页面合并项选择
+				"firstPage_display_combine" : "http://" + $rootScope.api_domain + "/api/aps/config/user/schedule/view/schedule-unit-type?locationId=",
 	            //列信息配置
 	            "column_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column?locationId=",
 	            //多列排序信息配置

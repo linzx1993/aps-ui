@@ -18,7 +18,7 @@ $("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",f
 app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService",
     function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
     //默认跳转初始版本页面
-    $state.go('config.admin');
+    // $state.go('config.admin');
     $http.get($rootScope.restful_api.public_version_number)
         .then((res) => {
             $scope.versionNumer =res.data.version;
@@ -42,8 +42,8 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         {text : "VersionNav", url : "view/version.html","sref":".version"},
         {text : "displayConfiguration",url : "view/columnConfig.html", "sref":".display",
             children : [
-                // {text : "levelPage",url : "","sref":".first"},
-                {text : "secondaryPage",url : "view/columnConfig.html","sref":".ssssssecond",
+                {text : "levelPage",url : "view/displayDays","sref":".first"},
+                {text : "secondaryPage",url : "view/columnConfig.html","sref":".second",
                     // children : [
                     //         {text : "ColumnInformationConfiguration",url : "view/columnConfig.html","sref":".column"},
                     //         {text : "Multi-columnSortConfiguration",url : "view/sortConfig.html","sref":".sort"}

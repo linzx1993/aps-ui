@@ -62,14 +62,25 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              url:'/display',
              templateUrl:'dist/view/template/displaySecondPage.html',
              controller: function($state){
-                 $state.go('config.second');//默认显示第一个tab
+                 $state.go('config.first');//默认显示第一个tab
              }
          })
          // 配置页-一级页面
          .state('config.first',{
              url:'/first',
-             templateUrl:'dist/view/template/sortConfig.html',
+             templateUrl:'dist/view/template/displayFirstPage.html',
+             controller : "firstPageController"
          })
+         // 配置页-一级页面-显示天数
+        .state('config.first.displayDays',{
+            url:'/displayDays',
+            templateUrl:'dist/view/template/displayDays.html',
+        })
+        // 配置页-一级页面-显示合并项
+        .state('config.first.displayCombine',{
+            url:'/displayCombine',
+            templateUrl:'dist/view/template/displayCombine.html',
+        })
          //配置页-二级页面
          .state('config.second',{
              url:'/second',

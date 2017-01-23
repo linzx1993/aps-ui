@@ -22,6 +22,7 @@
     transform: rotate($deg);
 }
 
+$themeColor : #1E7CD9;
 $config-box-height : 814px;
 $title-height : 68px;
 $config-content-height : $config-box-height -  $title-height;
@@ -120,15 +121,20 @@ $config-content-height : $config-box-height -  $title-height;
 }
 
 /*=========参数配置页面右边内容栏=========*/
-.config-box .columnContent input,
-.config-box .sortContent input,
-.config-box .checkItem input,
+.config-box input[type=checkbox],
+.config-box input[type=radio],
 .config-box .checkItem select,
-.config-box .adminContent select,
-.config-box .papRuleContent input {
+.config-box .adminContent select
+ {
     display: none;
 }
-
+.config-box .input-text-box{
+    padding-left: 5px;
+    width: 133px;
+    height: 28px;
+    line-height: 24px;
+    border: 1px solid #d9d9d9;
+}
 .config-box .config-content {
     width: 1138px;
     height: 100%;
@@ -154,20 +160,40 @@ $config-content-height : $config-box-height -  $title-height;
     border-bottom: 1px solid #dedede;
 }
 
-.config-box .column-content-checkbox {
+/*单选框，多选框样式*/
+.input-check{
     width: 16px;
     height: 16px;
     border: 1px solid #ccc;
     box-sizing: border-box;
     vertical-align: middle;
     background-color: #fff;
+    cursor: pointer;
+}
+.input-radio{
+    @extend .input-check;
+    border-radius: 50%;
 }
 
-.config-box input:checked + span {
+input:checked + .input-check {
     border: none;
     background: url("../images/selected.png") #fff;
 }
-
+input:checked + .input-radio{
+    position: relative;
+    border:1px solid $themeColor;
+    background-image: none;
+    &:after{
+        content: "";
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 6px;
+        height: 6px;
+        background-color: $themeColor;
+        border-radius: 50%;
+    }
+}
 .config-box .table-sort-itemList {
     display: flex;
     width: 480px;
@@ -176,6 +202,11 @@ $config-content-height : $config-box-height -  $title-height;
     &:after{
         display: none;
     }
+}
+/*二级页面显示项*/
+.display-combine-line{
+    display: flex;
+    align-items: center;
 }
 /*/校验规则可配/*/
 .check-rule-nav{
@@ -218,6 +249,24 @@ $config-content-height : $config-box-height -  $title-height;
     .addRule:hover:after,.addRule:hover:before {
         background-color: #1E7CD9;
     }
+    input {
+        width: 120px;
+        background-color: transparent;
+    }
+    .nav-manage {
+        left: auto;
+        right: 20px;
+        background: url("../images/set-gray.png") no-repeat;
+    }
+    .addRule:before {
+        top: -2px;
+        left: 9px;
+        width: 2px;
+        height: 16px;
+    }
+    .nav-manage:hover {
+        background-image: url("../images/set-blue.png");
+    }
 }
 .config-form{
     width: 902px;
@@ -232,34 +281,6 @@ $config-content-height : $config-box-height -  $title-height;
     line-height: 46px;
     color: #292929;
     cursor: pointer;
-}
-
-.config-box .check-rule-nav input {
-    display: inline-block;
-    width: 120px;
-    background-color: transparent;
-}
-
-//.check-rule-nav li:first-child {
-//    padding-left: 0;
-//}
-
-
-.check-rule-nav .addRule:before {
-    top: -2px;
-    left: 9px;
-    width: 2px;
-    height: 16px;
-}
-
-.check-rule-nav .nav-manage {
-    left: auto;
-    right: 20px;
-    background: url("../images/set-gray.png") no-repeat;
-}
-
-.check-rule-nav .nav-manage:hover {
-    background-image: url("../images/set-blue.png");
 }
 
 .config-box .checkContent dt {

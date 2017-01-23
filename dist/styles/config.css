@@ -93,13 +93,18 @@
   padding-left: 40px; }
 
 /*=========参数配置页面右边内容栏=========*/
-.config-box .columnContent input,
-.config-box .sortContent input,
-.config-box .checkItem input,
+.config-box input[type=checkbox],
+.config-box input[type=radio],
 .config-box .checkItem select,
-.config-box .adminContent select,
-.config-box .papRuleContent input {
+.config-box .adminContent select {
   display: none; }
+
+.config-box .input-text-box {
+  padding-left: 5px;
+  width: 133px;
+  height: 28px;
+  line-height: 24px;
+  border: 1px solid #d9d9d9; }
 
 .config-box .config-content {
   width: 1138px;
@@ -123,17 +128,36 @@
   border-top-right-radius: 4px;
   border-bottom: 1px solid #dedede; }
 
-.config-box .column-content-checkbox {
+/*单选框，多选框样式*/
+.input-check, .input-radio {
   width: 16px;
   height: 16px;
   border: 1px solid #ccc;
   box-sizing: border-box;
   vertical-align: middle;
-  background-color: #fff; }
+  background-color: #fff;
+  cursor: pointer; }
 
-.config-box input:checked + span {
+.input-radio {
+  border-radius: 50%; }
+
+input:checked + .input-check, input:checked + .input-radio {
   border: none;
   background: url("../images/selected.png") #fff; }
+
+input:checked + .input-radio {
+  position: relative;
+  border: 1px solid #1E7CD9;
+  background-image: none; }
+  input:checked + .input-radio:after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 6px;
+    height: 6px;
+    background-color: #1E7CD9;
+    border-radius: 50%; }
 
 .config-box .table-sort-itemList {
   display: flex;
@@ -141,6 +165,11 @@
 
 .all-location:after {
   display: none; }
+
+/*二级页面显示项*/
+.display-combine-line {
+  display: flex;
+  align-items: center; }
 
 /*/校验规则可配/*/
 .check-rule-nav {
@@ -177,6 +206,20 @@
     background-color: #8e9092; }
   .check-rule-nav .addRule:hover:after, .check-rule-nav .addRule:hover:before {
     background-color: #1E7CD9; }
+  .check-rule-nav input {
+    width: 120px;
+    background-color: transparent; }
+  .check-rule-nav .nav-manage {
+    left: auto;
+    right: 20px;
+    background: url("../images/set-gray.png") no-repeat; }
+  .check-rule-nav .addRule:before {
+    top: -2px;
+    left: 9px;
+    width: 2px;
+    height: 16px; }
+  .check-rule-nav .nav-manage:hover {
+    background-image: url("../images/set-blue.png"); }
 
 .config-form {
   width: 902px;
@@ -191,25 +234,6 @@
   line-height: 46px;
   color: #292929;
   cursor: pointer; }
-
-.config-box .check-rule-nav input {
-  display: inline-block;
-  width: 120px;
-  background-color: transparent; }
-
-.check-rule-nav .addRule:before {
-  top: -2px;
-  left: 9px;
-  width: 2px;
-  height: 16px; }
-
-.check-rule-nav .nav-manage {
-  left: auto;
-  right: 20px;
-  background: url("../images/set-gray.png") no-repeat; }
-
-.check-rule-nav .nav-manage:hover {
-  background-image: url("../images/set-blue.png"); }
 
 .config-box .checkContent dt {
   min-width: 170px;

@@ -27,11 +27,11 @@
                 <dl class="mt-15 clearfix"><dt class="fl">冻结期 ：</dt><dd class="fl ml-5"><input id="freezePeriod" name="freezePeriod" type="text" maxlength="2" ng-model="scheduleCheckData.freezePeriod" ng-value="scheduleCheckData.freezePeriod"/><span class="info">(请输入1-90范围内的整数)</span></dd></dl>
                 <dl class="mt-15 clearfix scheduleCheck ">
                     <dt class="fl">排程前校验 ：</dt>
-                    <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleFrontData" for="validataFrom{{$index}}"><input id="validataFrom{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-5 mr-15"></span>{{data.chinese}}</label></dd>
+                    <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleFrontData" for="validataFrom{{$index}}"><input id="validataFrom{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-5 mr-15 input-check"></span>{{data.chinese}}</label></dd>
                 </dl>
                 <dl class="mt-15 clearfix scheduleCheck">
                     <dt class="fl">排程后校验 ：</dt>
-                    <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleLaterData" for="validataLater{{$index}}"><input id="validataLater{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-5 mr-15"></span>{{data.chinese}}</label></dd>
+                    <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleLaterData" for="validataLater{{$index}}"><input id="validataLater{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-5 mr-15 input-check"></span>{{data.chinese}}</label></dd>
                 </dl>
             </div>
             <span class="mt-30 show-advanced-configuration" ng-show="!jAdvancedConfiguration" ng-click="toggleAdvancedShow(jAdvancedConfiguration)">显示高级设置</span>

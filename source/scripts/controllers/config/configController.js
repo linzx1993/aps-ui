@@ -18,7 +18,7 @@ $("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",f
 app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService",
     function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
     //默认跳转初始版本页面
-    // $state.go('config.admin');
+    $state.go('config.scheme');
     $http.get($rootScope.restful_api.public_version_number)
         .then((res) => {
             $scope.versionNumer =res.data.version;
@@ -54,7 +54,7 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         },
         {text : "ScheduleRuleSetting", url : "view/checkFrom.html","sref":".rule"},
         {text : "SchedulingSchemeSettings", url : "view/schedulePlan.html","sref":".scheme"},
-        {text : "PAPRuleSetting", url : "view/papRule.html","sref":".papRule"},
+        // {text : "PAPRuleSetting", url : "view/papRule.html","sref":".papRule"},
         {text : "AdministratorConfigurationItem",url : "view/adminProperty.html","sref":".admin",
             children : [
                 // {text : "车间属性",url : "view/workshopProperty.html","sref":".workshopProperty"},

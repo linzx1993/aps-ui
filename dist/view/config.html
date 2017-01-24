@@ -11,7 +11,7 @@
                     <i class="nav-angle" ng-if="configLi.children"></i>
                     <ul ng-if="configLi.children">
                         <li class="second-nav" ng-repeat="child in configLi.children track by $index">
-                            <a href="javascript:;" ui-sref={{child.sref}}>{{child.text | translate}}</a>
+                            <a href="javascript:;" ui-sref={{child.sref}} ui-sref-opt="{reload:true}">{{child.text | translate}}</a>
                         </li>
                     </ul>
                 </li>

@@ -64,7 +64,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
     $scope.setWorkshop = () => {
         let workshopTree = $("#jWorkshop");
         //清空痕迹
-        workshopTree.find("i").attr("class","select-status unselect");
+        workshopTree.find("i").attr("class","select-status");
         workshopTree.find("ul ul span").removeClass("item-select");
         //第一次进入，没有数据
         if(!$scope.locationRuleList){
@@ -148,7 +148,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
 
     //临时添加方案，创建临时方案数据库，存储临时创建但是未保存的方案，关闭或刷新页面数据库消失
     $scope.temporySchemeData = {};
-    $scope.recordTemporyPlan = () =>{
+    $scope.recordTemporaryPlan = () =>{
         if(!$scope.newSchemeName){  //输入框中已设置newSchemeName
             layer.msg("排程方案名不能为空");
             return false;
@@ -293,17 +293,20 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
      * @return
      */
     let secondToFirst = (target) => {
-        let parentUl = $target.parentNode.parentNode;
-        let unSelected = parentUl.getElementsByClassName("unselect");
+        $(target).addClass("active");
+        let parentUl = $(target).parent().parent();
         //如果全部选中，父级变为选中，左侧列表只显示父级
-        if (unSelected.length <= 0){
+        //active的个数等于所有个数则表示选中所有父级
+        if (parentUl.find(".active").length === parentUl.find(".select-status").length){
             //设置为不选，。然后点击调用方法，全部选中
-            //判断是否为第一级春风车间
-            if(parentUl.previousElementSibling){
-                parentUl.previousElementSibling.firstElementChild.className = "select-status unselect";
-                parentUl.previousElementSibling.firstElementChild.click();
-                Array.prototype.forEach.call(parentUl.getElementsByTagName("i"),function(item,index){
-                    item.className += " disabled";
+            //判断是否为第一级春风车间,不是则继续执行
+            console.log(parentUl.parent());
+            if(parentUl.parent().prev().length){
+                parentUl.parent().siblings(".select-status").attr("class","select-status unselect");
+                parentUl.parent().siblings(".select-status").trigger("click");
+                //偷懒，先父级选中，所有子级不可选中
+                Array.prototype.forEach.call(parentUl.find(".select-status"),function(item){
+                    item.className = "select-status active disabled";
                 });
             }
             layer.msg("已合并为上一级车间",{time : 2000});
@@ -384,4 +387,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
             //强制刷新dom
             $scope.$apply();
         })
+            .on("click","disabled",() =>{
+                return false;
+            })
 }]);

@@ -39,26 +39,26 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                                 $(item).text(text);
                             })
                         },0);
-                        // document.getElementById("scheduleInterval").onkeyup = function () {
-                        //     if (this.value.length == 1) {
-                        //         this.value = this.value.replace(/[^0-9]/g, '')
-                        //     } else {
-                        //         this.value = this.value.replace(/\D/g, '')
-                        //     }
-                        //     if (this.value > 90) {
-                        //         this.value = 90;
-                        //     }
-                        // };
-                        // document.getElementById("freezePeriod").onkeyup = function () {
-                        //     if (this.value.length == 1) {
-                        //         this.value = this.value.replace(/[^1-9]/g, '')
-                        //     } else {
-                        //         this.value = this.value.replace(/\D/g, '')
-                        //     }
-                        //     if (this.value > 90) {
-                        //         this.value = 90;
-                        //     }
-                        // };
+                        document.getElementById("scheduleInterval").onkeyup = function () {
+                            if (this.value.length == 1) {
+                                this.value = this.value.replace(/[^0-9]/g, '')
+                            } else {
+                                this.value = this.value.replace(/\D/g, '')
+                            }
+                            if (this.value > 90) {
+                                this.value = 90;
+                            }
+                        };
+                        document.getElementById("freezePeriod").onkeyup = function () {
+                            if (this.value.length == 1) {
+                                this.value = this.value.replace(/[^1-9]/g, '')
+                            } else {
+                                this.value = this.value.replace(/\D/g, '')
+                            }
+                            if (this.value > 90) {
+                                this.value = 90;
+                            }
+                        };
                         //当前日期前的车间计划
                         if(!$scope.scheduleCheckData.isLoadOverduePoolTask) {
                             $("input[name=overduePeriod]").attr("disabled", "disabled");

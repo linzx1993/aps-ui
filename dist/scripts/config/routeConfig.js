@@ -125,11 +125,11 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              templateUrl:'dist/view/template/schedulePlan.html',
              controller: "planController"
          })
-         .state('config.papRule',{
-             url:'/papRule',
-             templateUrl:'dist/view/template/papRule.html',
-             controller: 'papRuleController'
-         })
+         // .state('config.papRule',{
+         //     url:'/papRule',
+         //     templateUrl:'dist/view/template/papRule.html',
+         //     controller: 'papRuleController'
+         // })
          .state('config.admin',{
              url:'/admin',
              templateUrl:'dist/view/template/adminDisplay.html',

@@ -4,21 +4,26 @@
 'use strict';
 app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
-        $state.go('config.first.displayDays');//默认显示第一个tab
+        //默认显示第一个tab---start
+        $state.go('config.first.displayDays');
+
+        //默认显示第一个tab---end
         $scope.firstPage = {};
-        console.log(99999);
     }])
     .controller("displayDaysController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
-            $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId)
-        .then(function(res){
-            $scope.firstPage.showItemLists = res.data.selectList;
-            $scope.firstPage.showItemLists.map((item)=>{
-                item.valueContent = Number(item.valueContent);
+        //设置面包屑导航
+        $scope.showPageConfig = "显示天数";
+        
+        $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId)
+            .then(function(res){
+                $scope.firstPage.showItemLists = res.data.selectList;
+                $scope.firstPage.showItemLists.map((item)=>{
+                    item.valueContent = Number(item.valueContent);
+                });
+                $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
+            },function () {
+                layer.alert("获取一级页面显示天数，请检查服务器");
             });
-            $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
-        },function () {
-            layer.alert("获取一级页面显示天数，请检查服务器");
-        });
 
         //显示输入数字范围
         $scope.validateNum = (val) =>{
@@ -56,6 +61,8 @@ app
         }
     }])
     .controller("displayCombineController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+        //设置面包屑导航
+        $scope.showPageConfig = "显示合并项";
         $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId)
             .then(function(res){
                 $scope.firstPage.combineItemList = res.data.optionList;

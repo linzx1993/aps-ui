@@ -6,11 +6,11 @@
     <nav class="config-nav fl">
         <h1 class="configNavTitle">{{"configOption" | translate}}</h1>
             <ul>
-                <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index">
-                    <a class="" href="javascript:;" ui-sref={{configLi.sref}} ng-click=selectLi(configLi.url,$event)>{{configLi.text | translate}}</a>
+                <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index" ng-class="isActiveNav(configLi.sref) ? 'active' : ''"  ng-click=selectLi(configLi.sref,$event)>
+                    <a class="" href="javascript:;" ui-sref={{configLi.sref}}>{{configLi.text | translate}}</a>
                     <i class="nav-angle" ng-if="configLi.children"></i>
                     <ul ng-if="configLi.children">
-                        <li class="second-nav" ng-repeat="child in configLi.children track by $index">
+                        <li class="second-nav" ng-repeat="child in configLi.children track by $index" ng-class="isActiveNav(configLi.sref) ? 'active' : ''" ng-click=selectLi(configLi.sref,$event)>
                             <a href="javascript:;" ui-sref={{child.sref}} ui-sref-opt="{reload:true}">{{child.text | translate}}</a>
                         </li>
                     </ul>

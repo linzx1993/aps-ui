@@ -15,28 +15,26 @@ $("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",f
         }
         $(this).addClass("active drag").siblings().removeClass("active drag");
     });
-app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService",
-    function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
+app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
     //默认跳转初始版本页面
-    $state.go('config.scheme');
-    $http.get($rootScope.restful_api.public_version_number)
-        .then((res) => {
-            $scope.versionNumer =res.data.version;
-        },function(){
-            layer.alert("获取系统版本失败，请检查服务器");
-        });
+    $state.go('config.version');
+    //目录li加上class-active
+    $scope.activeNav = ".version";
+    $scope.isActiveNav = function(val){
+        return $scope.activeNav ==  val;
+    };
+    console.log();
     //***********************//
-    //杜伟伟设置的代码，未知bug修正
-    $("#do_detail_dialog_1").parent().remove();
-    $("#do_detail_dialog").parent().remove();
     //生成车间树,设置车间选中
     $scope.columnWorkshop = true;
     $scope.locationId = $scope.locationId || "01";
-    //判断是否在当前页面==>是否重新发送请求 = 设置初始页面
-    $scope.currentPage = $scope.dataUrl="view/adminManage.html";
-    $timeout(function(){
-        $scope.selectLi("view/version.html");
-    },0);
+
+    // // 判断是否在当前页面==>是否重新发送请求 = 设置初始页面
+    // $scope.currentPage = $scope.dataUrl="view/adminManage.html";
+    // $timeout(function(){
+    //     $scope.selectLi("view/version.html");
+    // },0);
+    //
     //自定义目录栏数据
     $scope.configLis = [
         {text : "VersionNav", url : "view/version.html","sref":".version"},
@@ -62,39 +60,21 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
             ]
         }
     ];
-    //点击li获得跳转的url进行局部刷新
-    $scope.selectLi = (gourl,event) => {
-        $timeout(() => {
-            $scope.dataUrl = gourl;
+
+    //
+    $scope.selectLi = (sref,event) => {
+        //为li加上class-active
+        $scope.activeNav = sref;
+        $timeout(function(){
+            $(".second-nav.active").css("pointer-events","none");
+            console.log($(".second-nav.active"));
         });
-        //判断是否在当前页,是=>不变
-        if($scope.currentPage == gourl){
-            return
-        }else{
-            // if($scope.currentPage == "view/schedulePlan.html"){
-                // let move = layer.confirm('方案未保存，确定离开此界面', {
-                //     btn: ['确定','取消'] //按钮
-                // }, function(){
-                //     layer.close(move);
-                //     $scope.currentPage = gourl;
-                // }, function(){
-                //     layer.close(move);
-                //     return;
-                // });
-            // }else{
-                $scope.currentPage = gourl;
-            // }
-        }
         //每次第一次点进来默认点击车间树
-        if(gourl !== "view/checkFrom.html" && gourl !== "view/schedulePlan.html"){
-            $timeout(() => {
-                $(`.select-status[location-id=${$scope.locationId}]`).trigger("click");
-            },100);
-        }
+        $timeout(() => {
+            $(`.select-status[location-id=${$scope.locationId}]`).trigger("click");
+        },100);
     };
-    //版本页面
-    $scope.browser = tool.getBrowser().browser;
-    $scope.version = tool.getBrowser().version;
+
     /**************=======================相关零散代码========================************/
     //清楚后端缓存
     $scope.clearCache = function(){

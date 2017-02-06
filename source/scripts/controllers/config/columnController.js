@@ -3,6 +3,9 @@
  */
 'use strict';
 app.controller("columnController",["$rootScope","$scope","$http",function($rootScope,$scope,$http){
+    //设置面包屑导航
+    $scope.showPageConfig = "显示排序项";
+
     /**
      *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
      */

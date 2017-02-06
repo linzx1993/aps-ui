@@ -5,6 +5,7 @@ var webpack = require("webpack");
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 // var CommonsChunkPlugin = require("webpack/lib/optimize/CommonsChunkPlugin");//合并公共文件
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 module.exports = {
     // devtool: 'eval-source-map',
     // entry:  __dirname + "/main.js",
@@ -20,11 +21,11 @@ module.exports = {
         // main : __dirname + "/main.js",
     },
     output: {
-        path: __dirname + "/dist/scripts/controllers/",
+        path: __dirname + "/dist",
         // publicPath: './images',
         // publicPath : "../dist",
         // filename: '[name].[chunkhash].js'
-        filename: '[name].js?' + new Date().valueOf()+"",//人为js加上时间戳
+        filename: '/scripts/controllers/[name].js?' + new Date().valueOf()+"",//人为js加上时间戳
     },
     module: {
         loaders: [
@@ -51,13 +52,16 @@ module.exports = {
         // new webpack.optimize.UglifyJsPlugin(),//压缩js代码
         // new webpack.optimize.CommonsChunkPlugin('common.js'),
         new ExtractTextPlugin("../../styles/[name].css"),//相对于output的path进行定位
+        //将css，js文件内联到html中
         new HtmlWebpackPlugin({
             title: 'APS',
             filename : "../../index.html",
             template: './index.html', // Load a custom template (ejs by default but can be changed)
             inject: 'body', // Inject all scripts into the body (this is the default so you can skip it)
             // hash:true,//通过加时间戳，也可以起到清缓存的作用
+            // inlineSource:  '.(js|css)',//内联所有 javascript、css
         }),
+        // new HtmlWebpackInlineSourcePlugin()
     ],
     // devServer: {
     //     contentBase: "./public",

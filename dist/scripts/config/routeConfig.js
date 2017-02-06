@@ -55,21 +55,21 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              //         templateUrl:'dist/view/template/columnConfig.html',
              //     }
              // }
-
+             controller : "versionController",
          })
          // // 配置页-显示
          .state('config.display',{
              url:'/display',
              templateUrl:'dist/view/template/displaySecondPage.html',
              controller: function($state){
-                 $state.go('config.first');//默认显示第一个tab
+                 $state.go('config.first.displayDays');//默认显示第一个tab
              }
          })
          // 配置页-一级页面
          .state('config.first',{
              url:'/first',
              templateUrl:'dist/view/template/displayFirstPage.html',
-             controller : "firstPageController"
+             controller : "firstPageController",
          })
          // 配置页-一级页面-显示天数
         .state('config.first.displayDays',{

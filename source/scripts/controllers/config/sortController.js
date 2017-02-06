@@ -2,6 +2,9 @@
  * Created by yiend on 2017/1/15.
  */
 app.controller("sortController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService) {
+    //设置面包屑导航
+    $scope.showPageConfig = "多列排序项";
+
     function getSortConfig(){
         $http.get($rootScope.restful_api.sort_content_config + $scope.locationId)
             .then((res) => {

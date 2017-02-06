@@ -49,18 +49,29 @@
 	/**
 	 * Created by xujun on 2016/7/1.
 	 */
-	app.controller('progressCtrl', function ($scope, $rootScope, $interval, $location, $http, $timeout) {
+	app.controller('progressCtrl', function ($scope, $rootScope, $interval, $location, $http, $timeout, tool) {
 		//用户名
 		$scope.userName = $rootScope.userName;
-		xujun_tool.newprogressBar("#progressbar", "#progress-label", $rootScope.restful_api.aps_rate + "?schemeId=" + sessionStorage.schemeId, "自动排程", function () {
-			var index = layer.confirm('自动排程结束,要跳转到结果页面吗？？', {
-				btn: ['确定', '取消'] //按钮
-			}, function () {
-				$("#progressbar").hide();
-				$location.path("/result");
-				$scope.$apply();
-				layer.close(index);
-			}, function () {});
+		tool.newprogressBar("#progressbar", "#progress-label", $rootScope.restful_api.aps_rate + "?schemeId=" + sessionStorage.schemeId, "自动排程", function () {
+			$scope.failAlert = false;
+			$scope.successAlert = true;
+			$timeout(function () {
+				var lastText = $(".pbody-wrap .wrap-info ul").find("li:last-child").find("span").eq(1).text();
+				if (lastText == "自动排程完成") {
+					$(".pbody-wrap .wrap-info ul").find("li:last-child").find(".in-state-icon-success").show();
+				} else if (lastText == "自动排程失败") {
+					$(".pbody-wrap .wrap-info ul").find("li:last-child").find(".in-state-icon-fail").show();
+				}
+				// 遍历
+				$(".pbody-wrap .wrap-info ul").find("li").each(function () {
+					var stateText = $(this).find("span").eq(1).text();
+					if (stateText == "自动排程失败") {
+						$scope.failAlert = true;
+						$scope.successAlert = false;
+					}
+				});
+			}, 50);
+			$scope.btnShow = true;
 		}, function (res) {
 			var mapState = res.mapState;
 			var listState = []; //定义数组
@@ -113,16 +124,34 @@
 							case "CONFIRMSCH_FAILED":
 								return listState[j].state = "排程确认失败";break;
 						}
+						if (listState[j].state == "自动排程完成") {
+							listState[j].icons = true;
+						}
+
+						$(".pbody-wrap .wrap-info ul").find("li").each(function () {
+							var stateText = $(this).find("span").eq(1).text();
+							if (stateText == "自动排程完成") {
+								$(this).find(".in-state-icon-success").show();
+							} else if (stateText == "自动排程失败") {
+								$(this).find(".in-state-icon-fail").show();
+							}
+						});
 					}
 				}, 0);
 			}
 			$scope.states = listState;
+			console.log(listState);
 		}, $location.$$absUrl);
 		//提示信息操作
 		var ele = $(".wrap-content");
 		ele.on("click", "b", function () {
 			$(this).next("p").toggle().next("i").toggle();
 			$(this).parent().siblings().find("p").hide().end().find("i").hide();
+		});
+
+		$(".prompt_msg i").click(function () {
+			$(".prompt_msg").hide();
+			$(".pbody-wrap .wrap-info li b").removeClass("click-detail");
 		});
 		//按钮
 		$scope.wrap_back = function () {
@@ -134,25 +163,47 @@
 		//提示
 		$scope.alertMsg = function (x, $event) {
 			$event.stopPropagation();
-			var briefInfo = x.briefInfo;
-			$scope.briefInfo = briefInfo;
-			var msgLayer = layer.open({
-				type: 1,
-				title: "提示信息",
-				shadeClose: true,
-				skin: 'yourclass',
-				content: $("#prompt_msg"),
-				success: function success() {
-					// 272是显示框正常宽度，450是高度
-					$(".layui-layer").css({
-						"left": $event.pageX - 152,
-						"top": $event.pageY > document.body.clientHeight - 450 ? document.body.clientHeight - 450 : $event.pageY
-					});
-					$("#prompt_msg").on("click", ".sure", function () {
-						layer.close(msgLayer);
-					});
-				}
+			var briefInfoMap = x.briefInfoMap;
+			$scope.doTaskNum = briefInfoMap.doTaskNum;
+			$scope.undoTaskNum = briefInfoMap.undoTaskNum;
+			$scope.totalTaskNum = briefInfoMap.totalTaskNum;
+			$scope.useTime = briefInfoMap.useTime;
+
+			$(".pbody-wrap .wrap-info li b").removeClass("click-detail");
+			$($event.target).addClass("click-detail");
+
+			$(".prompt_msg").show(0, function () {
+				//			var d_left = $($event.target).offset().left + 56;
+				//			var d_top = $($event.target).offset().top - 71;
+				var body = $("body");
+				var scrollTop = $(document).scrollTop(),
+				    scrollLeft = $(document).scrollLeft();
+				var d_left = $($event.target).offset().left + 56 + scrollLeft;
+				var d_top = $($event.target).offset().top - 71 + scrollTop;
+				var targetHeight = $($event.target).css("top").split("px");
+				var targetParentHeight = $($event.target).parent().parent().parent().css("top").split("px");
+				$(".prompt_msg").css({
+					"left": d_left,
+					"top": d_top > document.body.clientHeight - 100 ? document.body.clientHeight - 100 : d_top
+				});
 			});
+			//		var msgLayer = layer.open({
+			//          type: 1,
+			//          title: "提示信息",
+			//          shadeClose: true,
+			//          skin: 'yourclass',
+			//          content : $("#prompt_msg"),
+			//          success : function(){
+			//              // 272是显示框正常宽度，450是高度
+			//              $(".layui-layer").css({
+			//                    "left" : $event.pageX - 152,
+			//                    "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
+			//              })
+			//              $("#prompt_msg").on("click",".sure",function(){
+			//                    layer.close(msgLayer);
+			//              })
+			//            }
+			//      })
 		};
 	});
 

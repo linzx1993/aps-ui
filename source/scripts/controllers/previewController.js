@@ -1,7 +1,7 @@
 /**
  * Created by xujun on 2016/7/1.
  */
-app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $location, $timeout, scheduleTableViewModelService) {
+app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $location, $timeout, scheduleTableViewModelService,tool) {
 	$(".table-dialog-window").hide();
 	//查询条件
 	var startTime;
@@ -26,31 +26,13 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	
 	//初始化查询日期
 	var today = new Date();
-	if($rootScope.daily_test){today.setFullYear(2016,10,1);}//测试用代码，用于日常环境每次打开显示的为7月1日而不是今天
-	startTime = xujun_tool.dateToString(today);//开始时间为今天
-	endTime =  xujun_tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+	//if($rootScope.daily_test){today.setFullYear(2016,10,1);}//测试用代码，用于日常环境每次打开显示的为7月1日而不是今天
+	
 
 	//测试时间
 	//startTime = "2016-07-07";
 	//endTime = "2016-07-08";
-	
-	//接口还没好，暂时先注释掉
-	$http.get($rootScope.restful_api.get_lock_days).then(
-		function(res) {
-			var resData = res.data.lockDate; //锁定期
-			if(resData){
-				fact_days = resData; //锁定期(可预排最大日期)
-			}else{
-				layer.alert('锁定期接口获取的数据发生错误,请联系技术人员', {
-					skin: 'layer-alert-themecolor' //样式类名
-				});
-			}
-		},
-		function(res) {
-			layer.alert('获取锁定期失败,请联系技术人员', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-		});
+
 	
 	/**
 	 * 显示正式派工单表的排程计划
@@ -62,11 +44,12 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			 * 本地测试方法
 			 */
 				//保存设备信息
+			$scope.get_differall_num();
 			goEquipment = $.extend({},showTable.punit);
 			goInfo = $.extend({},showTable);
 			//json转viewModel对象
 			tableHeadViewModel = scheduleTableViewModelService.jsonToTableHeadViewModel(showTable);
-			tableBodyViewModel = scheduleTableViewModelService.jsonToTableBodyViewModel(showTable);
+			tableBodyViewModel = scheduleTableViewModelService.jsonToTableBodyViewModelNew(showTable);
 			//绑定view层
 			$scope.tableHeadViewModel = tableHeadViewModel;
 			$scope.tableBodyData = tableBodyViewModel.tableBodyData;
@@ -77,31 +60,24 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			//判断上一页下一页按钮是否能点
 //			checkQueryTime(startTime, endTime, today, maxEndTime);
 		}else{
-			$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.urlId_res);
 			$scope.get_differall_num();
 			
-			$("#do_detail_dialog_1").parent().remove();
 			//获取查询信息			
-			var saleOrder = xujun_tool.getFromInput(".sale-order"),
-				materialName = xujun_tool.getFromInput(".material-name"),
-				materialCode = xujun_tool.getFromInput(".material-code");
+			var saleOrder = tool.getFromInput(".sale-order"),
+				materialName = tool.getFromInput(".material-name"),
+				materialCode = tool.getFromInput(".material-code");
 				
 			//拼url
-			var get_url = $rootScope.restful_api.preview_show_table + "?locationFilterList="+locationFilterList+ "&startTime="+ startTime + "&endTime="+ endTime;			
+			var get_url = $rootScope.restful_api.preview_show_table + "?locationFilterList=" + locationFilterList
+																	+ "&startTime=" + startTime 
+																	+ "&endTime="+ endTime;
 			//获取和显示table数据
 			$http.get(get_url).then(
 				//成功
 				function(response){
-					var isSearch = false;
-					if(saleOrder+materialName+materialCode){
-						isSearch = true;
-					}
-
 					//保存设备信息
 					goInfo = $.extend({},response.data);
 					goEquipment = $.extend({},response.data.punit);
-					//是否查询
-					response.data.isSearch = isSearch;
 					//锁定期
 					response.data.freezeDate = fact_days;
 					//是否翻转状态
@@ -120,11 +96,20 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 
 					//json转viewModel对象
 					tableBodyViewModel = scheduleTableViewModelService.jsonToTableBodyViewModelNew(response.data);
-
+					
+					//有查询操作并且有查询成功的数据
+					if(tableBodyViewModel.searchSuccess == "success_search"){
+						layer.msg('根据您的查询条件，已高亮出查询结果，请查看', {time: 3500,icon: 1});
+					}else if(tableBodyViewModel.searchSuccess == "false_search"){
+						layer.msg('根据您的查询条件，未查询出结果', {time: 3500,icon: 2});
+					}else if(tableBodyViewModel.searchSuccess == "allUnitNull"){
+						layer.msg('当前无工单，无法查询', {time: 3500,icon: 2});
+					}
+					
 					//查询时间
 					queryObject = scheduleTableViewModelService.jsonToQueryObject(response.data);
 					if(queryObject == undefined){
-						layer.alert('数据获取接口有问题，请联系技术人员处理', {
+						layer.alert('接口获取的数据有问题，请联系技术人员处理', {
 							skin: 'layer-alert-themecolor' //样式类名
 						});	
 						return;
@@ -137,9 +122,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 					
 					$scope.last_page_button_style = {'display':'inline-block'};
 					$scope.next_page_button_style = {'display':'inline-block'};
-					$(".page-select").css("pointer-events","auto");
-					//页面显示表格,by jquery
-					jqueryDraw();
+					$(".page-select").css("pointer-events","auto");	
+					$(".search-box").hide();
+					$(".search-btn").removeClass("search-btn-click");
 				},
 				//失败
 				function(response){
@@ -152,44 +137,16 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			
 		}
 	}
-	/**
-	 * 搜索框输入检测
-	 **/
-	function checkSearchData(thisStartTime,thisEndTime,aEquipmentId){
-		if(!thisStartTime){
-			layer.alert('请选择开始时间', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-			return false;
-		}else if(!thisEndTime){
-			layer.alert('请选择结束时间', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-			return false;
-		}else if(!thisEquipmentName){
-			layer.alert('请输入设备', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-			return false;
-		}
-		if(aEquipmentId.length < 1){
-			layer.alert('请输入正确的设备名称', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-			return false;
-		}
-		return true;
-	}
 	
 	/**
 	 * 上一页按钮点击
 	 **/
 	$scope.last_page = function(){
 		$(".page-select").css("pointer-events","none");
-		var startTime_date = xujun_tool.stringToDate(startTime);
-		var endTime_date = xujun_tool.stringToDate(endTime);
-		startTime = xujun_tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() - offset - 1)));//开始时间为周期后+1
-		endTime =  xujun_tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() - offset - 1)));//结束时间为周期后+1
+		var startTime_date = tool.stringToDate(startTime);
+		var endTime_date = tool.stringToDate(endTime);
+		startTime = tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() - offset - 1)));//开始时间为周期后+1
+		endTime =  tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() - offset - 1)));//结束时间为周期后+1
 		//获取表格数据
 		preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);
 	}
@@ -199,10 +156,10 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	 **/
 	$scope.next_page = function(){
 		$(".page-select").css("pointer-events","none");
-		var startTime_date = xujun_tool.stringToDate(startTime);
-		var endTime_date = xujun_tool.stringToDate(endTime);
-		startTime = xujun_tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() + offset + 1)));//开始时间为周期后+1
-		endTime =  xujun_tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() + offset + 1)));//结束时间为周期后+1
+		var startTime_date = tool.stringToDate(startTime);
+		var endTime_date = tool.stringToDate(endTime);
+		startTime = tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() + offset + 1)));//开始时间为周期后+1
+		endTime =  tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() + offset + 1)));//结束时间为周期后+1
 		//获取表格数据
 		preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);
 	}	
@@ -226,7 +183,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			thisText = "再编辑";
 		}
 		
-		var index = layer.confirm('确定要开始'+thisText+'?', {
+		var index = layer.confirm('确定'+thisText+'?', {
 			btn: ['确定','取消'] //按钮
 		}, function(){
 				//使用弹窗模块
@@ -267,52 +224,6 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	}
 
 	/**
-	 * 翻转
-	 **/
-	$scope.turn_to_back = function(){
-		//判断往那边转
-		var thisOpacity = 1;
-		if($rootScope.frontBack){
-			$rootScope.frontBack = false;
-			thisOpacity = 0;
-		}else{
-			$rootScope.frontBack = true;
-		}
-
-		$(".table-tr").each(function(a){
-			var thisTr = $(this),
-				TdList = thisTr.find(".table-td");
-			TdList.each(function(index){
-
-				if(index == 0){
-					return;
-				}else{
-					var thisTd = $(this),
-						thisFront = thisTd.find(".td-front"),
-						thisBack = thisTd.find(".td-back"),
-						ry = 0,
-						by = 0;
-
-					//连点终止之前的动画。
-					thisFront.stop(false,false);
-
-					//调用jquery动画函数
-					thisFront.animate({opacity:thisOpacity},{
-						step: function(n){
-							ry = (1-n)*180;
-							by = n*180;
-							$(this).css("transform","rotateY("+ry+"deg)");
-							thisBack.css("opacity",1-n);
-							thisBack.css("transform","rotateY("+by+"deg)");
-						},
-						duration:500,
-					});
-				}
-			})
-		});
-	}
-	
-	/**
 	 * 预排转实际
 	 * 打开预排转实际的弹窗
 	 **/
@@ -343,7 +254,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		$scope.punitNameList = punitNameList; 
 			
 		//转换获取到的锁定期	
-		fact_days = xujun_tool.stringToDate(fact_days);
+		fact_days = tool.stringToDate(fact_days);
 		
 		//算今天到锁定期的相隔天数
 		for( ;todayDate.getTime() <= fact_days.getTime(); ){
@@ -353,7 +264,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		}
 		
 		//再次转换锁定期的日期格式
-		fact_days =  xujun_tool.dateToString(fact_days);	
+		fact_days =  tool.dateToString(fact_days);	
 		
 		//页面显示天数
 		$scope.maxdays = daysNum;
@@ -406,11 +317,13 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		//若输入框的值都为空或者0,则不执行
 		if(nullNum == daysList.length){	
 			layer.alert('无法预排，请检查是否可排或检查是否输入了预排天数', {
+				move: false,
 				skin: 'layer-alert-themecolor' //样式类名
-			});	
+			});
 			return;
 		}else{
 			layer.confirm('是否确认预排转实际？', {
+				move: false,
 				btn: ['确定','取消'] //按钮
 			}, function(){
 				var equipment = goInfo.punit,
@@ -434,7 +347,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 						
 						var maxToFactDate,
 							dataList = [],
-							thisFreezeDate = xujun_tool.stringToDate(equipment[i].freezeDate);
+							thisFreezeDate = tool.stringToDate(equipment[i].freezeDate);
 						
 						//当前设备可预排的最大日期
 						maxToFactDate = nowDate.setDate(nowDate.getDate() + daysList[temp]-1);
@@ -448,7 +361,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 						
 						//折算出从今天到最大日期间的所有日期
 						for( ; minDate.getTime() <= maxToFactDate ; ){
-							dataList.push(xujun_tool.dateToString(minDate));
+							dataList.push(tool.dateToString(minDate));
 							minDate = minDate.setDate(minDate.getDate()+1);
 							minDate = new Date(minDate);
 						}
@@ -477,23 +390,26 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 					$http.post($rootScope.restful_api.plan_to_fact, aList).then(
 						function(res){
 							if(res.data == true){
-								layer.alert('预排转实际成功', {
-									skin: 'layer-alert-themecolor' //样式类名
-								});
+								layer.msg('预排转实际成功', {time: 3500,icon: 1});
+								$(".to-fact-box").hide();
+								$(".right-menu-button").removeClass("to-fact-click");
 							}else{
 								layer.alert('预排转实际失败', {
+									move: false,
 									skin: 'layer-alert-themecolor' //样式类名
 								});
 							}
 						},
 						function(res){
 							layer.alert('连接失败', {
+								move: false,
 								skin: 'layer-alert-themecolor' //样式类名
 							});
 						}
 					);
 				}else{
 					layer.alert('锁定期内无单', {
+						move: false,
 						skin: 'layer-alert-themecolor' //样式类名
 					});
 				}
@@ -506,27 +422,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	 **/
 	$(function(){
 		
-		//右边栏弹出小提示
-		var arrEle=$(".right-menu-button");
-		for(var i=0;i<arrEle.length;i++){
-			$(arrEle[i]).mouseover(function(){
-				$(this).find(".tip").stop().show().animate({
-					left:"-120px",
-					opacity:"1"
-				},300);
-			});
-			$(arrEle[i]).mouseleave(function(){
-					$(this).find(".tip").hide().animate({
-					left:"-220px",
-					opacity:"0.3"
-				},0)
-			})
-		}
-		
 		//预排转实际加减号
 		$(".to-fact-box").on("click",".add",function(){
 			var va = $(this).parent().find(".each_days_input").val() - 0;
-//			var va = va - 0 ;
 			if(va < daysNum && va >= 0){
 				$(this).parent().find(".sub").css("cursor","pointer");
 				$(this).css("cursor","pointer");
@@ -539,7 +437,6 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		})
 		$(".to-fact-box ").on("click",".sub",function(){	
 			var va = $(this).parent().find(".each_days_input").val() - 0;
-//			var va = va - 0 ;
 			if(va <= daysNum && va > 0){
 				$(this).parent().find(".each_days_input").val(va - 1);
 				$(this).parent().find(".add").css("cursor","pointer");
@@ -550,53 +447,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 				$(this).parent().find(".add").css("cursor","pointer");
 			}
 		})
-		
-		//排程方案选择下拉框
-		$(".aps-case ")
-			.on("click","p.case-header",function(){
-				if($(this).next("ul").hasClass("select-li")){
-					$(this).next("ul").removeClass("select-li");
-					$(this).removeClass("chosen");
-				}else{
-					$(this).next("ul").addClass("select-li");
-					$(this).addClass("chosen");
-				}			
-			})
-			.on("click",".case-content li",function(){
-				$(".case-header").html($(this).html());
-				$(".case-content").removeClass("select-li");
-				$(this).parent().siblings(".case-header").removeClass("select-li");
-				$(this).parent().siblings(".case-header").removeClass("chosen");
-			})			
 	})
-	
-	/**
-	 * 表头
-	 **/
-	function setTableHeadWidth(parentNodes){
-		var lastLeft = 0;
-		var jCoverHead = parentNodes.find(".cover-head"),
-			jShowTable = parentNodes.find(".show-table thead");
-		jCoverHead.width(jShowTable.width());
-		jCoverHead.height(jShowTable.height());
-		var jCoverTh = jCoverHead.find("div");
-		var jHeadTh = jShowTable.find("th");
-		var thNum = jHeadTh.length;
-		for(var i = 0; i < thNum ; i++){
-			
-			if(!!window.ActiveXObject || "ActiveXObject" in window){
-				if(i == thNum-1){
-					jCoverTh.eq(i).width(jShowTable.width()-jHeadTh.eq(i).position().left-2);
-				}else{
-					var thisWidth = jHeadTh.eq(i+1).position().left-lastLeft-2;
-					lastLeft = jHeadTh.eq(i+1).position().left
-					jCoverTh.eq(i).width(thisWidth);
-				}
-			}else{
-				jCoverTh.eq(i).width(jHeadTh.eq(i).width());
-			}
-		}
-	};
 	
 	/**
 	 * 获取外部差异条数
@@ -605,6 +456,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	var bodyData;	//表体数据
 	var tabList;	//标签数据
 	var headData;	//表头数据
+	var differAllNum;//总条数
 	$scope.get_differall_num = function(){
 		/*拼接url开始*/
 		var ex_diff_url = "";
@@ -629,22 +481,27 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 					var externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(resData);	
 					bodyData = externalDifferViewModel.bodyData;
 					tabList = externalDifferViewModel.tabList;
-					headData = externalDifferViewModel.headData;
 					
-					//计算总条数
-					differAllNum = 0;
-					for(var i = 0;i< tabList.length;i ++){  
-						
-						//每部分对应的条数
-						var each_differ_num = tabList[i].each_differ_num;   
-						differAllNum += each_differ_num;
+					var poolTaskChangeList = resData.poolTaskChangeList;
+					if(poolTaskChangeList.length){
+						//计算总条数
+						differAllNum = 0;
+						for(var i = 0;i< tabList.length;i ++){  
+							//每部分对应的条数
+							var each_differ_num = tabList[i].each_differ_num;   
+							differAllNum += each_differ_num;
+						}
 						$scope.differAllNum = differAllNum;
 						if(differAllNum){
-							
 							//如果有值,则显示数字
 							$(".right-menu .external-diff-num").show();
-						}				
+						}else{
+							$(".right-menu .external-diff-num").hide();
+						}						
+					}else{
+						$(".right-menu .external-diff-num").hide();
 					}
+					
 				}else{
 					layer.alert('"外部差异"接口数据有问题，请联系技术人员处理', {
 						skin: 'layer-alert-themecolor' //样式类名
@@ -665,7 +522,6 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			var externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(exterDiffer);	
 			bodyData = externalDifferViewModel.bodyData;
 			tabList = externalDifferViewModel.tabList;
-			headData = externalDifferViewModel.headData;
 			differAllNum = 0;
 			for(var i = 0;i< tabList.length;i ++){      //计算总条数
 				var each_differ_num = tabList[i].each_differ_num;   //每部分对应的条数
@@ -692,74 +548,65 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		//打开遮罩层
 		$(".cover").show(); 
 		
-		//表头
-		$scope.headData = headData; 
-		if(tabList.length) {
-			
+
+		
+		if(differAllNum) {
 			//tab标签
 			$scope.tabList = tabList; 
-			
+
+			//表头
+			var firstTab = tabList[0].changeType;
+			if(firstTab == "tim"){
+				headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间","新计划时间"];
+			}else{
+				headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间"];
+			}
+			$scope.headData = headData; 
+		
 			//第一个tab标签的表格
-			var changeType = tabList[0].changeType;
-			$scope.changedBodyData = bodyData[changeType]; 
+			$scope.changedBodyData = bodyData[firstTab]; 
 			$(".exDiffer-window .null-data").hide();
+			
 		}else{
 			$(".exDiffer-window .null-data").show();
 		}
 
 		//表头
 		$timeout(function() {
-			setTableHeadWidth($(".exDiffer-window"))
+			tool.setTableHeadWidth($(".exDiffer-window"));
+			
+			//第一个tab的样式有点击状态
+			$(".external-diff-tab").children("li:first").not(".each-diff-num").addClass("click-tab"); 
+			
+			//小提示
+			$("body").on("mouseover",".help-span",function(){
+				$(this).find(".help-box").show();
+			}).on("mouseleave",".help-span",function(){
+				$(this).find(".help-box").hide();
+			})
+			
+			if(firstTab == "tim"){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(6).css("color","#0099CC");
+					$(this).find("td").eq(7).css("color","#009F95");
+				})				
+			}else if(firstTab == "des"){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(2).css("color","#0099CC");
+				})				
+			}else{
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(3).css("color","#0099CC");
+				})				
+			}
+			
+
 		}, 0);
 		
 		//resize
 		$(window).on("resize", function() {
-			setTableHeadWidth($(".exDiffer-window"));
+			tool.setTableHeadWidth($(".exDiffer-window"));
 		});
-
-		$timeout(function() {
-			
-			//第一个tab的样式有点击状态
-			$(".external-diff-tab").children("li:first").not(".each-diff-num").addClass("click-tab"); 
-			var Litype = $(".external-diff-tab").children("li:first").attr("type");
-			
-			//如果此时是"变化"的情况则给弹窗加上class,主要是为了下面的功能 红色 字体的显示
-			if(Litype == "change") { 
-				$(".pbody .exDiffer-window").addClass("exDiffer");
-			}else if(Litype == "add" || Litype == "desc") { //如果不是"变化"的情况,去掉弹窗的class
-				$(".pbody .exDiffer-window").removeClass("exDiffer");
-			}
-			
-			//红色字体的格子会显示变化前的数据
-			if(Litype == "change"){	
-				$("body").on("mouseenter",".exDiffer .brightColor",function(){
-					$(".differ-tip").remove();
-					var tdWidth = $(this).width();
-					var tdHeight = $(this).height();
-					var tdLeft = $(this).offset().left;
-					var tdTop = $(this).offset().top;
-					var oldData = $(this).attr("data-old");	
-					var oldDataTip = layer.open({
- 						 type: 4,
- 						 content: "变化前 : " + oldData, //数组第二项即吸附元素选择器或者DOM
- 						 tips: 1,
- 						 skin:"differ-tip",
-   						 time: 3000,
- 						 closeBtn: 0,
- 						 shade: 0,
-			             success : function(){
-			              	$(".pbody .external-diff-tab li").click(function(){
-			              		layer.close(oldDataTip);
-			              	})
-			              	$(".differ-tip").css({
-			              		"left":tdLeft+tdWidth/2,
-			              		"top":tdTop+tdHeight+12
-			              	});
-			             }	 						 
-					});
-				});
-			}
-		}, 0)
 		
 		//关闭窗口
 		jDifferWindow.find(".close-window").on("click", function() { 
@@ -770,72 +617,85 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	};
 
 	/**
+	 * 外部差异变化数据弹窗
+	 **/
+	$scope.alertTip = function(){
+		$("body").on("mouseenter",".exDiffer .brightColor",function(){
+			$(".differ-tip").remove();
+			var tdWidth = $(this).width();
+			var tdHeight = $(this).height();
+			var tdLeft = $(this).offset().left;
+			var tdTop = $(this).offset().top;
+			var oldData = $(this).attr("data-old");	
+			var oldDataTip = layer.open({
+ 				 type: 4,
+ 				 content: "变化前 : " + oldData, //数组第二项即吸附元素选择器或者DOM
+ 				 tips: 1,
+ 				 skin:"differ-tip",
+   				 time: 3000,
+ 				 closeBtn: 0,
+ 				 shade: 0,
+	             success : function(){
+		         	$(".pbody .external-diff-tab li").click(function(){
+			     		layer.close(oldDataTip);
+			    	})
+			    	$(".differ-tip").css({
+			    	    "left":tdLeft+tdWidth/2,
+			    	    "top":tdTop+tdHeight+12
+			    	});
+			    }	 						 
+			});
+		});
+	}
+
+	/**
 	 * 点击外部差异tab
 	 **/
 	$scope.exteriffer_tab = function(tabInfo,$event){
-		
+		var jDifferWindow = $(".exDiffer-window");
 		//获取当前点击的li对应的类型
 		var changeType = tabInfo.changeType;
-		var jDifferWindow = $(".exDiffer-window");
+		if(changeType == "tim"){
+			headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间","新计划时间"];
+		}else{
+			headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间"];
+		}
+		$scope.headData = headData; 
 		
 		//根据tab重绘表格部分
 		$scope.changedBodyData = bodyData[changeType];	
 		
 		//表头
-		$timeout(function(){setTableHeadWidth($(".exDiffer-window"))},0);
+		$timeout(function(){
+			tool.setTableHeadWidth($(".exDiffer-window"));
+
+			//切换点击的tab的样式
+			var thisLi=$event.target;
+			$($event.target).not(".each-diff-num").addClass("click-tab").siblings().removeClass("click-tab");	
+			$(".exDiffer-window").on("click",".each-diff-num",function(){
+				$(this).parent().not(".each-diff-num").addClass("click-tab").siblings().removeClass("click-tab");
+			})
+
+			if(changeType == "tim"){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(6).css("color","#0099CC");
+					$(this).find("td").eq(7).css("color","#009F95");
+				})				
+			}else if(changeType == "des"){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(2).css("color","#0099CC");
+				})				
+			}else{
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(3).css("color","#0099CC");
+				})				
+			}			
+		},50);
 		
 		//resize
 		$(window).on("resize",function(){
-			setTableHeadWidth($(".exDiffer-window"));
+			tool.setTableHeadWidth($(".exDiffer-window"));
 		});
-		
-		//切换点击的tab的样式
-		var thisLi=$event.target;
-		$($event.target).not(".each-diff-num").addClass("click-tab").siblings().removeClass("click-tab");	
-		$(".exDiffer-window").on("click",".each-diff-num",function(){
-			$(this).parent().not(".each-diff-num").addClass("click-tab").siblings().removeClass("click-tab");
-		})
-		
-		$timeout(function(){
-			var Litype = $($event.target).attr("type")||$($event.target).parent().attr("type");
-			
-			//如果不是"变化"的情况,去掉弹窗的class
-			if(Litype == "add" || Litype == "desc"){	
-				$(".pbody .exDiffer-window").removeClass("exDiffer");
-			}else if(Litype == "change"){
-				$(".pbody .exDiffer-window").addClass("exDiffer");
-			}			
-			
-			//红色字体的格子会显示变化前的数据
-			if(Litype == "change"){	
-				$("body").on("mouseenter",".exDiffer .brightColor",function(){
-					$(".differ-tip").remove();
-					var tdWidth = $(this).width();
-					var tdHeight = $(this).height();
-					var tdLeft = $(this).offset().left;
-					var tdTop = $(this).offset().top;
-					var oldData = $(this).attr("data-old");	
-					var oldDataTip = layer.open({
- 						 type: 4,
- 						 content: "变化前 : " + oldData, //数组第二项即吸附元素选择器或者DOM
- 						 tips: 1,
- 						 skin:"differ-tip",
-   						 time: 3000,
- 						 closeBtn: 0,
- 						 shade: 0,
-			             success : function(){
-			              	$(".pbody .external-diff-tab li").click(function(){
-			              		layer.close(oldDataTip);
-			              	})
-			              	$(".differ-tip").css({
-			              		"left":tdLeft+tdWidth/2,
-			              		"top":tdTop+tdHeight+12
-			              	});
-			             }	 						 
-					});
-				});
-			}
-    	},0)			
 		
 		//关闭窗口
 		jDifferWindow.find(".close-window").on("click",function(){
@@ -859,7 +719,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		if(cell[0].type == 3){
 			return;
 		}
-		var thisInf = cell[0].args,
+		var thisInf = cell[0],
 			thisDate = thisInf.date,
 			thisStartDate = thisInf.s_date,
 			thisEndDate = thisInf.e_date,
@@ -870,9 +730,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			thisEndDate = thisDate;
 		}
 		//查询条件
-		var saleOrder = xujun_tool.getFromInput_nocode(".sale-order");
-			materialName = xujun_tool.getFromInput_nocode(".material-name");
-			materialCode = xujun_tool.getFromInput_nocode(".material-code");
+		var saleOrder = tool.getFromInput_nocode(".sale-order");
+			materialName = tool.getFromInput_nocode(".material-name");
+			materialCode = tool.getFromInput_nocode(".material-code");
 
 		$scope.click_creat_window(thisStartDate,thisEndDate,thisEquipment,saleOrder,materialName,materialCode);
 	}
@@ -885,9 +745,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			thisStartDate = thisData.thisDate,
 			thisEndDate = thisData.thisDate,
 			thisEquipment = thisData.equipment;
-		var saleOrder = xujun_tool.getFromInput_nocode(".sale-order"),
-			materialName = xujun_tool.getFromInput_nocode(".material-name"),
-			materialCode = xujun_tool.getFromInput_nocode(".material-code");
+		var saleOrder = tool.getFromInput_nocode(".sale-order"),
+			materialName = tool.getFromInput_nocode(".material-name"),
+			materialCode = tool.getFromInput_nocode(".material-code");
 		$scope.click_creat_window(thisStartDate,thisEndDate,thisEquipment,saleOrder,materialName,materialCode);
 	}
 
@@ -984,25 +844,17 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 				"materialCode":materialCode,
 				"saleOrderCode":saleOrder,
 				"order":isStr,
-				"equipments":isArr
+				"equipments":isArr,
+				"from":"preview"
 			};
-			localStorage.setItem("hrefPrameter",JSON.stringify(body_data));
-			var href = "./view/secondPage.html?preview";
+			sessionStorage.setItem("hrefPrameter",JSON.stringify(body_data));
+			var href = "./view/secondPage.html";
 			window.open(href);
 			return;
 		}
 	}
 
-	//jquery控制表格显示样式，需要采用这种异步的方式调用
-	function jqueryDraw(){
-		$timeout(function() {
-//          view_js.autoResize();
-			$(".search-box").hide();
-			$(".search-btn").removeClass("search-btn-click");
-			//页面渲染绘制锁定期相关的信息：锁定期线，以后会扩展更多
-			if(tableBodyViewModel)view_js.aps_freeze_draw(tableBodyViewModel.tableTrFreezeInfo,tableBodyViewModel.tableTrOverCapability);
-		}, 0)
-	}
+	
 
 	/**************以下是本页实际执行的代码，上面都为函数和事件绑定****************/
 	
@@ -1013,7 +865,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
     	$http.get(thisUrl).then(
     		function(res){
     			var resData = res.data;
-    			$scope.folder = getData(res.data)[0];//处理数据,并绑定到页面
+    			$scope.folder = scheduleTableViewModelService.getData(res.data)[0];//处理数据,并绑定到页面
     			
     			//存储第一个车间下的子地点
     			var resData_body;
@@ -1069,7 +921,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
                 		//第一级点击操作
                 		$(this).parent().siblings("li").children("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
                 		$(this).parent().siblings("li").find("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
-                	});
+                	})
             	$timeout(function(){ 
                     //如果没有子地点 ,移除 s 标签
                     var clickSpan=$(".location-list").find("span");
@@ -1097,9 +949,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
                 	thisSelect.parents("folder-tree").each(function(){
                 		var thisTree = $(this);
                 		var thisStatus = thisTree.siblings(".selcetstatus");
-                		if(thisTree.find(".selected").length<1){
+                		if(thisTree.find(".selected").length < 1){
                 			thisStatus.removeClass("selected").removeClass("active").removeClass("selectsome").addClass("unselect");
-                		}else if(thisTree.find(".unselect").length<1){
+                		}else if(thisTree.find(".unselect").length < 1){
                 			thisStatus.removeClass("selectsome").removeClass("unselect").removeClass("selectsome").addClass("selected").addClass("active");
                 		}else{
                 			thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("selectsome");
@@ -1115,52 +967,82 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
     $timeout(function(){
     	var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i")
 		var defaultId = defaultEle.attr("location-id");
-		
-		//是否有上一次的缓存
-		if(sessionStorage.locationId_pre) { 
-//			if(sessionStorage.defaultList_pre.indexOf(sessionStorage.locationId_pre) > -1) {    
-//				preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);  //查询显示
-//				jqueryDraw();          //页面显示表格
-//				$("i[location-id="+sessionStorage.locationId_pre+"]").click();
-//			} else {
-//				defaultEle.click();
-//				sessionStorage.locationId_pre = defaultId;
-//	    		sessionStorage.locationFilterList_pre = $rootScope.defaultList;
-//	    		preview_show_table(defaultId,$rootScope.defaultList);
-//				jqueryDraw();  
-//			}
-			//第一次登陆,判断是否有用户id缓存
-			if(sessionStorage.userId) {
-				//判断上一次的缓存是否对该用户有权限
-				if($rootScope.userId == sessionStorage.userId) {
-					preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);  //查询显示
-					jqueryDraw();          //页面显示表格
-					$("i[location-id="+sessionStorage.locationId_pre+"]").click();
-					sessionStorage.userId = $rootScope.userId;   //存储当前用户Id
-				} else {
-					defaultEle.click();
-					sessionStorage.locationId_pre = defaultId;
-		    		sessionStorage.locationFilterList_pre = $rootScope.defaultList;
-		    		preview_show_table(defaultId,$rootScope.defaultList);
-					jqueryDraw();
-					sessionStorage.userId = $rootScope.userId;
-				}
-			} else {
-				defaultEle.click();
-				sessionStorage.locationId_pre = defaultId;
-	    		sessionStorage.locationFilterList_pre = $rootScope.defaultList;
-	    		preview_show_table(defaultId,$rootScope.defaultList);
-				jqueryDraw(); 
-				sessionStorage.userId = $rootScope.userId;
-			}
+		var defaultList = $rootScope.defaultList;
+		//是否存在该用户缓存信息
+		if(sessionStorage.locationId_pre && sessionStorage.userId && $rootScope.userId == sessionStorage.userId) { 
+			defaultId = sessionStorage.locationId_pre;
+			defaultList = sessionStorage.locationFilterList_pre;
+			$("i[location-id="+sessionStorage.locationId_pre+"]").click();
 		} else {
+			//第一次登陆
 			defaultEle.click();
 			sessionStorage.locationId_pre = defaultId;
-    		sessionStorage.locationFilterList_pre = $rootScope.defaultList;
-    		preview_show_table(defaultId,$rootScope.defaultList); 
-			jqueryDraw(); 
-			sessionStorage.userId = $rootScope.userId;
+    		sessionStorage.locationFilterList_pre = $rootScope.defaultList;   
 		}
+		sessionStorage.userId = $rootScope.userId;  //存储当前用户Id
+		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.urlId_res,true);
+		
+        //获取合并规则
+        $http.get($rootScope.restful_api.group_by).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		if(thisObj){
+        			$rootScope.showType = {
+			    			group_by:thisObj[0].valueContent,
+			    			cnName:"个"+thisObj[0].valueAlias
+			    		};
+        		}else{
+        			$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        		}
+        	},
+        	function(res){
+        		$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        	}
+        );
+        
+        //获取显示天数
+        $http.get($rootScope.restful_api.get_show_days).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		offset = thisObj[0].valueContent-1;
+        		startTime = tool.dateToString(today);//开始时间为今天
+				endTime =  tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+//				console.log(offset);
+				preview_show_table(defaultId,defaultList);  //查询显示
+        	},
+        	function(res){
+        		offset = 6;
+        		startTime = tool.dateToString(today);//开始时间为今天
+				endTime =  tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+//				console.log(offset);
+				preview_show_table(defaultId,defaultList);  //查询显示
+        	}
+        );
+        
+        //接口还没好，暂时先注释掉
+		$http.get($rootScope.restful_api.get_lock_days).then(
+			function(res) {
+				var resData = res.data.lockDate; //锁定期
+				if(resData){
+					fact_days = resData; //锁定期(可预排最大日期)
+				}else{
+					layer.alert('锁定期接口获取的数据发生错误,请联系技术人员', {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+				}
+			},
+			function(res) {
+				layer.alert('获取锁定期失败,请联系技术人员', {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+			}
+		);
 		
 		//改变按钮位置
 		$(".out-bg").animate({width:"64px"},0);
@@ -1220,10 +1102,45 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
     	sessionStorage.locationFilterList_pre = body_locationid.join();
     	$rootScope.urlLocationid = urlLocationid;
     	$rootScope.body_locationid = body_locationid.join();
-    	
-		preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);  //查询显示
-		jqueryDraw();          //页面显示表格
-		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.urlId_res);
+		
+		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.urlId_res,true);
+		//获取合并规则
+        $http.get($rootScope.restful_api.group_by).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		if(thisObj){
+        			$rootScope.showType = {
+		    			group_by:thisObj[0].valueContent,
+		    			cnName:"个"+thisObj[0].valueAlias
+		    		};
+		    		
+        		}else{
+        			layer.alert( "获取数据失败!", {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+        		}
+	        		
+        	},
+        	function(res){
+        		layer.alert( "获取数据失败!", {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+        	}
+        );
+        layer.msg('地点已修改', {time: 3500,icon: 1});
+        //获取显示天数
+        $http.get($rootScope.restful_api.get_show_days).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		offset = thisObj[0].valueContent-1;
+				preview_show_table(sessionStorage.locationId_pre,sessionStorage.locationFilterList_pre);  //查询显示
+        	},
+        	function(res){
+        		layer.alert( "获取数据失败!", {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+        	}
+        );
 		
 		//更改为默认第一级展开状态,并将地点树隐藏
 		$(".location-list span").removeClass("open").removeClass("active");
@@ -1237,6 +1154,8 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		//设置前面线的高度
 		var thisB=$(folderTree[0]).children("ul").children("b");
     	thisB.height($(folderTree[0]).children("ul").height()-30);
+    	
+    	$scope.get_differall_num();
     }
     
    /**
@@ -1324,7 +1243,6 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 					data_body.schemeId = id;
 				}
 				$rootScope.cancel_data = data_body;
-//				sessionStorage.cancel_data = data_body;
 				sessionStorage.setItem("cancel_data",JSON.stringify(data_body));
 				
 				var post_body = {     //开始排程往后台发送数据
@@ -1366,26 +1284,70 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	}
 	
 	/**
+	 * 排程方案选择下拉框
+	 **/
+	$(".aps-case ")
+		.on("click","p.case-header",function(){
+			if($(this).next("ul").hasClass("select-li")){
+				$(this).next("ul").removeClass("select-li");
+				$(this).removeClass("chosen");
+			}else{
+				$(this).next("ul").addClass("select-li");
+				$(this).addClass("chosen");
+			}			
+		})
+		.on("click",".case-content li",function(){
+			$(".case-header").html($(this).html());
+			$(".case-content").removeClass("select-li");
+			$(this).parent().siblings(".case-header").removeClass("select-li");
+			$(this).parent().siblings(".case-header").removeClass("chosen");
+		})
+	
+	/**
 	 * 点击开始排程按钮
 	 **/
 	$scope.aps_start = function(){
-//		$(".wrap-box").next("p").remove();
-		startApsType = "apsStart";
-		$scope.aps_schme();
-		var index=layer.open({
-            type: 1, 
-            title: false,
-            closeBtn: 0,
-            shadeClose: false,
-            area: ['400px', 'auto'],
-            skin: 'yourclass',
-            content: $(".aps-case"),
-            success : function(){
-            	$(".aps-case").on("click",".in-but",function(){
-                    layer.close(index);
-                    $(".case-content").removeClass("select-li");
-               })
-            }
+		//判断是否有已配置的方案
+		$http.get($rootScope.restful_api.all_schedule_plan).success(function(res){
+			
+			if(res.error_response){
+				layer.alert( "方案返回数据错误,请联系技术人员处理!", {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+				return;
+			}else{
+				var sechemeLength = res.length;
+				//若没有方案,弹窗提示
+				if(sechemeLength == 0){
+					layer.alert( "您没有配置方案,无法排程!", {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+					return;
+				}else{   //已配置方案,继续操作
+					startApsType = "apsStart";
+					$scope.aps_schme();
+					var index = layer.open({
+			            type: 1, 
+			            title: false,
+			            closeBtn: 0,
+			            shadeClose: false,
+			            area: ['400px', 'auto'],
+			            skin: 'yourclass',
+			            content: $(".aps-case"),
+			            success : function(){
+			            	$(".aps-case").on("click",".in-but",function(){
+			                    layer.close(index);
+			                    $(".case-content").removeClass("select-li");
+			               })
+			            }
+			        })
+				}
+			}
+		})
+		.error(function(res) {
+          	layer.alert( "请求方案数据错误,请联系技术人员处理!", {
+				skin: 'layer-alert-themecolor' //样式类名
+			});  
         })
 	}
 	
@@ -1393,21 +1355,46 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	 * 点击再编辑
 	 **/
 	$scope.edit_again = function(){
-		startApsType = "editAgain";
-		$scope.aps_schme();
-		$rootScope.index=layer.open({
-            type: 1, 
-            title: false,
-            closeBtn: 0,
-            shadeClose: false,
-            area: ['400px', 'auto'],
-            skin: 'yourclass',
-            content: $(".aps-case"),
-            success : function(){
-            	$(".aps-case").on("click",".in-but",function(){
-                    layer.close($rootScope.index);
-                })
-            }
+		//判断是否有已配置的方案
+		$http.get($rootScope.restful_api.all_schedule_plan).success(function(res){
+			
+			if(res.error_response){
+				layer.alert( "方案返回数据错误,请联系技术人员处理!", {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+				return;
+			}else{
+				var sechemeLength = res.length;
+				//若没有方案,弹窗提示
+				if(sechemeLength == 0){
+					layer.alert( "您没有配置方案,无法再编辑!", {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+					return;
+				}else{    //已配置方案,继续操作
+					startApsType = "editAgain";
+					$scope.aps_schme();
+					$rootScope.index = layer.open({
+			            type: 1, 
+			            title: false,
+			            closeBtn: 0,
+			            shadeClose: false,
+			            area: ['400px', 'auto'],
+			            skin: 'yourclass',
+			            content: $(".aps-case"),
+			            success : function(){
+			            	$(".aps-case").on("click",".in-but",function(){
+			                    layer.close($rootScope.index);
+			                })
+			            }
+			        })
+				}
+			}
+		})
+		.error(function(res) {
+            layer.alert( "请求方案数据错误,请联系技术人员处理!", {
+				skin: 'layer-alert-themecolor' //样式类名
+			});  
         })
 	}
 })

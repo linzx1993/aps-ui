@@ -12,7 +12,8 @@ app.directive('ngRightClick', function($parse) {
 		});
 	};
 });
-app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $location, $interval,$timeout,$q,scheduleTableViewModelService) {
+
+app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $location, $interval,$timeout,$q,scheduleTableViewModelService,tool) {
 		$(".table-dialog-window").hide();
 		$(".cache-window").hide();
         //查询条件
@@ -40,54 +41,11 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$scope.checkSwitch = false;
         //初始化查询日期
         var today = new Date();
-        if($rootScope.daily_test){today.setFullYear(2016,10,1);}//测试用代码，用于日常环境每次打开显示的为7月1日而不是今天
-        startTime = xujun_tool.dateToString(today);//开始时间为今天
-        endTime =  xujun_tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
-
-	//合并时设置头部宽度
-	function setTableHeadWidth(parentNodes){
-		var lastLeft = 0;
-		var jCoverHead = parentNodes.find(".cover-head"),
-			jShowTable = parentNodes.find(".show-table thead");
-		jCoverHead.width(jShowTable.width());
-		jCoverHead.height(jShowTable.height());
-		var jCoverTh = jCoverHead.find("div");
-		var jHeadTh = jShowTable.find("th");
-		var thNum = jHeadTh.length;
-		for(var i = 0; i < thNum ; i++){
-			if(!!window.ActiveXObject || "ActiveXObject" in window){
-				if(i == thNum-1){
-					jCoverTh.eq(i).width(jShowTable.width()-jHeadTh.eq(i).position().left-2);
-				}else{
-					var thisWidth = jHeadTh.eq(i+1).position().left-lastLeft-2;
-					lastLeft = jHeadTh.eq(i+1).position().left
-					jCoverTh.eq(i).width(thisWidth);
-				}
-			}else{
-				jCoverTh.eq(i).width(jHeadTh.eq(i).width());
-			}
-		}
-	};
-	
-	/**
-	 * 获取锁定期
-	 **/
-	$http.get($rootScope.restful_api.get_freeze_days +　"?schemeId=" + sessionStorage.schemeId).then(
-		function(res) {
-			var resData = res.data.lockDate; //锁定期
-			if(resData){
-				fact_days = resData; //锁定期(可预排最大日期)
-			}else{
-				layer.alert('锁定期接口获取的数据发生错误,请联系技术人员', {
-					skin: 'layer-alert-themecolor' //样式类名
-				});
-			}
-		},
-		function(res) {
-			layer.alert('获取锁定期失败,请联系技术人员', {
-				skin: 'layer-alert-themecolor' //样式类名
-			});
-		});
+        //是否进行搜索提示操作
+        var ifSearchMsg = false;
+        //if($rootScope.daily_test){today.setFullYear(2016,10,1);}//测试用代码，用于日常环境每次打开显示的为7月1日而不是今天
+//      startTime = xujun_tool.dateToString(today);//开始时间为今天
+//      endTime =  xujun_tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
 
         /**
          * 显示临时派工单表的排程计划
@@ -120,30 +78,27 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
     		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
     		
         	//获取查询信息
-        	var saleOrder = xujun_tool.getFromInput(".sale-order"),
-				materialName = xujun_tool.getFromInput(".material-name"),
-				materialCode = xujun_tool.getFromInput(".material-code");	
+        	var saleOrder = tool.getFromInput(".sale-order"),
+				materialName = tool.getFromInput(".material-name"),
+				materialCode = tool.getFromInput(".material-code");	
     		
-			var get_url = "http://"+$rootScope.api_domain+"/api/schedule/result/temp/location/"+location+"/packaged"+"?locationFilterList="+locationFilterList+ "&startTime="+ startTime + "&endTime="+ endTime+"&schemeId="+sessionStorage.schemeId;	
+			var get_url = $rootScope.restful_api.result_show_table + "?locationFilterList=" + locationFilterList 
+																   + "&startTime=" + startTime 
+																   + "&endTime=" + endTime
+																   + "&schemeId=" + sessionStorage.schemeId;
             //获取和显示table数据
             $http.get(get_url).then(
                 //成功
                 function(response){
-                	//是否存在查询条件
-                	var isSearch = false;
-                	if(saleOrder+materialName+materialCode){
-		        		isSearch = true;
-		        	}
 					//保存数据供其他功能使用
 					goEquipment = $.extend({},response.data.punit);
 					goInfo = $.extend({},response.data);
-					$scope.later = goInfo;
-					//是否搜索
-					response.data.isSearch = isSearch;
 					//冻结期
 					response.data.freezeDate = fact_days;
-					//是否翻转
+					//是否翻转状态
 					response.data.front = $rootScope.frontBack;
+					//复制数据，差异化用					
+					$scope.later = $.extend({},response.data);
                     //json转viewModel对象
                     tableHeadViewModel = scheduleTableViewModelService.jsonToTableHeadViewModel(response.data);
 
@@ -158,10 +113,19 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
                     //json转viewModel对象
                     tableBodyViewModel = scheduleTableViewModelService.jsonToTableBodyViewModelNew(response.data);
 
+					//有查询操作并且有查询成功的数据
+					if(tableBodyViewModel.searchSuccess == "success_search" && ifSearchMsg){
+						layer.msg('根据您的查询条件，已高亮出查询结果，请查看', {time: 3500,icon: 1});
+					}else if(tableBodyViewModel.searchSuccess == "false_search" && ifSearchMsg){
+						layer.msg('根据您的查询条件，未查询出结果', {time: 3500,icon: 2});
+					}else if(tableBodyViewModel.searchSuccess == "allUnitNull" && ifSearchMsg){
+						layer.msg('当前无工单，无法查询', {time: 3500,icon: 2});
+					}
+					
                     //查询时间
                     queryObject = scheduleTableViewModelService.jsonToQueryObject(response.data);
 					if(queryObject == undefined){
-						layer.alert('数据获取接口有问题，请联系技术人员处理33', {
+						layer.alert('数据获取接口有问题，请联系技术人员处理', {
 							skin: 'layer-alert-themecolor' //样式类名
 						});	
 						return;
@@ -174,17 +138,16 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
                     $scope.tableBodyData = tableBodyViewModel.tableBodyData;
                     //判断上一页下一页按钮是否能点
                     checkQueryTime(startTime, endTime, today, maxEndTime);
-                    $(".page-select").css("pointer-events","auto");
+                    $(".page-select").css("pointer-events","auto");                  
+					$(".search-box").hide();
+					$(".search-btn").removeClass("search-btn-click");
 					//一级页面差异化
-					//var getFrontUrl =  $rootScope.restful_api.preview_table_json + "&startDate="+ startTime + "&endDate="+ endTime+"&saleOrderCode="+saleOrder+"&materialName="+materialName+"&materialCode="+materialCode;
 					if($(".differ-btn").hasClass("active")){
 						$scope.differentiation = [];
 						$(".table").toggle();
 						$(".differ-btn").toggleClass("active");
 						$scope.showDiffer();
-					}
-                    //页面显示表格,by jquery
-                    jqueryDraw();
+					}             
                 },
                 //失败
                 function(response){
@@ -197,53 +160,59 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
         }
     }
 	$scope.differentiation = [];
-	
+
+	var ifDiffer = false;
 	$scope.showDiffer = function() {
 		//获取查询信息
 		if ($scope.differentiation.length < 2) {
-			var saleOrder = xujun_tool.getFromInput(".sale-order"),
-				materialName = xujun_tool.getFromInput(".material-name"),
-				materialCode = xujun_tool.getFromInput(".material-code");
+			var saleOrder = tool.getFromInput(".sale-order"),
+				materialName = tool.getFromInput(".material-name"),
+				materialCode = tool.getFromInput(".material-code");
 
 			var front=$rootScope.restful_api.front_info+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ startTime + "&endTime="+ endTime;
 			//判断是否已存在差异化数据
 			$http.get(front).success(function (res) {
+				
+				//冻结期
+				res.freezeDate = fact_days;
+				//是否翻转状态
+				res.front = $rootScope.frontBack;
+				
 				$scope.differentiation.push(res);
 				$scope.differentiation.push($scope.later);
 				$http.get($rootScope.restful_api.differ_info+"?locationFilterList="+sessionStorage.locationFilterList_res+"&schemeId="+sessionStorage.schemeId+ "&startTime="+ startTime + "&endTime="+ endTime).success(function (respones) {
 					$scope.dateId = [];
+					
 					for (var i in respones) {
-//						for(var j = 0;j<respones[i].length;j++){
-//							$scope.dateId.push(i + "" + respones[i][j]);
-//						}
 						for(var j = 0;j<respones[i].length;j++){
 							var punitIdString = respones[i][j];
-//							punitIdString.split("_");
-//							punitId = punitIdString[0];
-//							punitId = punitIdString.substring(0,punitIdString.indexOf("_"));
 							$scope.dateId.push(i + "" + punitIdString);    //this_punitId.substring(0,this_punitId.indexOf("_"))
 						}
-						
 					}
 					$scope.differTableBodyViewModel = scheduleTableViewModelService.jsonDifferTableBodyViewModel($scope.differentiation);
+					
+					ifDiffer = true;
+					if(respones.data && ifDiffer){
+						layer.msg('差异化结果已高亮，请查看', {time: 3500,icon: 1});
+						ifDiffer = false;
+					}else if(!respones.data && ifDiffer){
+						layer.msg('无差异化结果', {time: 3500,icon: 2});
+						ifDiffer = false;
+					}
+					
 					$timeout(function () {
-						$(".diffe-table .table-td.second").css({"opacity" : 0.2});
-						$(".diffe-table .table-td.second").each(function () {
-							for(var i = 0; i < $scope.dateId.length; i++) {
-								if ($(this).attr("data-dateid") == $scope.dateId[i]) {
-									$(this).css({"opacity" : 1});
-									break;
-								} else {
-									$(this).css({"opacity" : 0.2});
-								}
-							}
-						})
-						$(".table-content").show();
+						$(".diffe-table .table-td").each(function () {
+							var thisDataDateid = $(this).attr("data-dateid");
+							if($scope.dateId.indexOf(thisDataDateid) > -1){
+								$(this).addClass("jIsDifferent")
+									   .css({"opacity" : 1 , "cursor" : "pointer"});
+							}else{
+								$(this).css({"opacity" : 0.2 , "cursor" : "defult"});		
+							}						
+						});
+						$(".diffe-table .first").css({"opacity" : 1 , "cursor" : "defult"});
 					}, 0)
-				})
-					.then(function(){
-						$(".table-content").hide();
-					});
+				});
 			});
 		}else{
 			$scope.differentiation = [];
@@ -253,82 +222,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$(".differ-btn").toggleClass("active");
 	}
 	
-    /**
-	 * 确认保存APS结果
-	 **/
-    $scope.save_aps = function(){
-		$("#progress-label_two").text("保存 0%");
-        if($rootScope.local_test){
-            /**
-             * 本地测试方法
-             */
-            $location.path("/preview").replace();
-        }else{
-            var sta = false;   //状态变量
-            //点击开始保存按钮
-            $http.post($rootScope.restful_api.aps_save, JSON.parse(sessionStorage.getItem("cancel_data"))).then(
-                //成功
-                function(response){
-                	 $(".cover").show();
-                    if(response.data){ 
-                        sta = true;
-                    }else{
-                        layer.alert("保存排程结果失败，返回参数错误,请联系技术人员处理");
-                    }
-                },
-                //失败
-                function(response){
-                    layer.alert("保存排程结果失败，请联系技术人员处理");
-                    $("#progressbar_two").hide();
-                }
-            );
-			//进度部分         
-			$(function(){
-				var progressbar = $("#progressbar_two"),
-			    progressLabel = $("#progress-label_two");
-			 	var i=1;    //循环次数
-			    function progress(){							
-					var progressVal=0;
-					var sUrl=$rootScope.restful_api.aps_rate_confirm+"?schemeId="+sessionStorage.schemeId;
-					$http.get(sUrl).success(function(res){
-						//获取接口数据
-						progressVal=res.rate || 0;
-						progressbar.children("span").css("width", progressVal + "%");
-						progressLabel.text("保存"+" "+progressVal + "%");
-						if(progressVal){    //数据正确
-		        			var j=setTimeout(progress, 1000);
-		        			if(sta){
-								progressbar.children("span").css("width","100%");
-								progressLabel.text( "保存完成" );
-								$("#progressbar_two").hide(20);
-								clearTimeout(j);
-								$(".cover").hide();
-								$location.path("/preview");
-							}else{
-								clearTimeout(j);
-								$("#progressbar_two").hide(20);
-								layer.alert("保存失败！");
-								$(".cover").hide();
-							}
-							//如果时间超过1小时，停止加载 ，弹框提示
-							if(i > 3600){
-								layer.alert("进度失败，请联系技术人员处理");
-								clearTimeout(j);
-								progressbar.hide(20);   //进度条加载完成后隐藏
-								$(".cover").hide();             //遮盖层隐藏	
-					    	}
-		      			}else{                                    //如果数据错误		      					      				
-		      				layer.alert("进度失败，请联系技术人员处理");
-		      				$(".cover").hide();
-		      				progressbar.hide(20);   //进度条加载完成后隐藏
-		      			}
-					});
-					i++;   //循环加一
-				}	    		
-			    setTimeout( progress,1000);	 //开始加载
-			})	
-        }
-   }
+    
     
     /**
 	 * 取消APS结果
@@ -350,6 +244,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
                     //成功
                     function(response){
                         if(response.data == true){
+                        	layer.msg('取消排程成功', {time: 3500,icon: 1});
                             $location.path("/preview").replace();
                         }else{
 							layer.alert('取消自动排程结果失败，返回参数错误，请联系技术人员处理', {
@@ -376,13 +271,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
      * @param max_time 总结束时间
      */
     function checkQueryTime(s_time, e_time, min_time, max_time){
-        if(min_time == undefined || xujun_tool.stringToDate(s_time) <= min_time){
+        if(min_time == undefined || tool.stringToDate(s_time) <= min_time){
             $scope.last_page_button_style = {'display':'none'};
         }else{
             $scope.last_page_button_style = {'display':'inline-block'};
         }
         $scope.next_page_button_style = {'display':'inline-block'};
-//      if(max_time == undefined || xujun_tool.stringToDate(e_time) >= xujun_tool.stringToDate(max_time)){
+//      if(max_time == undefined || tool.stringToDate(e_time) >= tool.stringToDate(max_time)){
 //          $scope.next_page_button_style = {'display':'none'};
 //      }else{
 //          $scope.next_page_button_style = {'display':'inline-block'};
@@ -394,12 +289,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
     $scope.last_page = function(){
     		$(".page-select").css("pointer-events","none");
-            var startTime_date = xujun_tool.stringToDate(startTime);
-            var endTime_date = xujun_tool.stringToDate(endTime);
-            startTime = xujun_tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() - offset - 1)));//开始时间为周期后+1
-            endTime =  xujun_tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() - offset - 1)));//结束时间为周期后+1
+            var startTime_date = tool.stringToDate(startTime);
+            var endTime_date = tool.stringToDate(endTime);
+            startTime = tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() - offset - 1)));//开始时间为周期后+1
+            endTime =  tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() - offset - 1)));//结束时间为周期后+1
             //获取表格数据
             result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
+            ifDiffer = true;
     }
 
     /**
@@ -407,12 +303,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
     $scope.next_page = function(){
     		$(".page-select").css("pointer-events","none");
-            var startTime_date = xujun_tool.stringToDate(startTime);
-            var endTime_date = xujun_tool.stringToDate(endTime);
-            startTime = xujun_tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() + offset + 1)));//开始时间为周期后+1
-            endTime =  xujun_tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() + offset + 1)));//结束时间为周期后+1
+            var startTime_date = tool.stringToDate(startTime);
+            var endTime_date = tool.stringToDate(endTime);
+            startTime = tool.dateToString(new Date(startTime_date.setDate(startTime_date.getDate() + offset + 1)));//开始时间为周期后+1
+            endTime =  tool.dateToString(new Date(endTime_date.setDate(endTime_date.getDate() + offset + 1)));//结束时间为周期后+1
             //获取表格数据
             result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
+            ifDiffer = true;
     }
 
 	/**
@@ -420,13 +317,14 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
 	$scope.around_del =function(){
 		$http.post($rootScope.restful_api.aps_rate_around_del_but,sessionStorage.papBodyData).success(function(){
-			$scope.newprogressBar_post("#progressbar_four","#progress-label_four",$rootScope.restful_api.aps_rate_around_del,sessionStorage.papBodyData,"删除前拉后推",function(){
-				layer.alert("删除前拉后推完成");
-				$('#progressbar_four').hide();   //隐藏进度
+			$scope.newprogressBar_post("#progressbar_one","#progress-label_one",$rootScope.restful_api.aps_rate_around_del,sessionStorage.papBodyData,"删除前拉后推",function(){
+				layer.msg('删除前拉后推完成', {time: 3500,icon: 1});
+				$('#progressbar_one').hide();   //隐藏进度
 			},function(){});
+			ifSearchMsg = false;
 			result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  /*刷新数据*/
+			
 		})
-		result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  /*刷新数据*/
 	}
 	
 	/**
@@ -455,11 +353,11 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 						},0)
 					}	
 				},0)
-			result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);	
+			ifSearchMsg = false;
+			result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);	 /*刷新数据*/
 			});
 		})
-		$(".cover").show(50);
-		result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  /*刷新数据*/
+		$(".cover").show();
 	}
 	
 	/**
@@ -485,7 +383,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 								layer.alert("进度失败，请联系技术人员处理");
 								clearTimeout(j);
 								progressLabel.text(text+"失败");
-								progressbar.hide(30); //进度条加载完成后隐藏
+								progressbar.hide(20); //进度条加载完成后隐藏
 							}
 						} else {
 							progressLabel.text(text+"完成");
@@ -493,11 +391,10 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 						}
 					} else { //如果数据错误		      					      				
 						layer.alert("进度失败，请联系技术人员处理");
-						progressbar.hide(30); //进度条加载完成后隐藏
+						progressbar.hide(20); 
 					}
 				});
 			i++;
-			console.log(i);
 	    } 
 	    SetProgress();//开始加载
 	}
@@ -516,12 +413,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 关闭前拉后推 提示
 	 **/
 	$scope.pap_close = function(){
-		$(".pap-alert").hide(50);
+		var j_pap_alert = $(".pap-alert");
+		j_pap_alert.hide(50);
 		$("#progressbar_one").hide(50);
-		$(".cover").hide(50);
-		$(".pap-alert").find("em").remove();
-		$(".pap-alert").find(".pap-in-alert").hide();  //关闭提示信息
-		$(".pap-alert").find(".pap-alert-tri").hide();
+		$(".cover").hide();
+		
+		//提示信息关闭
+		j_pap_alert.find("em").remove();
+		j_pap_alert.find(".pap-in-alert").hide();  //关闭提示信息
+		j_pap_alert.find(".pap-alert-tri").hide();
 	}
 	
 	/**
@@ -545,23 +445,25 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	/**
 	 * 撤销按钮
 	 **/
-	$scope.rollback=function(){
-		var post_data={
-			"schemeId":sessionStorage.schemeId,
-			"locationDtoList":[]
+	$scope.rollback = function(){
+		var post_data = {
+			'schemeId':sessionStorage.schemeId,
+			'locationDtoList':[]
 		};
 		$http.post($rootScope.restful_api.aps_rollback,post_data).then(
 			function(res){
 				if(res.data){
+					ifSearchMsg = false;
 					result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);      //若为真，则重新获取数据
-					layer.alert("撤销成功");
+					layer.msg('撤销成功', {time: 3500,icon: 1});
+					
 					//刷新暂存区和二级页面
 					if($(".table-dialog-window").css("display") == "flex"){
 						var thisQuery = goWindowTableData.query,
 							thisEquipmentId = thisQuery.equipments,
 							thisStartTime = thisQuery.startTime,
 							thisEndTime = thisQuery.endTime;
-						$scope.click_creat_window(thisStartTime,thisEndTime,thisEquipmentId[0].equipmentId+"_"+thisEquipmentId[0].equipmentType,"","","");
+						$scope.click_creat_window(thisStartTime,thisEndTime,thisEquipmentId[0].equipmentId+"_"+thisEquipmentId[0].equipmentType,'','','');
 					}
 					if($(".cache-window").css("display") == "flex"){
 						$scope.cache_box();
@@ -579,14 +481,14 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 								}
 								$(".cache-num").show().text(cacheNum);
 							},
-							function(res){
-								
-							}
+							function(res){}
 						);
 					}
 				}else{
+					ifSearchMsg = false;
 					result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
-					layer.alert("撤销失败");
+					layer.msg('已经是最后一步！', {time: 3500,icon: 2});
+					
 					//刷新暂存区和二级页面
 					if($(".table-dialog-window").css("display")=="flex"){
 						var thisQuery = goWindowTableData.query,
@@ -600,28 +502,27 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					}
 				}
 			},
-			function(res){
-			}
+			function(res){}
 		);
 	}
 	
 	/**
 	 * 检验按钮 方法
 	 **/
-	$scope.check_aps=function($event){
+	$scope.check_aps = function($event){
+		ifSearchMsg = false;
 		if($event.target.className == "check-check-box"){
 			$scope.checkSwitch = !$scope.checkSwitch;
 			$(".jiaoyan-icon").parent().toggleClass("search-btn-click");
 			return;
 		}
-		$scope.confirm_check(function(){});
+		$scope.confirm_check();
 	}
 	
 	/**
 	 * 提示信息 校验
 	 **/
-	$scope.confirm_dialog=function(checkRow,$event){
-//		$("#check_detail_dialog").children("table").remove();
+	$scope.confirm_dialog = function(checkRow,$event){
 		$event.stopPropagation();
 		var thisInfo=checkRow.info;
 		$scope.checkRows = thisInfo;
@@ -647,20 +548,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	/**
 	 * 保存前校验 方法
 	 **/
-	$scope.save_check_aps=function(){
-		$scope.confirm_check(function(){
-	 		var index = layer.confirm('校验结束。若无误，点确认保存排程；若有误，点取消查看校验结果。', {
-				btn: ['确定','取消'] //按钮
-			}, function(){
-				$scope.save_aps();
-				$(".wrap-alert").hide(50);
-				$("#progressbar_three").hide();
-				layer.close(index);
-				$(".progress-label_three").text("校验中");
-				$('.pbody-wrap').find("ul li").empty();
-				$(".cover").hide();
-			 });
-		});
+	$scope.save_check_aps = function(){
+		ifSearchMsg = false;
+		$scope.confirm_check();
 	}
 	
 	/**
@@ -668,8 +558,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
 	$scope.confirm_check=function(fn){
 		$scope.allSuccess = true;
-		var progressbar = $("#progressbar_three"),
-		    progressLabel = $("#progress-label_three");
+		var progressbar = $("#progressbar_one"),
+		    progressLabel = $("#progress-label_one");
 		progressLabel.text("校验中");
 		progressbar.show();    //进度条
 		$(".wrap-alert").show();           //提示信息
@@ -680,24 +570,30 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			$http.post($rootScope.restful_api.aps_check,JSON.parse(sessionStorage.getItem("cancel_data"))).success(function(res) {				
 				var scheduleValidateMap=res.scheduleValidateMap;
 				var list1 = [];
-//				var list2 = [];	
 				for(var j in scheduleValidateMap){
 					var data = {
 					  	  'code':j,
 					  	  'info':scheduleValidateMap[j]
 					    };
-					list1.push(data);	 
+					    
+					if(scheduleValidateMap[j].length){
+						list1.unshift(data)
+					}else{
+						list1.push(data);
+					}
+					
 					$timeout(function() {     //异步进行
 						for(var i = 0;i < list1.length;i++) {
-							if(list1[i].info.length==0){
+							if(list1[i].info.length == 0){
 								$(".wrap-alert li:eq("+i+")").children("span:eq(3)").text("校验正常");
 								$(".wrap-alert li:eq("+i+")").children("span:eq(2)").removeClass("class-false").addClass("class-true");
 								$(".wrap-alert li:eq("+i+")").children("b").hide();     //如果没有异常，提示信息按钮将隐藏
 							}else{
 								$(".wrap-alert li:eq("+i+")").children("span:eq(3)").text("校验存在异常");
 								$(".wrap-alert li:eq("+i+")").children("span:eq(2)").removeClass("class-true").addClass("class-false");
+								$(".wrap-alert li:eq("+i+")").children("b").show();     //如果有异常，提示信息按钮显示
 							}
-						}	
+						}
 					},0)
 				}	
 				$scope.listOne = list1;
@@ -705,7 +601,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					progressbar.children("span").css("width", 100 + "%"); 
 	   				progressLabel.text("校验完成");
 	   				if(fn){
-	   					fn();          //参数
+	   					fn();
 	   				}
 				}
 			})
@@ -713,49 +609,34 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		setTimeout(progress,1000);
 		result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  /*刷新数据*/
 	}
-		
-	/**
-	 * 关闭校验
-	 **/
-	$scope.confirm_close=function(){
-		$(".wrap-alert").hide(50);
-		$("#progressbar_three").hide(50);
-		$(".cover").hide(50);
-		
-		$(".progress-label_three").text("校验中");
-		$('.pbody-wrap').find("ul li").empty();   //清空上一次操作
-		result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
-	}
 	
 	/******===== 二级页面差异化 开始=====******/
 	
 	var index = 2;//锚点当前位置
 	
 	/**
-	 * 关闭页面
+	 * 关闭一级差异化页面
 	 **/
 	$scope.differ_close=function(){
-		$("#show").css("background","#fff");
 		$(".differ-show-info").hide();
 		$(".differ-show").find("table").empty();
-//		$(".table-dialog-differ").children(".table-window-right").find("table").children("tbody").children("tr").children("td").removeClass("differ-highlight");
 		$(".table-dialog-differ").hide();
-		index = 2;    //重置为默认锚点  默认位置
+		
+		//重置为默认锚点  默认位置
+		index = 2;    
 		$("#J_point").css({"left":"50px"});  
 	}
 	
 	/**
-	 * 单击单元格
+	 * 单击差异化单元格
 	 **/
 	$scope.differ_unit_click = function(cell,$event) {
 		//表头不能点击
-		if($($event.target).parents(".table-td").hasClass("first")){
+		ifSearchMsg = false;
+		if($($event.target).parents(".table-td").hasClass("first") || !$($event.target).parents(".table-td").hasClass("jIsDifferent")){
 			return;
 		}
-    	if(!cell[0].args){
-    		return;
-    	}
-        var thisInf = cell[0].args,
+        var thisInf = cell[0],
     		thisDate = thisInf.date,
     		thisEquipment = thisInf.equipment_id;
         $scope.differ_show(thisDate,thisEquipment);
@@ -827,14 +708,14 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				}		
 			}
 		//处理数据
-			var headList=res.columnAlias;    //表头列表
-			    leftList=taskLeft,
-			    rightList=taskRight,
-			    cpList=res.compareList;
+			var headList = res.columnAlias;    //表头列表
+			    leftList = taskLeft,
+			    rightList = taskRight,
+			    cpList = res.compareList;
 			
 			//处理json格式
-			var leftJson={},
-			    rightJson={};
+			var leftJson = {},
+			    rightJson = {};
 			leftJson.columnAlias = res.columnAlias;
 			leftJson.column = res.column;
 			leftJson.row = taskLeft;
@@ -846,7 +727,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			rightJson.query = res.query;
 			var leftDifferTableData = scheduleTableViewModelService.jsonToDifferTable(leftJson);
 			var rightDifferTableData = scheduleTableViewModelService.jsonToDifferTable(rightJson); 
-		//绑定页面
+			
 			//表头
 	        var headDataView_left = leftDifferTableData.headData;
 	    	//表格数据
@@ -893,7 +774,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			poolRight = handle(poolRight);
 			//判断差异
 			for(var i in poolRight){
-				poolRight[i].isHighLight=false;
+				poolRight[i].isHighLight = false;
 				for(var j in poolLeft){
 					if( !poolLeft[j].isHighLight && poolRight[i].poolTaskId == poolLeft[j].poolTaskId && poolRight[i].taskNum == poolLeft[j].taskNum){
 						poolRight[i].isHighLight = true;
@@ -903,8 +784,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				}
 			}
 		/*对数据进行处理*/
-			var leftJson_pool={};
-			var rightJson_pool={};
+			var leftJson_pool = {};
+			var rightJson_pool = {};
 			leftJson_pool.columnAlias = res.columnAlias;
 			leftJson_pool.column = res.column;
 			leftJson_pool.row = poolLeft;
@@ -934,7 +815,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		   };		
 	    $timeout(function(){
 			//保留差异 按钮
-			$scope.differ_keep=function(){
+			$scope.differ_keep = function(){
 				var hideTr = $(".table-dialog-differ").find("tbody").children("tr[isHighLight=true]");
 				$(hideTr).toggle();
 				//更新表头遮盖层列宽  ==工单
@@ -955,7 +836,6 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		var len = n_len / 2;   //一半的长度
 //		var index = 2;//锚点当前位置
 		var x_start = $("#J_sliderBar").offset().left;
-//		console.log(bar_length,n_len,len,x_start);
 		$("#J_sliderBar").on("mousedown",function(e){
 			$("body").addClass("select-none");//禁止选中文字
 			var _this = $(this);
@@ -985,46 +865,46 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	            lastX = _cliX;
 			}
 		})
-		document.onmouseup = function(e){
+		document.onmouseup = function(){
+			//移动操作方法
+			function move_range(left_range1,left1,left_range2,right_range1,left2,right_range2,boolean1,left3,boolean2,title_range1,m_left1,boolean3,title_range2,m_left2){
+				var table_left = $(".table-left"),
+					table_right = $(".table-right"),
+					differ_line = $(".differ-line"),
+					title_left = $(".title-left"),
+					title_right = $(".title-right");
+				table_left.animate({"width" : left_range1,"left" : left1},60);
+				table_left.find("table").animate({"width" : left_range2},60);
+				table_right.animate({"width" : right_range1,"left" : left2},60);
+				table_right.find("table").animate({"width" : right_range2},60);
+				
+				if(boolean1) {
+					differ_line.show().animate({"left" : left3},60);
+				} else {
+					differ_line.hide();
+				}
+				if(boolean2) {
+					title_left.show().animate({"width" : title_range1,"margin-left" : m_left1},60);
+				} else {
+					title_left.hide();
+				}
+				if(boolean3) {
+					title_right.show().animate({"width" : title_range2,"margin-left" : m_left2},60);
+				} else {
+					title_right.hide();
+				}
+			}
+			
 			if(index == 0){
-				$(".table-left").animate({"width":"0px"},100);
-				$(".table-left").find("table").animate({"width":"100%"},100);
-				$(".table-right").animate({"width":"1190px","left":"-635px"},100);
-				$(".table-right").find("table").animate({"width":"1190px"},100);
-				$(".differ-line").hide();
-				$(".title-left").animate({"width":"0px"},100).hide();
-				$(".title-right").show().animate({"width":"1190px","margin-left":"-635px"},100);
+				move_range("0","0","100%","1190px","-635px","1190px",false,"",false,"","",true,"1190px","-635px");
 			}else if(index == 1){
-				$(".table-left").show().animate({"width":"230px","left":"0"},100);
-				$(".table-left").find("table").animate({"width":"100%"},100);
-				$(".table-right").show().animate({"width":"880px","left":"-320px"},100);
-				$(".table-right").find("table").animate({"width":"100%"},100);
-				$(".differ-line").show().animate({"left":"314px"},100);
-				$(".title-left").show().animate({"width":"230px","margin-left":"0"},100);
-				$(".title-right").show().animate({"width":"880px","margin-left":"-320px"},100);
+				move_range("230px","0","100%","880px","-320px","100%",true,"314px",true,"230px","0",true,"880px","-320px");
 			}else if(index == 2){
-				$(".table-left").show().animate({"width":"554px","left":"0"},100);
-				$(".table-left").find("table").animate({"width":"100%"},100);
-				$(".table-right").show().animate({"width":"554px","left":"0"},100);
-				$(".table-right").find("table").animate({"width":"100%"},100);
-				$(".differ-line").show().animate({"left":"634px"},100);
-				$(".title-left").show().animate({"width":"554px","margin-left":"0"},100);
-				$(".title-right").show().animate({"width":"554px","margin-left":"0"},100);
+				move_range("554px","0","100%","554px","0","100%",true,"634px",true,"554px","0",true,"554px","0");
 			}else if(index == 3){
-				$(".table-left").show().animate({"width":"880px","left":"0"},100);
-				$(".table-left").find("table").animate({"width":"100%"},100);
-				$(".table-right").show().animate({"width":"230px","left":"330px"},100);
-				$(".table-right").find("table").animate({"width":"100%"},100);
-				$(".differ-line").show().animate({"left":"960px"},100);
-				$(".title-left").show().animate({"width":"880px","margin-left":"0"},100);
-				$(".title-right").show().animate({"width":"230px","margin-left":"330px"},100);
+				move_range("880px","0","100%","230px","330px","100%",true,"960px",true,"880px","0",true,"230px","330px");
 			}else if(index == 4){
-				$(".table-left").animate({"width":"1190px","left":"0px"},100);
-				$(".table-left").find("table").animate({"width":"1190px"},100);
-				$(".table-right").show().animate({"width":"0px","left":"330px"},100);
-				$(".differ-line").hide(100);
-				$(".title-left").show().animate({"width":"1190px","margin-left":"0px"},100);
-				$(".title-right").hide();
+				move_range("1190px","0","1190px","0","330px","100%",false,"",true,"1190px","0",false,"","");
 			}
 			$timeout(function(){
 			//更新表头遮盖层列宽  ==工单
@@ -1043,6 +923,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		}).mouseleave(function(){
 			$(this).css("overflow","hidden");
 		})
+		//固定表头
 		$(".differ-wrap-table").scroll(function(){
 			var thisScrollTop=$(this).scrollTop();
 			$(this).children("div").first().css("top",thisScrollTop);
@@ -1050,38 +931,34 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	}
 	
 	/**
-	 * 点击表格
+	 * 点击二级差异化表格行
 	 **/
 	$scope.click_show=function($event){
 		if($(".isPooltaskId").css("display") == "block"){
 			return;
 		}
 		$("#show").empty();  //清空
-		$("#show").css("background","#fff");
 		$(".differ-show-info").show();
 		
 		//点击表格
-		var thisTd=$($event.target).parent();
-		var index=thisTd.index()+1;
-		var thisTr=$(".isTask").find(".table-space-differ").children("table").find("tr:eq("+index+")");
-		var el_head=thisTd.parent().siblings();
+		var thisTd = $($event.target).parent();
+		var index = thisTd.index()+1;
+		var thisTr = $(".isTask").find(".table-space-differ").children("table").find("tr:eq("+index+")");
+		var el_head = thisTd.parent().siblings();
 
-		if(thisTd.parents("div").hasClass("table-window-left")){
+		if(thisTd.parents("div").hasClass("table-window-left")) {
 			$("#show").append(el_head.clone()).append(thisTr.clone());
-		}else if(thisTd.parents("div").hasClass("table-window-right")){
-			if(thisTr.length == 1){
+		}else if(thisTd.parents("div").hasClass("table-window-right")) {
+			if(thisTr.length == 1) {
 				$("#show").append(el_head.clone()).append("<tr style='height:25px;border: 1px #ccc solid;'></tr>").append(thisTr.clone());
-			}else{
+			}else {
 				$("#show").append(el_head.clone()).append(thisTr.clone());
 			}
-		}
-		if(thisTr.hasClass("differ-highlight")){
-			$("#show").css("background","#fefaec");
 		}	
 	}
 	
 	/**
-	 * 切换
+	 * 切换派工单维度还是车间计划维度（二级差异化界面）
 	 **/
 	$(".isPoolBtn").on("click",function(){
 		$(".isPooltaskId").show();
@@ -1100,24 +977,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$(this).siblings("span").removeClass("switch-result");
 	})
 	/******===== 二级页面差异化 结束=====******/
-	//右边栏弹出小提示	
-	$(function(){
-		var arrEle=$(".right-menu-button");
-		for(var i = 0;i < arrEle.length;i++){
-			$(arrEle[i]).mouseover(function(){
-				$(this).find(".tip").stop().show().animate({
-					left:"-120px",
-					opacity:"1"
-				},300);
-			});
-			$(arrEle[i]).mouseleave(function(){
-				$(this).find(".tip").hide().animate({
-					left:"-220px",
-					opacity:"0.3"
-				},0)
-			});
-		}	
-	});
+	
 	
 	/**
 	 * 打开暂存间
@@ -1126,12 +986,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		var jTableDialogWindow = $(".table-dialog-window");
 		var jCacheWindow = $(".cache-window");	
 		
-		var inputList = xujun_tool.getFromInput(".cache-window .info-show"),
+		var inputList = tool.getFromInput(".cache-window .info-show"),
 			saleOrderCode = inputList[0],
 			materialName = inputList[1],
 			materialCode = inputList[2];
+		if((saleOrderCode || materialName || materialCode) && cacheSearch){
+			var searchAct = true;
+		}
 		
-        var sUrl = $rootScope.restful_api.cache_info+"?schemeId="+sessionStorage.schemeId;
+        var sUrl = $rootScope.restful_api.cache_info+"?schemeId="+sessionStorage.schemeId + "&saleOrderCode=" + saleOrderCode + "&materialName=" + materialName + "&materialCode=" + materialCode;
         $http.get(sUrl).then(
         	function(res){
         		//将二级页面靠左
@@ -1145,11 +1008,21 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
         		$scope.cacheHeadDataView = windowTableData.headData;
         		$scope.cacheTableDataView = windowTableData.bodyData;
 				
-				$timeout(function(){setTableHeadWidth($(".cache-window"))},0);
+				if(searchAct && res.data.row.length){
+					layer.msg('已查询，请在下方表格中查看查询结果', {time: 3500,icon: 1});
+					cacheSearch = false;
+				}else if(searchAct && !(res.data.row.length)){
+					layer.msg('未查询出结果', {time: 3500,icon: 2});
+					cacheSearch = false;
+				}
+				
+				$timeout(function(){
+					tool.setTableHeadWidth($(".cache-window"));
+				},0);
 				
 				//resize
 				$(window).on("resize",function(){
-					setTableHeadWidth($(".cache-window"));
+					tool.setTableHeadWidth($(".cache-window"));
 				});
 				$timeout(function(){
 					//初始化复选框
@@ -1193,13 +1066,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
         	function(res){
         		
         	}
-      );
+        );
 	}
 		
 	/**
 	 * 暂存间查询
 	 **/
+    var cacheSearch = false;
 	$scope.change_cache_window = function(){
+		cacheSearch = true;
 		$scope.cache_box();
 	}
 	
@@ -1248,7 +1123,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			_type:"post",
 			_url:nUrl,
 			_data:thisObj,
-			_text:'移入暂存间失败！'
+			_text:'移入暂存间'
 		});
 	}
 	
@@ -1324,17 +1199,20 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$(".num-window").find("input").val(0);
 		$(".num-window").show().css("left",thisX).css("top",thisY);			
 		
+		$($event.target).css("color","#1E7CD9");
+		
 		$(".num-window-sure").off("click");
 		$(".num-window-sure").on("click",function(){
 			var num = $(".num-window").find("input").val()+"";
-			console.log(num.indexOf("."));
 			if(num.indexOf(".")>-1 || +num <= 0 || +num > thisNum){
  				layer.alert('请输入正确的数字！', {
 					skin: 'layer-alert-themecolor' //样式类名
 				});
 				return;
 			}
-			$(".num-window").hide();
+			$(".num-window").hide(0,function(){
+				$(".show-table .sale-order-change").css("color","");
+			});
 			num = num-0;
 			
 			var thisObj = {};
@@ -1353,15 +1231,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					pkId : thisPkId,
 					versionId : thisVersionId
 				});
-				_text = '移入暂存间失败！';
-				nUrl=$rootScope.restful_api.cache_movein_part_v;			
+				_text = '移入暂存间';
+				nUrl=$rootScope.restful_api.cache_movein;			
 			}else{
 				thisObj.taskNum = num;
 				thisObj.partTemp = {
 					pkId : thisPkId,
 					versionId : thisVersionId
 				};
-				_text = '部分导入失败！';
+				_text = '部分导入';
 				nUrl=$rootScope.restful_api.cache_movein_part;
 			}
 			$scope.askRequest({
@@ -1377,7 +1255,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 关闭数量弹窗
 	 **/
 	$(".close-num-window").on("click",function(){
-		$(".num-window").hide();
+		$(".num-window").hide(0,function(){
+			$(".show-table .sale-order-change").css("color","");
+		});
 	});
 				
 	/**
@@ -1407,6 +1287,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$(".num-window").find("input").val(0);
 		$(".num-window").show().css("left",thisX).css("top",thisY);
 		
+		$($event.target).css("color","#1E7CD9");
+		
 		$(".num-window-sure").off("click");
 		$(".num-window-sure").on("click",function(){
 			var num = $(".num-window").find("input").val()+"";
@@ -1418,10 +1300,12 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				return;
 			}
 			
-			$(".num-window").hide();
+			$(".num-window").hide(0,function(){
+				$(".show-table .sale-order-change").css("color","");
+			});
 			num = num-0;
 			var thisObj = {};
-			var nUrl
+			var nUrl;
 			thisObj.locationIdList = $rootScope.locationIdList;
 			thisObj.workDate = workDate;
 			thisObj.pUnitId = thisEquipmentId[0].equipmentId;
@@ -1433,7 +1317,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					pkId : thisPkId,
 					versionId : thisVersionId
 				});									
-				nUrl=$rootScope.restful_api.cache_moveout_part_v;		
+				nUrl=$rootScope.restful_api.cache_moveout;		
 			}else{
 				thisObj.taskNum = num;			
 				thisObj.partTemp = {
@@ -1458,7 +1342,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		var  jTableSpace = $(".table-dialog-window").find(".show-table");
 		thisObj.schemeId=sessionStorage.schemeId;
 		//清空二级页面查询条件和排序，进入编辑状态
-		var URL=$rootScope.restful_api.get_processOrder;
+		var nUrl=$rootScope.restful_api.res_sourceUrl;
         var isArr=[];
         for(var i in thisEquipmentId){
         	var isObj={};          	
@@ -1468,16 +1352,16 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
         	isArr.push(isObj);
         }
         
-		var body_data={
-			"startTime":thisStartTime,
-			"endTime":thisEndTime,
-			"materialName":"",
-			"materialCode":"",
-			"saleOrderCode":"",
-			"schemeId":sessionStorage.schemeId,
-			"equipments":isArr
+		var body_data = {
+			'startTime':thisStartTime,
+			'endTime':thisEndTime,
+			'materialName':'',
+			'materialCode':'',
+			'saleOrderCode':'',
+			'schemeId':sessionStorage.schemeId,
+			'equipments':isArr
 		};				
-        $http.post(URL,body_data).then(
+        $http.post(nUrl,body_data).then(
         	function(res){
             	var jTableDialogWindow = $(".table-dialog-window")
             	jTableDialogWindow.show();	                	
@@ -1494,7 +1378,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 
         		$timeout(function(){
         			//更新表头宽度
-					setTableHeadWidth(jTableDialogWindow)
+					tool.setTableHeadWidth(jTableDialogWindow);
 				},0);              	
         	},
         	function(res){
@@ -1575,7 +1459,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 							_type:"post",
 							_url:url,
 							_data:thisObj,
-							_text:'调整失败！'
+							_text:'调整'
 						});
 						cleanE();
 					}else{
@@ -1591,7 +1475,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				_type:"post",
 				_url:url,
 				_data:thisObj,
-				_text:'调整失败！'
+				_text:'调整'
 			});
 			cleanE();
 		}
@@ -1630,7 +1514,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				$scope.click_creat_window(_data.workDate,_data.workDate,_data.pUnitId+"_"+_data.pUnitType,"","","");
 				hasChange = true;
 				if($scope.checkSwitch){
-					$scope.check(function(){
+					$scope.confirm_check(function(){
 						if($scope.allSuccess){
 							for(let i = 0 , l = $scope.listOne.length ; i < l ; i++){
 								if($scope.listOne[i].info.length){
@@ -1640,10 +1524,11 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 							$scope.close();
 						}
 					});
-				}	
+				}
+				layer.msg(_obj._text + '成功', {time: 3500,icon: 1});
 			},
 			function(res){
-				layer.alert(_obj._text, {
+				layer.alert(_obj._text + "失败", {
 					skin: 'layer-alert-themecolor' //样式类名
 				});
 			}
@@ -1652,53 +1537,10 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	
 		
 	/**
-	 * 翻转
-	 **/
-	$scope.turn_to_back = function(){
-		//判断往那边转
-		var thisOpacity = 1;
-		if($rootScope.frontBack){	
-			$rootScope.frontBack = false;
-			thisOpacity = 0;
-		}else{
-			$rootScope.frontBack = true;
-		}
-		
-		$(".table-tr").each(function(a){
-			var thisTr = $(this),
-				TdList = thisTr.find(".table-td");
-			TdList.each(function(index){
-				if(index == 0){
-					return;
-				}else{
-					var thisTd = $(this),
-						thisFront = thisTd.find(".td-front"),
-						thisBack = thisTd.find(".td-back"),
-						ry = 0,
-						by = 0;
-						
-					//连点终止之前的动画。
-					thisFront.stop(false,false);
-					//调用jquery动画函数
-					thisFront.animate({opacity:thisOpacity},{
-						step: function(n){
-							ry = (1-n)*180;
-							by = n*180;
-							$(this).css("transform","rotateY("+ry+"deg)");
-							thisBack.css("opacity",1-n);
-							thisBack.css("transform","rotateY("+by+"deg)");
-						},
-						duration:500,
-					});
-				}
-			})
-		});
-	}
-		
-	/**
 	 * 点击查询，刷新页面。
 	 **/
 	$scope.search = function(){
+		ifSearchMsg = true;
 		result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
 	}
         
@@ -1715,9 +1557,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
     		thisStartDate = thisData.thisDate,
     		thisEndDate = thisData.thisDate,
     		thisEquipment = thisData.equipment;
-        var saleOrder = xujun_tool.getFromInput_nocode(".sale-order"),
-			materialName = xujun_tool.getFromInput_nocode(".material-name"),
-			materialCode = xujun_tool.getFromInput_nocode(".material-code");	
+        var saleOrder = tool.getFromInput_nocode(".sale-order"),
+			materialName = tool.getFromInput_nocode(".material-name"),
+			materialCode = tool.getFromInput_nocode(".material-code");	
    		$scope.click_creat_window(thisStartDate,thisEndDate,thisEquipment,saleOrder,materialName,materialCode,mouseType);
     }
         
@@ -1725,11 +1567,12 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 单元格鼠标点击事件
 	 **/
     $scope.unit_click = function(cell,$event) {
+    	ifSearchMsg = false;
     	var mouseType = $event.button;
         	if((cell[0].type == 1 && mouseType == 2) || (cell[0].type == 3 && mouseType == 0)){
 	    		return;
 	    	}		
-        var thisInf = cell[0].args,
+        var thisInf = cell[0],
     		thisDate = thisInf.date,
     		thisStartDate = thisInf.s_date,
     		thisEndDate = thisInf.e_date,
@@ -1739,9 +1582,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
     		thisEndDate = thisDate;
     	}
        //查询条件
-		var saleOrder = xujun_tool.getFromInput_nocode(".sale-order"),
-			materialName = xujun_tool.getFromInput_nocode(".material-name"),
-			materialCode = xujun_tool.getFromInput_nocode(".material-code");	
+		var saleOrder = tool.getFromInput_nocode(".sale-order"),
+			materialName = tool.getFromInput_nocode(".material-name"),
+			materialCode = tool.getFromInput_nocode(".material-code");	
 		$scope.click_creat_window(thisStartDate,thisEndDate,thisEquipment,saleOrder,materialName,materialCode,mouseType);
     }
         
@@ -1814,44 +1657,45 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
             //查询二级页面数据
             var isArr=[];
 			var isStr,
-			newurl=$rootScope.restful_api.creat_secondPage;
-			var aPunitId=aEquipment;
+			newurl=$rootScope.restful_api.res_sourceUrl;
+			var aPunitId = aEquipment;
             for(var i in aPunitId){
-            	var isObj={};
-            	var newI=aPunitId[i].split("_");
+            	var isObj = {};
+            	var newI = aPunitId[i].split("_");
             	
-                isObj.freezeDate=goEquipment[aPunitId[i]].freezeDate;
+                isObj.freezeDate = goEquipment[aPunitId[i]].freezeDate;
                 thisEquipmentName.push(goEquipment[aPunitId[i]].punitName);    
-				isObj.equipmentId=newI[0];
-            	isObj.equipmentType=newI[1];
+				isObj.equipmentId = newI[0];
+            	isObj.equipmentType = newI[1];
             	isArr.push(isObj);
            }
 			var body_data={    //向后台传送数据
-				"startTime":thisStartTime,
-				"endTime":thisEndTime,
-				"materialName":materialName,
-				"materialCode":materialCode,
-				"saleOrderCode":saleOrder,
-				"order":isStr,
-				"equipments":isArr,
-				"schemeId":sessionStorage.schemeId
+				'startTime':thisStartTime,
+				'endTime':thisEndTime,
+				'materialName':materialName,
+				'materialCode':materialCode,
+				'saleOrderCode':saleOrder,
+				'order':isStr,
+				'equipments':isArr,
+				'schemeId':sessionStorage.schemeId,
+				"from":"result"
 			};
 			//若为左键点击,跳转打开新页面
 			if(mouseType == 0){
-				var href = "./view/secondPage.html?result";
-				localStorage.setItem("hrefPrameter",JSON.stringify(body_data))
+				var href = "./view/secondPage.html";
+				sessionStorage.setItem("hrefPrameter",JSON.stringify(body_data));
 				window.open(href);
 				return;
 			}
 	        $http.post(newurl,body_data).then(
                 //成功
                 function(response){
-                	var jTableDialogWindow = $(".table-dialog-window")
+                	var jTableDialogWindow = $(".table-dialog-window");
                 	jTableDialogWindow.show();	                	
 					$(".equipment-list").remove();
                 	var resData = response.data;
 	            	var headList = resData.columnAlias;//表头列表
-
+					
 					//保存数据
 	            	goWindowTableData = $.extend({},resData);
 	            	var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(resData);
@@ -1859,10 +1703,21 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	            	//绑定页面
 			    	$scope.headDataView = windowTableData.headData;
 				    $scope.tableDataView = windowTableData.bodyData;
-	
+
+					if(windowSearch && resData.row.length){
+						layer.msg('已查询，请在下方表格中查看查询结果', {time: 3500,icon: 1});
+						windowSearch = false;
+					}else if(windowSearch && (!resData.row.length)){
+						layer.msg('未查询出结果', {time: 3500,icon: 2});
+						windowSearch = false;
+					}
+					
+					console.log(resData);
+					console.log(windowTableData);
+					
             		$timeout(function(){
             			//更新表头宽度
-						setTableHeadWidth(jTableDialogWindow)
+						tool.setTableHeadWidth(jTableDialogWindow);
 						//更新查询条件
 						var windowSearchBox = $(".table-dialog-window").find(".window-search-box");
 						windowSearchBox.eq(0).find("input").val(thisStartTime);
@@ -1888,7 +1743,16 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			            if(allSingleNum == clickableNum){
 			            	$(".headCheckbox").css("pointerEvents","none");
 			            }
-            		
+            			
+            			//预排过得单子字体颜色特殊处理
+            			$(".show-table table tbody tr").each(function(){
+            				var source = $(this).attr("source");
+            				if(source){
+            					$(this).addClass("source-light");
+            				}else{
+	            				$(this).removeClass("source-light");
+	            			}
+            			});
             		},0);
 					
 		            //全选全不选
@@ -1941,6 +1805,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 						//是否微调
 						if(hasChange){
 							//重新加载一级页面
+							ifSearchMsg = false;
 							result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);
 							hasChange = false;
 						}
@@ -1960,25 +1825,14 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 二级页面地点下拉框
 	 **/
     $scope.equipment_list = function($event){
-    	if($(".equipment-list").length > 0){
-    		$(".equipment-list").remove();
-    		$(".equipment-input").css("border","");
+    	var j_equipment_list = $(".equipment-list"),
+    		j_equipment_input = $(".equipment-input");
+    	if(j_equipment_list.length > 0){
+    		j_equipment_list.remove();
     	}else{
-    		view_js.dialogWindowEquipment(goEquipment,$event,true);
-    		$(".equipment-input").css("border","1px solid #1E7CD9");
+    		tool.dialogWindowEquipment(goEquipment,$event,true);
+    		j_equipment_input.css("border","1px solid #1E7CD9");
     	}
-    	$timeout(function(){
-    		$(".equipment-list").on("click","li",function(){
-    			$(".equipment-list").remove();
-    		})
-    		$(document).click(function(){
-				$(".equipment-list").remove();
-			});
-			$(".equipment-list,.equipment-input").click(function(event){
-   				 event.stopPropagation();
-			});	
-			
-    	},0)
     }
     
     /**
@@ -1989,13 +1843,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		var pkId = thisRow[0].pkId;
 		var versionId = thisRow[0].versionId;
 		var sUrl = "";
-		if(versionId ==undefined){     
-            sUrl="http://"+$rootScope.api_domain+"/api/schedule/result/"+pkId;
+		if(versionId == undefined){     
+            sUrl = $rootScope.restful_api.preview_third + pkId;
             $(".do-code").show();
             $(".pk-id").hide();
             $(".version-id").hide();
         }else{
-			sUrl="http://"+$rootScope.api_domain+"/api/adjust/get/"+pkId+ "?versionId="+versionId;
+			sUrl = $rootScope.restful_api.result_third + pkId + "?versionId="+versionId;
             $(".do-code").hide();
             $(".pk-id").show();
             $(".version-id").show();
@@ -2009,14 +1863,22 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			skin: 'yourclass',
 			content : $("#do_detail_dialog_1"),
 			success : function(){
+				$($event.target).css("color","#1E7CD9");
+				
 				// 272是显示框正常宽度，450是高度
 				$(".layui-layer").css({
 					"left" : $event.pageX - 272,
 					"top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
 				})
+				
+                $("body").on("click","#do_detail_dialog_1 .sure,.layui-layer-shade,.layui-layer-close",function(){
+                    $(".show-table .sale-order-look").css("color","");
+                })		
+                
 				$("#do_detail_dialog_1").on("click",".sure",function(){
 					layer.close(indexLayer);
 				})
+				
 			}
 		})
 		
@@ -2044,9 +1906,10 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	/**
 	 * 刷新二级页面
 	 **/
+	var windowSearch = false;
 	$scope.refreshDialogTable = function(){
 		//获取查询条件
-		var inputList = xujun_tool.getFromInput_nocode(".table-dialog-window .info-show");
+		var inputList = tool.getFromInput_nocode(".table-dialog-window .info-show");
 		var thisStartTime = inputList[0],
 			thisEndTime = inputList[0],
 			thisEquipmentName = decodeURIComponent(inputList[2]),
@@ -2092,18 +1955,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			});
 			return;
 		}
+		if(thisStartTime || thisEndTime || aEquipmentId.length || saleOrder || materialName || materialCode){
+			windowSearch = true;
+		}else{
+			windowSearch = false;
+		}
+		
 		$scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode);
 	}
-        //jquery控制表格显示样式，需要采用这种异步的方式调用
-        function jqueryDraw(){
-                $timeout(function() {
-//                  view_js.autoResize();
-					$(".search-box").hide();
-					$(".search-btn").removeClass("search-btn-click");
-                    //页面渲染绘制锁定期相关的信息：锁定期线，以后会扩展更多
-                    if(tableBodyViewModel)view_js.aps_freeze_draw(tableBodyViewModel.tableTrFreezeInfo,tableBodyViewModel.tableTrOverCapability);
-                }, 0)
-        }
+       
         /**************以下是本页实际执行的代码，上面都为函数和事件绑定****************/
         
 	/**
@@ -2113,22 +1973,27 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	$http.get(thisUrl).then(
 		function(res){
 			var resData = res.data;
-			$scope.resData=resData;
+			$scope.resData = resData;
 			var resData_body,
 				arr_scheme = [];  //存方案
 			for(var i = 0;i < resData.length;i++){   //排程方案与显示地点匹配
 				if(resData[i].schemeId == sessionStorage.schemeId){
-					resData_body=resData[i].locationDtoList;
+					resData_body = resData[i].locationDtoList;
 					$(".location-scheme-select").text(resData[i].schemeName);   //显示方案名称
 				}
 			}
+			
+			//存储当前地点树的地点
 			var defaultList_res = [];
 			for(var i in resData_body){
 				defaultList_res.push(resData_body[i].locationId);
 			}
-			sessionStorage.defaultList_res = defaultList_res;  //存储当前地点树的地点
-			$scope.folder = getData_two(resData_body)[0];
-			/* ***默认值*** */
+			sessionStorage.defaultList_res = defaultList_res; 
+			
+			//处理数据,并绑定到页面
+			$scope.folder = scheduleTableViewModelService.getData_two(resData_body)[0];
+			
+			//默认值
 			$rootScope.locationId_res = resData_body[0].locationId;
 			$rootScope.defaultLocation = []; 
 			
@@ -2141,15 +2006,16 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
                 		$(this).toggleClass("active").toggleClass("open");
                 		$(this).next().toggle();
                 	}
+                	
                 	//设置前面线的高度
-					let thisUL=$(this).parents("ul");
-					let thisB=$(this).parents("ul").children("b");
-					let thisLI=$(this).parents("ul").children("li")
-					let thisHeight=0;
+					let thisB = $(this).parents("ul").children("b");
+					let thisLI = $(this).parents("ul").children("li")
+					let thisHeight = 0;
                 	for(var i = 0;i < thisLI.length-1;i++){
 						thisHeight += $(thisLI[i]).height();
                 	}
                 	thisB.height(thisHeight + 100);
+                	
                 	//改变按钮的位置
                 	var bgPosition = $(".location-choose").width();
 					$(".out-bg").width(bgPosition);
@@ -2162,16 +2028,16 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
                 })
             	
         	$timeout(function(){ 
-                //移除span
+                //移除 s 标记
                 var clickSpan=$(".location-list").find("span");
                 clickSpan.each(function(){
-                	if($(this).next().find("li").length==0){
+                	if($(this).next().find("li").length == 0){
                 		$(this).children("s").removeClass("open-btn");
                 	}else{
                 		$(this).children("s").addClass("open-btn");
                 	}
                 })
-        	})
+        	},100)
         	
         	//改变状态 方法
             function changeSelectStatus(thisSelect){   
@@ -2197,22 +2063,32 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
             		}
             	})
             }
-            
             //选择方案显示
-		    $("body")
-		    	.on("click",".location-scheme-select",function(){
-					if($(".location-scheme-option").css("display") == "none") {
-						$(".location-scheme-option").slideDown(80);
-						$(this).addClass("select-li");
-					} else if($(".location-scheme-option").css("display") == "block"){
-						$(".location-scheme-option").slideUp(80);
-						$(this).removeClass("select-li");
-					}
-			    })
-		    	.on("click",".location-scheme-option li",function(){
-		    		$(".location-scheme-option").slideUp(80);
-		    		$(".location-scheme-select").text($(this).text());
-		    	})
+		    $(".location-scheme-select").on("click",function(){
+				if($(".location-scheme-option").css("display") == "none") {
+					$(".location-scheme-option").slideDown(80);
+					$(this).addClass("select-li");
+					return ;
+				} else if($(".location-scheme-option").css("display") == "block"){
+					$(".location-scheme-option").slideUp(80);
+					$(this).removeClass("select-li");
+					return ;
+				}
+		    })
+	    	$(".location-scheme-option").on("click","li",function(){
+	    		$(".location-scheme-option").slideUp(80);
+	    		$(".location-scheme-select").text($(this).text());
+	    		
+	            //是否有子地点    没有则移除 s 标记
+	            var clickSpan=$(".location-list").find("span");
+	            clickSpan.each(function(){
+	            	if($(this).next().find("li").length == 0){
+	            		$(this).children("s").removeClass("open-btn");
+	            	}else{
+	            		$(this).children("s").addClass("open-btn");
+	            	}
+	            })
+	    	})
 		    	
 		    //点击选择方案
 		    $scope.scheme_btn=function(id){
@@ -2220,74 +2096,106 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		    	//排程方案与显示地点匹配
 		    	for(var i = 0;i < resData.length;i++){   
 					if(resData[i].schemeId == id){
-						resData_bodys=resData[i].locationDtoList;
+						resData_bodys = resData[i].locationDtoList;
 					}
 				}
-				var defaultList_res=[];
+				var defaultList_res = [];
 				for(var i in resData_bodys){
 					defaultList_res.push(resData_bodys[i].locationId);
 				}
 				//存储当前地点树的地点
-				sessionStorage.defaultList_res=defaultList_res;
+				sessionStorage.defaultList_res = defaultList_res;
+				
 				//绑定数据,显示
-				$scope.folder = getData_two(resData_bodys)[0];
+				$scope.folder = scheduleTableViewModelService.getData_two(resData_bodys)[0];
+				
 				//存储schemeId
 			    sessionStorage.schemeId = id;  
+			    
 				//默认值
 				$rootScope.locationId_res = resData_bodys[0].locationId;
-				$rootScope.defaultLocation=[];
+				$rootScope.defaultLocation = [];
 				
 				//取消排程 往后台发送数据 (刷新新数据)
 				var data_body={     
-					"schemeId":"",
-					"locationDtoList":[]
+					'schemeId':'',
+					'locationDtoList':[]
 				};
 				for(var i = 0;i < defaultList_res.length;i++){
-					var objLocation={};
-				    var locationDtoList=[];
+					var objLocation = {};
+				    var locationDtoList = [];
 					objLocation.locationId = defaultList_res[i];
 					objLocation.locationFilterList = [];
 					data_body.locationDtoList.push(objLocation);
-					data_body.schemeId=id;
+					data_body.schemeId = id;
 				}
 				sessionStorage.setItem("cancel_data",JSON.stringify(data_body));
 				
-				//默认勾中第一个
+				//切换方案  默认勾中第一个地点
 			    $timeout(function(){
-					var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i")
+					var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i");
 					var defaultId = defaultEle.attr("location-id");
-					if(sessionStorage.locationId_res){
-						//判断缓存是否为当前地点树的地点
-						if(sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res)>-1){   
-							$("i[location-id="+sessionStorage.locationId_res+"]").click();
+//					if(sessionStorage.locationId_res && sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res)>-1){
+//						//判断缓存是否为当前地点树的地点
+//						$("i[location-id="+sessionStorage.locationId_res+"]").click();	
+//					}else{
+//			    		$("i[location-id=" +defaultId+ "]").click();
+//			    		sessionStorage.locationId_res = $rootScope.locationId_res;
+//			    		sessionStorage.locationFilterList_res = [];
+//					}
+					$("i[location-id=" +defaultId+ "]").click();
+					$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
+					result_show_table(defaultId,'');  //查询显示
+					//获取合并规则
+			        $http.get($rootScope.restful_api.group_by).then(
+			        	function(res){
+			        		var thisObj = res.data.selectList;
+			        		if(thisObj){
+			        			$rootScope.showType = {
+						    			group_by:thisObj[0].valueContent,
+						    			cnName:"个"+thisObj[0].valueAlias
+						    		};
+			        		}else{
+			        			$rootScope.showType = {
+					    			group_by:"processId",
+					    			cnName:"个工序"
+					    		};
+			        		}
+			        	},
+			        	function(res){
+			        		$rootScope.showType = {
+					    			group_by:"processId",
+					    			cnName:"个工序"
+					    		};
+			        	}
+			        );
+			        
+			        //获取显示天数
+			        $http.get($rootScope.restful_api.get_show_days).then(
+			        	function(res){
+			        		var thisObj = res.data.selectList;
+			        		offset = thisObj[0].valueContent-1;
+			        		today = new Date();
+			        		startTime = tool.dateToString(today);//开始时间为今天
+							endTime =  tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+							ifSearchMsg = false;
 							result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //查询显示
-							jqueryDraw();          //页面显示表格
-						}else{
-							$("i[location-id="+defaultId+"]").click();
-				    		sessionStorage.locationId_res=$rootScope.locationId_res;
-				    		sessionStorage.locationFilterList_res=[];
-				    		result_show_table($rootScope.locationId_res,$rootScope.defaultLocation);  
-							jqueryDraw(); 
-						}
-					}else{
-			    		$("i[location-id="+defaultId+"]").click();
-			    		sessionStorage.locationId_res=$rootScope.locationId_res;
-			    		sessionStorage.locationFilterList_res = [];
-			    		result_show_table($rootScope.locationId_res,$rootScope.defaultLocation);  
-						jqueryDraw();
-					}
-					
+			        	},
+			        	function(res){
+			        		
+			        	}
+			        )
 					//pap相关接口body值
 					var papBodyData = {      
 						"schemeId":parseInt(sessionStorage.schemeId),
 						"locationDtoList":[]
 					}; 
 					var papObj = {
-						"locationId":"",
-						"locationFilterList":[]
+						'locationId':'',
+						'locationFilterList':[]
 					};
 					papObj.locationId=sessionStorage.locationId_res;
-					papObj.locationFilterList=[];
+					papObj.locationFilterList = [];
 					papBodyData.locationDtoList.push(papObj);
 					sessionStorage.setItem("papBodyData",JSON.stringify(papBodyData));
 					
@@ -2321,7 +2229,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					var jInfoShow = jCacheWindow.find(".info-show");
 					var jInfoShowInput = jInfoShow.find("input");
 					
-					var inputList = xujun_tool.getFromInput(".cache-window .info-show"),
+					var inputList = tool.getFromInput(".cache-window .info-show"),
 						saleOrderCode = inputList[0],
 						materialName = inputList[1],
 						materialCode = inputList[2];
@@ -2334,11 +2242,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			        		var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(res.data);
 			        		$scope.cacheHeadDataView = windowTableData.headData;
 			        		$scope.cacheTableDataView = windowTableData.bodyData;
-							$timeout(function(){setTableHeadWidth($(".cache-window"))},0);
+							$timeout(function(){
+								tool.setTableHeadWidth($(".cache-window"));
+							},0);
 							
 							//resize
 							$(window).on("resize",function(){
-								setTableHeadWidth($(".cache-window"));
+								tool.setTableHeadWidth($(".cache-window"));
 							});
 							
 							$timeout(function(){
@@ -2370,9 +2280,11 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 								jCacheWindow.hide();
 							})
 			        	}
-			      );
+			        );
 				}
 				$scope.cache_box_again();
+				//提示
+				layer.msg('方案已切换', {time: 3500,icon: 1});
 		    }
 		}
     );
@@ -2383,26 +2295,78 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
     $timeout(function(){
     	var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i")
 		var defaultId = defaultEle.attr("location-id");
-		if(sessionStorage.locationId_res){
+		if(sessionStorage.locationId_res && sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res) > -1){
 			//判断缓存是否为当前地点树的地点
-			if(sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res) > -1){   
-				$("i[location-id="+sessionStorage.locationId_res+"]").click();
-				result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //查询显示
-				jqueryDraw();          //页面显示表格
-			}else{
-				$("i[location-id="+defaultId+"]").click();
-	    		sessionStorage.locationId_res = $rootScope.locationId_res;
-	    		sessionStorage.locationFilterList_res=[];
-	    		result_show_table($rootScope.locationId_res,$rootScope.defaultLocation);  //查询显示
-				jqueryDraw(); 
-			}
+			$("i[location-id="+sessionStorage.locationId_res+"]").click();
 		}else{
     		$("i[location-id="+defaultId+"]").click();
     		sessionStorage.locationId_res = $rootScope.locationId_res;
-    		sessionStorage.locationFilterList_res = [];
-    		result_show_table($rootScope.locationId_res,$rootScope.defaultLocation);  
-			jqueryDraw(); 
+    		sessionStorage.locationFilterList_res = [];	
 		}
+		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
+		//获取合并规则
+        $http.get($rootScope.restful_api.group_by).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		if(thisObj){
+        			$rootScope.showType = {
+			    			group_by:thisObj[0].valueContent,
+			    			cnName:"个"+thisObj[0].valueAlias
+			    		};
+        		}else{
+        			$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        		}
+	        		
+        	},
+        	function(res){
+        		$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        	}
+        );
+        
+        //获取显示天数
+        $http.get($rootScope.restful_api.get_show_days).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		offset = thisObj[0].valueContent-1;
+        		startTime = tool.dateToString(today);//开始时间为今天
+				endTime =  tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+				result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //查询显示
+        	},
+        	function(res){
+        		offset = 6;
+        		startTime = tool.dateToString(today);//开始时间为今天
+				endTime =  tool.dateToString(new Date(today.setDate(today.getDate() + offset)));//结束时间为今天之后的7天
+				result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //查询显示
+        	}
+        );
+        
+        /**
+		 * 获取锁定期
+		 **/
+		$http.get($rootScope.restful_api.get_freeze_days +　"?schemeId=" + sessionStorage.schemeId).then(
+			function(res) {
+				var resData = res.data.lockDate; //锁定期
+				if(resData){
+					fact_days = resData; //锁定期(可预排最大日期)
+				}else{
+					layer.alert('锁定期接口获取的数据发生错误,请联系技术人员', {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+				}
+			},
+			function(res) {
+				layer.alert('获取锁定期失败,请联系技术人员', {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+			}
+		);
+        
 		$(".out-bg").animate({width:"64px"},0);
 		
 		//pap相关接口body值
@@ -2411,8 +2375,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			"locationDtoList":[]
 		}; 
 		var papObj = {
-			"locationId":"",
-			"locationFilterList":[]
+			'locationId':'',
+			'locationFilterList':[]
 		};
 		papObj.locationId = sessionStorage.locationId_res;
 		papObj.locationFilterList = [];
@@ -2432,26 +2396,65 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			});
     		return;
     	}
+		//存储地点信息
     	sessionStorage.locationId_res = thisLocationId;
     	sessionStorage.locationFilterList_res = [];
-		var papBodyData = {      //pap相关接口body值
+    	
+    	//pap相关接口body值
+		var papBodyData = {      
 			"schemeId":parseInt(sessionStorage.schemeId),
 			"locationDtoList":[]
 		}; 
 		var papObj = {
-			"locationId":"",
-			"locationFilterList":[]
-		};    //pap相关body数据
+			'locationId':'',
+			'locationFilterList':[]
+		};    
 		papObj.locationId = sessionStorage.locationId_res;
 		papObj.locationFilterList = [];
 		papBodyData.locationDtoList.push(papObj);
 		sessionStorage.setItem("papBodyData",JSON.stringify(papBodyData));
 		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
-        result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //获取表格数据
-        jqueryDraw();   //显示表格
-		//更改为默认第一级展开状态,并将地点树隐藏
-		$(".title span").removeClass("title-close").addClass("title-open");
-		$(".root").find("ul").hide();
+		//获取合并规则
+        $http.get($rootScope.restful_api.group_by).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		if(thisObj){
+        			$rootScope.showType = {
+			    			group_by:thisObj[0].valueContent,
+			    			cnName:"个"+thisObj[0].valueAlias
+			    		};
+        		}else{
+        			$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        		}
+	        		
+        	},
+        	function(res){
+        		$rootScope.showType = {
+		    			group_by:"processId",
+		    			cnName:"个工序"
+		    		};
+        	}
+        );
+        
+        layer.msg('地点已修改', {time: 3500,icon: 1});
+        
+        //获取显示天数
+        $http.get($rootScope.restful_api.get_show_days).then(
+        	function(res){
+        		var thisObj = res.data.selectList;
+        		offset = thisObj[0].valueContent-1;
+				ifSearchMsg = false;	        		
+				result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  //查询显示
+        	},
+        	function(res){
+        		
+        	}
+        )
+        
+		//更改为默认状态,并将地点树隐藏
 		$(".location-choose").animate({left:"-280px"},400);
 		$(".point-click").css("background-position","0px 0px");
 		$(".out-bg").animate({width:"64px"},400);

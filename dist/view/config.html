@@ -10,7 +10,7 @@
                     <a class="" href="javascript:;" ui-sref={{configLi.sref}}>{{configLi.text | translate}}</a>
                     <i class="nav-angle" ng-if="configLi.children"></i>
                     <ul ng-if="configLi.children">
-                        <li class="second-nav" ng-repeat="child in configLi.children track by $index" ng-class="isActiveNav(configLi.sref) ? 'active' : ''" ng-click=selectLi(configLi.sref,$event)>
+                        <li class="second-nav" ng-repeat="child in configLi.children track by $index" ng-class="isActiveNav(child.sref) ? 'active' : ''" ng-click=selectLi(child.sref,$event)>
                             <a href="javascript:;" ui-sref={{child.sref}} ui-sref-opt="{reload:true}">{{child.text | translate}}</a>
                         </li>
                     </ul>

@@ -571,7 +571,8 @@ input.disabled {
   line-height: 54px; }
 
 .planContent .rightLocation i.disabled {
-  background-color: #fff; }
+  background-color: #fff;
+  pointer-events: none; }
 
 /*pap*/
 .papRuleContent label {

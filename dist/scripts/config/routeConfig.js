@@ -81,13 +81,16 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
             url:'/displayCombine',
             templateUrl:'dist/view/template/displayCombine.html',
         })
+        // 配置页-一级页面-翻转显示
+        .state('config.first.displayFlip',{
+            url:'/.flip',
+            templateUrl:'dist/view/template/displayFlip.html',
+        })
          //配置页-二级页面
          .state('config.second',{
              url:'/second',
              templateUrl:'dist/view/template/displaySecondPage.html',
-             controller: function($scope,$state){
-                 $state.go('config.second.column');//默认显示第一个tab
-             }
+             controller: "secondPageController",
              // abstract:true
              // views: {
              //     'column': {

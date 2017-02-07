@@ -678,6 +678,7 @@ input.disabled{
 }
 .planContent .rightLocation i.disabled{
     background-color: #fff;
+    pointer-events: none;
 }
 /*pap*/
 .papRuleContent label {

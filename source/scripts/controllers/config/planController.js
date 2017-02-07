@@ -4,8 +4,6 @@
 app.controller("planController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService","dataService","tool", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService,dataService,tool){
     $scope.ruleList = dataService.ruleList;
     $scope.columnWorkshop = false;
-    //获取数据，创造车间树
-    $scope.createWorkshop();
 
     //获取车间计划列表
     $http.get($rootScope.restful_api.all_schedule_plan)
@@ -287,107 +285,122 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
         event.stopPropagation();
     };
 
-    /**
-     * 同级列表全部选中时，左侧列变为父级一个出现，移除所有同级的车间展示
-     * @param target: 点击的元素
-     * @return
-     */
-    let secondToFirst = (target) => {
-        $(target).addClass("active");
-        let parentUl = $(target).parent().parent();
-        //如果全部选中，父级变为选中，左侧列表只显示父级
-        //active的个数等于所有个数则表示选中所有父级
-        if (parentUl.find(".active").length === parentUl.find(".select-status").length){
-            //设置为不选，。然后点击调用方法，全部选中
-            //判断是否为第一级春风车间,不是则继续执行
-            console.log(parentUl.parent());
-            if(parentUl.parent().prev().length){
-                parentUl.parent().siblings(".select-status").attr("class","select-status unselect");
-                parentUl.parent().siblings(".select-status").trigger("click");
-                //偷懒，先父级选中，所有子级不可选中
-                Array.prototype.forEach.call(parentUl.find(".select-status"),function(item){
-                    item.className = "select-status active disabled";
-                });
-            }
-            layer.msg("已合并为上一级车间",{time : 2000});
-            // let id = parentUl.previousElementSibling.firstElementChild.getAttribute("location-id");
-        }
-    };
 
-        $("body")
+    $timeout(function(){
+        $("#jWorkshop")
         //选择添加/删除车间
-        .on("click","#jWorkshop .select-status",(event) => {
-            let e = event || window.event;
-            let target = e.target || e.srcElement;
-            let id = target.getAttribute("data-location-id");
-            let firstRule = dataService.ruleList[0];
-            let containMenu = false;//点击车间是否由子车间已经被选择了
-            //判断有没有排程规则
-            if(!firstRule){
-                layer.alert("请先添加排程规则");
-            }
-            //子列表变为不可编辑状态
-            //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
-            // if(id.length <= 4){
-                $(target).siblings("folder-tree").find("i").addClass("disabled");
-            // }
-            //开始添加,先判断是否有车间,没有车间直接添加
-            if(!$scope.locationRuleList.length){
-                $scope.locationRuleList.push({
-                    locationId : id,
-                    locationName : target.nextElementSibling.innerText,
-                    ruleName : firstRule ? firstRule.ruleName : "请选择排程规则",
-                    ruleId : firstRule ? firstRule.ruleId : ""
-                });
-            }
-            else{
-                //=====判断点击车间是够已经被选择
-                let repeatLocationId = $scope.locationRuleList.every((item,index,arr) => {
-                    if(item.locationId == id){
-                        arr.splice(index,1);
-                    }
-                    return item.locationId != id
-                });
-                // debugger;
-                // console.log(target.className);
-                // let repeatLocationId = target.className.includes("selected");
-                // console.log(repeatLocationId);
-                //======
-                //车间没被选中
-                if(repeatLocationId){
-                    //点击一级之后取消所有二级(有选中的二级情况下)
-                    for(let i = $scope.locationRuleList.length-1;i >= 0;i --){
-                        if($scope.locationRuleList[i].locationId.slice(0,id.length) == id){
-                            containMenu = true;
-                            $scope.locationRuleList.splice(i,1);
-                        }
-                    }
-                    //====================（没有选中的二级情况下）
+            .on("click",".select-status",(event) => {
+                let e = event || window.event;
+                let target = e.target || e.srcElement;
+                let id = target.getAttribute("data-location-id");
+                let firstRule = dataService.ruleList[0];
+                //判断有没有排程规则
+                if(!firstRule){
+                    layer.alert("请先添加排程规则");
+                }
+                //子列表变为不可编辑状态
+                //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
+                // if(id.length <= 4){
+                //     $(target).siblings("folder-tree").find("i").addClass("disabled");
+                // }
+                //开始添加,先判断是否有车间,没有车间直接添加
+                if(!$scope.locationRuleList.length){
                     $scope.locationRuleList.push({
                         locationId : id,
                         locationName : target.nextElementSibling.innerText,
                         ruleName : firstRule ? firstRule.ruleName : "请选择排程规则",
                         ruleId : firstRule ? firstRule.ruleId : ""
                     });
-                    secondToFirst(target);
-                    //如果该元素有子集列表,该元素的子列表变为不可点击
-                    $(target).siblings("folder-tree").find("select-status").addClass("active disabled")
-                    // if(target.parentNode.nextElementSibling && target.parentNode.nextElementSibling.nodeName === "UL"){
-                    //     Array.prototype.forEach.call(target.parentNode.nextElementSibling.getElementsByClassName("select-status"),function(item,index){
-                    //         item.className += " disabled";
-                    //     })
-                    // }
                 }
-                //车间已被选中
-                else {
-                    //子列表变为可点击
-                    $(target).parent().next().find("i").removeClass("disabled");
+                else{
+                    //车间已被选中，则子列表变为可点击，未选中的状态
+                    if($(target).hasClass("active")){
+                        $(target).parent().find("i").removeClass("disabled active");
+                    }
+                    //==========如果车间没被选中========
+                    else {
+                        //点击一级之后取消所有二级(有选中的二级情况下)
+                        for(let i = $scope.locationRuleList.length-1;i >= 0;i --){
+                            if($scope.locationRuleList[i].locationId.slice(0,id.length) === id){
+                                $scope.locationRuleList.splice(i,1);
+                            }
+                        }
+                        //====================（没有选中的二级情况下）
+                        $scope.locationRuleList.push({
+                            locationId : id,
+                            locationName : target.nextElementSibling.innerText,
+                            ruleName : firstRule ? firstRule.ruleName : "请选择排程规则",
+                            ruleId : firstRule ? firstRule.ruleId : ""
+                        });
+                        //=========二级菜单合并为一级菜单--start===========
+                        //同级列表全部选中时，左侧列变为父级一个出现，移除所有同级的车间展示
+                        $(target).addClass("active");
+                        let parentUl = $(target).parent().parent();
+                        //如果全部选中，父级变为选中，左侧列表只显示父级
+                        //active的个数等于所有个数则表示选中所有父级
+                        if (parentUl.find(".active").length === parentUl.find(".select-status").length){
+                            //设置为不选，。然后点击调用方法，全部选中
+                            //判断是否为第一级春风车间,不是则继续执行
+                            console.log(parentUl.parent().prev().length);
+                            if(parentUl.parent().prev().length){
+                                parentUl.parent().siblings(".select-status").attr("class","select-status unselect");
+                                parentUl.parent().siblings(".select-status").trigger("click");
+                                //偷懒，先父级选中，所有子级不可选中
+                                Array.prototype.forEach.call(parentUl.find(".select-status"),function(item){
+                                    item.className = "select-status active disabled";
+                                });
+                            }
+                            layer.msg("已合并为上一级车间",{time : 2000});
+                            // let id = parentUl.previousElementSibling.firstElementChild.getAttribute("location-id");
+                        }
+                        //=========二级菜单合并为一级菜单--end===========
+
+                        //如果该元素有子集列表,该元素的子列表变为不可点击
+                        $(target).siblings("folder-tree").find("select-status").addClass("active disabled")
+                    }
                 }
-            }
-            //强制刷新dom
-            $scope.$apply();
-        })
+                //强制刷新dom
+                $scope.$apply();
+            })
             .on("click","disabled",() =>{
                 return false;
             })
+    },1000);
+
+    $scope.createPlanWorkshopTree = () =>{
+        $http.get($rootScope.restful_api.get_new_location)
+            .then((res) => {
+                $scope.resWorkshop = res.data;
+                $scope.folder = tool.getLocationTreeData($.extend({},$scope.resWorkshop))[0];//处理数据,并绑定到页面
+                // $scope.folder = {
+                //     children : tool.getLocationTreeData($.extend({},$scope.resWorkshop))
+                // }
+            }, function(res){
+                layer.alert("读取车间失败，请检查服务器");
+            })
+            .then(() => {
+                $timeout(function () {
+                    $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+                    $("#jWorkshop").on("click","ul span",function(){
+                        if($(this).next().find("ul li").length == 0){
+                            return;
+                        }else{
+                            $(this).toggleClass("active").toggleClass("open");
+                            $(this).next().toggle();
+                        }
+                        //设置前面线的高度
+                        let thisUL = $(this).parents("ul");
+                        let thisLI = thisUL.children("li")
+                        let thisHeight = 0;
+                        for(var i = 0;i < thisLI.length-1;i++){
+                            thisHeight += $(thisLI[i]).height();
+                        }
+                        //改变按钮的位置
+                        var bgPosition=$(".location-choose").width();
+                        $(".out-bg").width(bgPosition);
+                    })
+                })
+            })
+    };
+    $scope.createPlanWorkshopTree();
 }]);

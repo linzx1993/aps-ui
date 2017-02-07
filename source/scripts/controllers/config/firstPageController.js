@@ -6,24 +6,34 @@ app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
         //默认显示第一个tab---start
         $state.go('config.first.displayDays');
-
         //默认显示第一个tab---end
-        $scope.firstPage = {};
+        $scope.firstPage = {
+            title : "",//面包屑导航三级目录文字
+            showItemLists : [],//显示天数
+            combineItemList : [],//显示合并项数组
+        };
     }])
     .controller("displayDaysController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
         //设置面包屑导航
-        $scope.showPageConfig = "显示天数";
-        
-        $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId)
-            .then(function(res){
-                $scope.firstPage.showItemLists = res.data.selectList;
-                $scope.firstPage.showItemLists.map((item)=>{
-                    item.valueContent = Number(item.valueContent);
+        $scope.firstPage.title = "显示天数";
+
+        /**
+         *根据点击的车间树获得相应的车间ID,显示对应显示天数的数据
+         */
+        let getDisplayDayData = () =>{
+            $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId)
+                .then((res) => {
+                    //获得get到的数据，渲染页面
+                    $scope.firstPage.showItemLists = res.data.selectList;
+                    $scope.firstPage.showItemLists.map((item)=>{
+                        item.valueContent = Number(item.valueContent);
+                    });
+                    $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
+                }, () => {
+                    layer.alert("获取一级页面显示天数失败，请检查服务器");
                 });
-                $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
-            },function () {
-                layer.alert("获取一级页面显示天数，请检查服务器");
-            });
+        };
+        getDisplayDayData();
 
         //显示输入数字范围
         $scope.validateNum = (val) =>{
@@ -58,16 +68,32 @@ app
                 },()=>{
                     layer.alert("数据保存失败，请检查服务器");
                 });
-        }
+        };
+
+        //创建车间树
+        $scope.createWorkshop(true,getDisplayDayData);
     }])
     .controller("displayCombineController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
         //设置面包屑导航
-        $scope.showPageConfig = "显示合并项";
-        $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId)
-            .then(function(res){
-                $scope.firstPage.combineItemList = res.data.optionList;
-                $scope.selectValue = res.data.selectList[0].valueContent;
-            })
+        $scope.firstPage.title = "显示合并项";
+
+        /**
+         *根据点击的车间树获得相应的车间ID,显示对应显示合并项的数据
+         */
+        let getDisplayCombineData = () =>{
+            $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId)
+                .then((res) => {
+                    //获得get到的数据，渲染页面
+                    $scope.firstPage.combineItemList = res.data.optionList;
+                    $scope.selectValue = res.data.selectList[0].valueContent;
+                }, () => {
+                    layer.alert("获取显示合并项失败，请检查服务器");
+                });
+        };
+        getDisplayCombineData();
+
+        //创建车间树
+        $scope.createWorkshop(true,getDisplayCombineData);
 
         //保存数据
         $scope.saveDisplayCombine = () =>{
@@ -79,7 +105,6 @@ app
             let selectObj = $scope.firstPage.combineItemList.filter((item)=>{
                 return item.valueContent === $scope.selectValue;
             })[0];
-            console.log(selectObj);
             let postData = {
                 "selectList" : [{
                     valueContent : selectObj.valueContent,
@@ -97,4 +122,7 @@ app
                     layer.alert("数据保存失败，请检查服务器");
                 });
         }
+    }])
+    .controller("displayFlipController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+
     }]);

@@ -49,22 +49,23 @@
                 </dd>
             </dl>
         </div>
+        <div id="columnWorkshop" class="location-list fl location-show">
+            <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+            <ul>
+                <li class="all-location">
+                    <i class="select-status" data-location-id="01"></i>
+                    <span class="ml-10 active open">
+                            <s class="open-btn mr-10"></s>
+                            春风车间
+                        </span>
+                    <folder-tree current-folder="folder"></folder-tree>
+                </li>
+            </ul>
+        </div>
         <div class="m-0-auto mt-80 mb-20 tc clearfix">
             <a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveSortContent()">应用</a>
             <a class="ml-15 reset-config" href="javascript:void(0);" ng-click="resetSortConfig()">还原</a>
         </div>
     </div>
-    <div id="columnWorkshop" class="location-list fl location-show">
-        <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
-        <ul>
-            <li class="all-location">
-                <i class="select-status" data-location-id="01"></i>
-                <span class="ml-10 active open">
-                            <s class="open-btn mr-10"></s>
-                            春风车间
-                        </span>
-                <folder-tree current-folder="folder"></folder-tree>
-            </li>
-        </ul>
-    </div>
+
 </div>

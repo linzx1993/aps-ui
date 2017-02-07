@@ -3,9 +3,7 @@
  */
 require("./adminConfigController");
 require("./versionController");
-require("./columnController");
-require("./configController");
+require("./secondPageController");
 require("./firstPageController");
 require("./planController");
 require("./ruleController");
-require("./sortController");

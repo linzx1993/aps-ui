@@ -47,9 +47,16 @@
 		<i class="differ-btn-icon"></i>
 		<div class="tip">查询差异化</div> 
 	</div>
-	<div class="right-menu-button change-one" ng-click="check_aps()">
+	<!--隐藏空白行-->
+	<div class="hide-tr right-menu-button" ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
+		<i class="hide-tr-icon"></i>
+		<div class="tip">隐藏空白行</div>
+	</div>
+	<!--隐藏空白行END-->
+	<div class="right-menu-button change-one" ng-click="check_aps($event)">
 		<i class="jiaoyan-icon"></i>
 		<div class="tip">校验</div>
+		<input type="checkbox" class="check-check-box"/>
 	</div>
 	<div class="right-menu-button back-one" ng-click="rollback()">
 		<i class="back-one-icon"></i>
@@ -86,7 +93,7 @@
 	    <div id="progress-label_one" class="pro_labels"></div>
 	</div>
 	
-	<div id="progressbar_two" class="pro_bars">
+	<!--<div id="progressbar_two" class="pro_bars">
 	    <span></span>
 	    <div id="progress-label_two" class="pro_labels"></div>
 	</div>
@@ -99,11 +106,11 @@
 	<div id="progressbar_four" class="pro_bars">
 	    <span></span>
 	    <div id="progress-label_four" class="pro_labels"></div>
-	</div>
+	</div>-->
 	
 	<!--校验提示信息  开始-->
 	<div class="wrap-alert" >
-		<button ng-click="close()" class="in-but"></button>
+		<button ng-click="confirm_close()" class="in-but"></button>
 		<h3 ><span></span>当前提示信息</h3>
 		<ul >
 		    <li  ng-repeat="checkRow in listOne">
@@ -111,9 +118,14 @@
 		    	<span class="in-states" title={{checkRow.code}}>{{checkRow.code}}</span>
 		    	<span class="in-true"></span>
 		    	<span class="in-infos" ></span>
-		    	<b class="in-icons" ng-click="confirm_dialog(checkRow,$event)" data-info={{checkRow.info}}>详情</b>
+		    	<b class="in-icons" style="display: none;" ng-click="confirm_dialog(checkRow,$event)" data-info={{checkRow.info}}>详情</b>
 		    </li>
 		 </ul>
+		 <div class="check-btn-div" ng-show="checkBtnShow">
+			 <div class="check-btn check-confirm" >确定</div>
+			 <div class="check-btn check-cancel" >取消</div>		 	
+		 </div>
+
 	</div>
 	<!--校验提示信息  结束-->
 	
@@ -126,7 +138,7 @@
 				<span class="pap-pkid">{{"pkId:"+" "+list.pkId}}</span>
 		    	<span class="pap-state">{{"当前状态："+" "+list.state}}</span>
 		    	<span class="pap-info"></span>
-		    	<b class="in-icons" data-info={{list.info}} ng-click="pap_dialog(list,$event)">详情</b>
+		    	<b class="in-icons" data-info={{list.info}} >详情</b>
 		    	<p class="pap-in-alert">
 		    		<i class="pap-alert-head">&nbsp;&nbsp;&nbsp;&nbsp;异常原因</i>
 		    		&nbsp;&nbsp;&nbsp;&nbsp;{{list.info}}
@@ -177,26 +189,23 @@
 
             <div class="table-body"><!-- 表格主体部分 -->
             	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index">
-            			<div  ng-repeat="cell in row track by $index" class="{{cell[0].frontClass}} table-td" ng-style="{opacity:cell[0].opacity}">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty">
+            			<div  ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
             				<!--背面-->
 	            			<div class="td-back">
-	            				<p>{{cell[0].changeModelNumber}}</p>
-	            				<p>{{cell[0].workTime}}</p>
-	            				<p>{{cell[0].cell_tasknum}}</p>
-	            				<p>{{cell[0].timePercent}}</p>
+	            				<p ng-repeat="back in cell.back">{{back}}</p>
 	            			</div>
 	            			<!--正面-->
-            				<div class="td-front" ng-click="unit_click(cell,$event)" ng-right-click="unit_click(cell,$event)" ng-style="{cursor: cell[0].cursor}">
-            					<div ng-repeat="unit in cell track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="unit_click(cell.front,$event)" ng-right-click="unit_click(cell.front,$event)" ng-style="{cursor: cell['useData'].cursor}">
+            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
 	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
 	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
 	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
 	            				</div>
             				</div>	            			
 	            			<!--图标放在这一层，加浮动到指定位置-->
-	            			<div class="freeze_info freeze_info_after"></div>
-	            			<div class="over-Capability"></div>
+	            			<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
+	            			<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
             			</div>
             		</div>
             	</div>
@@ -208,7 +217,7 @@
 			<div class="table-head"><!-- 表头部分 -->
 				<div style="display: flex;">
 					<div></div>
-					<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="">
+					<div ng-repeat="date in tableHeadViewModel track by $index" style="cursor: default;">
 						<span>{{date.thisDate.substring(5,7)}}</span>月
 						<span>{{date.thisDate.substring(8,10)}}</span>日
 					</div>
@@ -216,28 +225,23 @@
 			</div><!-- .table-head END -->
 
 			<div class="table-body"><!-- 表格主体部分 -->
-				<!--<div class="table-content">-->
 				<div class="table-content">
-					<div class="differSameItem mt-10" ng-repeat="differ in differTableBodyViewModel track by $index">
+					<div class="differSameItem mb-10" ng-repeat="differ in differTableBodyViewModel track by $index">
 						<div class="table-tr" ng-repeat="row in differ track by $index">
-							<div class="table-td" ng-repeat="cell in row track by $index"  ng-style="{opacity:cell[0].opacity}" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell[0].args.dateId}} >
+							<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell['useData'].dateId}} >
 								<!--背面-->
 								<div class="td-back">
-									<p>{{cell[0].changeModelNumber}}</p>
-									<p>{{cell[0].workTime}}</p>
-									<p>{{cell[0].cell_tasknum}}</p>
+									<p ng-repeat="back in cell.back">{{back}}</p>
 								</div>
 								<!--正面-->
-								<div class="td-front" ng-click="differ_unit_click(cell,$event)" ng-style="{cursor: cell[0].cursor}">
-									<div ng-repeat="unit in cell track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
-										<!--<div class="table-cell-name-font">{{unit.text}}</div>
-                                        <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
+								<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="differ_unit_click(cell.front,$event)">
+									<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
 										<div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
 									</div>
 								</div>
 								<!--图标放在这一层，加浮动到指定位置-->
-								<div class="freeze_info freeze_info_after"></div>
-								<div class="over-Capability"></div>
+								<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
+	            				<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
 							</div>
 						</div>
 					</div>
@@ -624,7 +628,7 @@
 	<div class="read-show">
 		<h1 class="location-title location-title-res">请选择需要显示的地点</h1>
 		<p class="location-scheme-select"></p>
-		<ul class="location-scheme-option" >
+		<ul class="location-scheme-option">
 			<li ng-repeat="x in resData" data-schemeId={{x.schemeId}} ng-click="scheme_btn(x.schemeId)">{{x.schemeName}}</li>
 		</ul>
 		<div class="wrap-result">

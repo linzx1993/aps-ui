@@ -12,11 +12,9 @@
   box-sizing: border-box; }
 
 .configNavTitle {
-  padding: 14px 0;
-  min-height: 28px;
-  line-height: 28px;
+  min-height: 68px;
+  line-height: 68px;
   font-size: 18px;
-  font-weight: bold;
   text-align: center;
   color: #fff;
   border-bottom: 1px solid #151b26; }
@@ -35,6 +33,9 @@
   border-left: 4px solid #1E7CD9;
   background-color: #375373; }
 
+.config-nav li li a {
+  font-size: 14px; }
+
 .config-nav li li.active > a {
   margin-left: -20px;
   padding-left: 40px;
@@ -44,7 +45,7 @@
 
 .configLi .nav-angle {
   position: absolute;
-  right: 15px;
+  right: 20px;
   top: 16px;
   width: 9px;
   height: 9px;
@@ -92,13 +93,18 @@
   padding-left: 40px; }
 
 /*=========参数配置页面右边内容栏=========*/
-.config-box .columnContent input,
-.config-box .sortContent input,
-.config-box .checkItem input,
+.config-box input[type=checkbox],
+.config-box input[type=radio],
 .config-box .checkItem select,
-.config-box .adminContent select,
-.config-box .papRuleContent input {
+.config-box .adminContent select {
   display: none; }
+
+.config-box .input-text-box {
+  padding-left: 5px;
+  width: 133px;
+  height: 28px;
+  line-height: 24px;
+  border: 1px solid #d9d9d9; }
 
 .config-box .config-content {
   width: 1138px;
@@ -114,102 +120,120 @@
 /*/多列配置页面/*/
 .config-box .config-content-title {
   padding-left: 30px;
-  height: 50px;
-  line-height: 50px;
+  height: 67px;
+  line-height: 67px;
   font-size: 18px;
   font-weight: bold;
   color: #195999;
   border-top-right-radius: 4px;
   border-bottom: 1px solid #dedede; }
 
-.config-box .column-content-checkbox {
+/*单选框，多选框样式*/
+.input-check, .input-radio {
   width: 16px;
   height: 16px;
   border: 1px solid #ccc;
   box-sizing: border-box;
   vertical-align: middle;
-  background-color: #fff; }
+  background-color: #fff;
+  cursor: pointer; }
 
-.config-box input:checked + span {
+.input-radio {
+  border-radius: 50%; }
+
+input:checked + .input-check, input:checked + .input-radio {
   border: none;
   background: url("../images/selected.png") #fff; }
+
+input:checked + .input-radio {
+  position: relative;
+  border: 1px solid #1E7CD9;
+  background-image: none; }
+  input:checked + .input-radio:after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 6px;
+    height: 6px;
+    background-color: #1E7CD9;
+    border-radius: 50%; }
 
 .config-box .table-sort-itemList {
   display: flex;
   width: 480px; }
 
+.all-location:after {
+  display: none; }
+
+/*二级页面显示项*/
+.display-combine-line {
+  display: flex;
+  align-items: center; }
+
 /*/校验规则可配/*/
 .check-rule-nav {
   width: 180px;
-  height: 100%;
+  height: 746px;
   background-color: #dde5f0; }
+  .check-rule-nav .schedulePlanLi.active, .check-rule-nav .schedulePlanLi:hover, .check-rule-nav .ruleLi.active, .check-rule-nav .ruleLi:hover {
+    background-color: #f0f3fa; }
+  .check-rule-nav li b {
+    display: none;
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    width: 14px;
+    height: 14px;
+    background: url("../images/garbage.png") no-repeat;
+    z-index: 10; }
+    .check-rule-nav li b.delete {
+      display: block; }
+  .check-rule-nav .addRule, .check-rule-nav .nav-manage {
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer; }
+  .check-rule-nav .addRule:after, .check-rule-nav .addRule:before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 2px;
+    width: 16px;
+    height: 2px;
+    background-color: #8e9092; }
+  .check-rule-nav .addRule:hover:after, .check-rule-nav .addRule:hover:before {
+    background-color: #1E7CD9; }
+  .check-rule-nav input {
+    width: 120px;
+    background-color: transparent; }
+  .check-rule-nav .nav-manage {
+    left: auto;
+    right: 20px;
+    background: url("../images/set-gray.png") no-repeat; }
+  .check-rule-nav .addRule:before {
+    top: -2px;
+    left: 9px;
+    width: 2px;
+    height: 16px; }
+  .check-rule-nav .nav-manage:hover {
+    background-image: url("../images/set-blue.png"); }
+
+.config-form {
+  width: 902px;
+  height: 746px;
+  overflow: auto;
+  box-sizing: border-box; }
 
 .check-rule-nav li, .check-scheme-nav li {
   position: relative;
-  padding-left: 25px;
+  padding-left: 30px;
   height: 46px;
   line-height: 46px;
   color: #292929;
   cursor: pointer; }
-
-.check-rule-nav .schedulePlanLi.active, .check-rule-nav .schedulePlanLi:hover,
-.check-rule-nav .ruleLi.active, .check-rule-nav .ruleLi:hover {
-  background-color: #ecf0f1; }
-
-.config-box .check-rule-nav input {
-  display: inline-block;
-  width: 120px;
-  background-color: transparent; }
-
-.check-rule-nav li b {
-  display: none;
-  position: absolute;
-  top: 14px;
-  right: 20px;
-  width: 14px;
-  height: 14px;
-  background: url("../images/garbage.png") no-repeat;
-  z-index: 10; }
-
-.check-rule-nav li b.delete {
-  display: block; }
-
-.check-rule-nav li:first-child {
-  padding-left: 0; }
-
-.check-rule-nav .addRule, .check-rule-nav .nav-manage {
-  position: absolute;
-  top: 14px;
-  left: 20px;
-  width: 16px;
-  height: 16px;
-  cursor: pointer; }
-
-.check-rule-nav .addRule:after, .check-rule-nav .addRule:before {
-  content: "";
-  position: absolute;
-  top: 5px;
-  left: 2px;
-  width: 16px;
-  height: 2px;
-  background-color: #8e9092; }
-
-.check-rule-nav .addRule:hover:after, .check-rule-nav .addRule:hover:before {
-  background-color: #1E7CD9; }
-
-.check-rule-nav .addRule:before {
-  top: -2px;
-  left: 9px;
-  width: 2px;
-  height: 16px; }
-
-.check-rule-nav .nav-manage {
-  left: auto;
-  right: 20px;
-  background: url("../images/set-gray.png") no-repeat; }
-
-.check-rule-nav .nav-manage:hover {
-  background-image: url("../images/set-blue.png"); }
 
 .config-box .checkContent dt {
   min-width: 170px;
@@ -245,7 +269,7 @@
   display: inline-block;
   min-width: 100px; }
 
-.checkItem .info {
+.config-box .info {
   font-size: 12px;
   color: #aaa;
   margin-left: 15px; }
@@ -338,6 +362,32 @@ input.disabled {
   background-color: #ecf0f1;
   cursor: not-allowed; }
 
+.show-advanced-configuration {
+  position: relative;
+  color: #0490f1;
+  cursor: pointer; }
+  .show-advanced-configuration:after, .show-advanced-configuration:before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    right: -12px;
+    width: 5px;
+    height: 5px;
+    border-left: 1px solid #0490f1;
+    border-top: 1px solid #0490f1;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg); }
+  .show-advanced-configuration:after {
+    top: 13px; }
+  .show-advanced-configuration.reverse:after, .show-advanced-configuration.reverse:before {
+    -webkit-transform: rotate(-135deg);
+    -ms-transform: rotate(-135deg);
+    transform: rotate(-135deg); }
+
+.checkR-rule-line {
+  border-top: 1px solid #ccc; }
+
 /*排程方案*/
 .planContent {
   height: 700px;
@@ -378,9 +428,7 @@ input.disabled {
   height: 8px; }
 
 .config-box .middleWorkshop {
-  width: 340px;
-  height: 100%;
-  border-right: 1px solid #ccc; }
+  width: 340px; }
 
 .middleWorkshop h6 span {
   color: #808080;
@@ -508,19 +556,23 @@ input.disabled {
   color: #fff; }
 
 .config-box .location-show {
+  position: absolute;
+  top: 0;
+  right: 0;
   padding-top: 0;
   width: 400px;
   background-color: transparent; }
+
+.planContent .rightLocation {
+  position: static; }
 
 .rightLocation h6 {
   height: 54px;
   line-height: 54px; }
 
-.config-box .location-show .ul-box {
-  margin-top: 0; }
-
-.config-box .location-show .ul-box {
-  height: 585px; }
+.planContent .rightLocation i.disabled {
+  background-color: #fff;
+  pointer-events: none; }
 
 /*pap*/
 .papRuleContent label {
@@ -654,89 +706,6 @@ input.disabled {
 #planSelect, #ruleSelect {
   width: 180px;
   height: 30px;
-  border: 1px solid #dedede; }
-
-/*# sourceMappingURL=config.css.map */
-/*地点树css*/
-.location-list li {
-  position: relative;
-  margin-top: 10px;
-  margin-left: 60px;
-  /*width: 200px;*/
-  line-height: 30px; }
-
-.location-list .column-border {
-  position: absolute;
-  top: 29px;
-  left: 42px;
-  bottom: 15px;
-  content: "";
-  width: 2px;
-  background-color: #B3B3B3; }
-
-.location-list li:after {
-  content: "";
-  position: absolute;
-  top: 13px;
-  left: -18px;
-  width: 18px;
-  height: 2px;
-  background-color: #B3B3B3; }
-
-.location-list i {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  box-sizing: border-box; }
-
-.location-list i.active {
-  background: url(../images/selected.png) no-repeat #fff;
-  border: none; }
-
-.location-list li span {
-  min-width: 78px;
-  padding: 0 10px;
-  height: 30px;
-  line-height: 30px;
-  background-color: #d9d9d9;
-  cursor: pointer; }
-
-.location-list li span.active {
-  color: #fff;
-  background-color: #1e7cd9; }
-
-.location-list .open-btn {
-  position: relative;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  background-color: #666;
-  border-radius: 50%;
-  vertical-align: -2px; }
-
-.location-list .open-btn:after, .location-list .open-btn:before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 7px;
-  width: 2px;
-  height: 8px;
-  background-color: #d9d9d9; }
-
-.location-list .open-btn:before {
-  width: 8px;
-  height: 2px;
-  top: 7px;
-  left: 4px; }
-
-.location-list span.active .open-btn {
-  background-color: #fff; }
-
-.location-list span.active .open-btn:after {
-  width: 0; }
-
-.location-list span.open .open-btn:before {
-  background-color: #1e7cd9; }
+  border: 1px solid #ccc; }
 
 /*# sourceMappingURL=config.css.map */

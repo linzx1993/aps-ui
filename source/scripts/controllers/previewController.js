@@ -455,8 +455,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	
 	var bodyData;	//表体数据
 	var tabList;	//标签数据
-	var headData;	//表头数据
 	var differAllNum;//总条数
+	var headData;//表头数据
+	var tableList;//关键字
 	$scope.get_differall_num = function(){
 		/*拼接url开始*/
 		var ex_diff_url = "";
@@ -478,9 +479,11 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 			function(response){
 				if(response.data){
 					var resData = response.data;
-					var externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(resData);	
+					externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(resData);	
 					bodyData = externalDifferViewModel.bodyData;
 					tabList = externalDifferViewModel.tabList;
+					headData = externalDifferViewModel.headData;
+					tableList = externalDifferViewModel.tableList;
 					
 					var poolTaskChangeList = resData.poolTaskChangeList;
 					if(poolTaskChangeList.length){
@@ -519,9 +522,12 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	//本地测试方法代码
 	$scope.get_differall_num1 = function(){
 		if($rootScope.local_test){
-			var externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(exterDiffer);	
+			externalDifferViewModel = scheduleTableViewModelService.jsonToexternalDifferViewModel(exterDiffer);	
 			bodyData = externalDifferViewModel.bodyData;
 			tabList = externalDifferViewModel.tabList;
+			headData = externalDifferViewModel.headData;
+			tableList = externalDifferViewModel.tableList;
+			
 			differAllNum = 0;
 			for(var i = 0;i< tabList.length;i ++){      //计算总条数
 				var each_differ_num = tabList[i].each_differ_num;   //每部分对应的条数
@@ -534,12 +540,57 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		}
 	};
 
+	$scope.find_column_index = function(tabType){
+		var columnIndex = {};
+		columnIndex.rudt_index = -1,//未排数
+		columnIndex.rtn_index = -1,//已排数
+		columnIndex.ptt_index = -1,//车间计划时间
+		columnIndex.nptt_index = -1;//新车间计划时间
+		for(var i = 0;i < tableList.length;i ++){
+			if(tableList[i] == "resultUnDoTaskNum"){
+				columnIndex.rudt_index = i;
+			}
+			if(tableList[i] == "resultTaskNum"){
+				columnIndex.rtn_index = i;
+			}
+			if(tableList[i] == "poolTaskTime"){
+				columnIndex.ptt_index = i;
+			}
+			if(tableList[i] == "newPoolTaskTime"){
+				columnIndex.nptt_index = i;
+			}
+		}
+			
+		if(tabType == "tim"){
+			if(columnIndex.ptt_index !== -1){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(columnIndex.ptt_index).css("color","#1E7CD9");//车间计划时间列高亮
+					console.log($(this).find("td"));
+				})					
+			}
+			if(columnIndex.nptt_index !== -1){
+				$(".table-space table tbody").find("tr").each(function(){
+					$(this).find("td").eq(columnIndex.nptt_index).css("color","#1E7CD9");//新车间计划时间列高亮
+					console.log($(this).find("td"));
+				})					
+			}
+		}else if(tabType == "des" && columnIndex.rtn_index !== -1){
+			$(".table-space table tbody").find("tr").each(function(){
+				$(this).find("td").eq(columnIndex.rtn_index).css("color","#1E7CD9");//已排数列高亮
+				console.log($(this).find("td"));
+			})				
+		}else if(columnIndex.rudt_index !== -1){
+			$(".table-space table tbody").find("tr").each(function(){
+				$(this).find("td").eq(columnIndex.rudt_index).css("color","#1E7CD9");//未排数高亮
+			})				
+		}
+	}
+	
 	/**
 	 * 外部差异
 	 **/
 	$scope.exter_differ = function(){
 		$(".differ-tip").remove();
-		
 		var jDifferWindow = $(".exDiffer-window");
 		jDifferWindow.show().animate({
 			opacity: 1
@@ -548,20 +599,25 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 		//打开遮罩层
 		$(".cover").show(); 
 		
-
-		
 		if(differAllNum) {
 			//tab标签
 			$scope.tabList = tabList; 
-
+			
+			if(headData.toString().indexOf("新车间计划时间") > -1){
+				headData.pop();
+			}
+			if(tableList.toString().indexOf("newPoolTaskTime") > -1){
+				tableList.pop();
+			}
+			
 			//表头
 			var firstTab = tabList[0].changeType;
 			if(firstTab == "tim"){
-				headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间","新计划时间"];
-			}else{
-				headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间"];
+				headData.push("新车间计划时间");
+				tableList.push("newPoolTaskTime");
 			}
-			$scope.headData = headData; 
+			
+			$scope.headData = headData;
 		
 			//第一个tab标签的表格
 			$scope.changedBodyData = bodyData[firstTab]; 
@@ -585,21 +641,7 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 				$(this).find(".help-box").hide();
 			})
 			
-			if(firstTab == "tim"){
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(6).css("color","#0099CC");
-					$(this).find("td").eq(7).css("color","#009F95");
-				})				
-			}else if(firstTab == "des"){
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(2).css("color","#0099CC");
-				})				
-			}else{
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(3).css("color","#0099CC");
-				})				
-			}
-			
+			$scope.find_column_index(firstTab);//高亮显示列
 
 		}, 0);
 		
@@ -617,48 +659,23 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 	};
 
 	/**
-	 * 外部差异变化数据弹窗
-	 **/
-	$scope.alertTip = function(){
-		$("body").on("mouseenter",".exDiffer .brightColor",function(){
-			$(".differ-tip").remove();
-			var tdWidth = $(this).width();
-			var tdHeight = $(this).height();
-			var tdLeft = $(this).offset().left;
-			var tdTop = $(this).offset().top;
-			var oldData = $(this).attr("data-old");	
-			var oldDataTip = layer.open({
- 				 type: 4,
- 				 content: "变化前 : " + oldData, //数组第二项即吸附元素选择器或者DOM
- 				 tips: 1,
- 				 skin:"differ-tip",
-   				 time: 3000,
- 				 closeBtn: 0,
- 				 shade: 0,
-	             success : function(){
-		         	$(".pbody .external-diff-tab li").click(function(){
-			     		layer.close(oldDataTip);
-			    	})
-			    	$(".differ-tip").css({
-			    	    "left":tdLeft+tdWidth/2,
-			    	    "top":tdTop+tdHeight+12
-			    	});
-			    }	 						 
-			});
-		});
-	}
-
-	/**
 	 * 点击外部差异tab
 	 **/
 	$scope.exteriffer_tab = function(tabInfo,$event){
 		var jDifferWindow = $(".exDiffer-window");
+
+		if(headData.toString().indexOf("新车间计划时间") > -1){
+			headData.pop();
+		}
+		if(tableList.toString().indexOf("newPoolTaskTime") > -1){
+			tableList.pop();
+		}
+		
 		//获取当前点击的li对应的类型
 		var changeType = tabInfo.changeType;
 		if(changeType == "tim"){
-			headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间","新计划时间"];
-		}else{
-			headData = ["销售订单号","物料名称","已排数","未排数","未派数","未转实际数","计划时间"];
+			headData.push("新车间计划时间");
+			tableList.push("newPoolTaskTime");
 		}
 		$scope.headData = headData; 
 		
@@ -676,21 +693,9 @@ app.controller('previewCtrl', function($scope, $rootScope, $http, $window, $loca
 				$(this).parent().not(".each-diff-num").addClass("click-tab").siblings().removeClass("click-tab");
 			})
 
-			if(changeType == "tim"){
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(6).css("color","#0099CC");
-					$(this).find("td").eq(7).css("color","#009F95");
-				})				
-			}else if(changeType == "des"){
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(2).css("color","#0099CC");
-				})				
-			}else{
-				$(".table-space table tbody").find("tr").each(function(){
-					$(this).find("td").eq(3).css("color","#0099CC");
-				})				
-			}			
-		},50);
+			$scope.find_column_index(changeType);//高亮显示列	
+			
+		},0);
 		
 		//resize
 		$(window).on("resize",function(){

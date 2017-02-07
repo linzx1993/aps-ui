@@ -6,12 +6,13 @@
     <nav class="config-nav fl">
         <h1 class="configNavTitle">{{"configOption" | translate}}</h1>
             <ul>
-                <li>123</li>
-                <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index">
-                    <a class="" href="javascript:;" ui-sref={{configLi.sref}} ng-click=selectLi(configLi.url,$event)>{{configLi.text | translate}}</a>
+                <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index" ng-class="isActiveNav(configLi.sref) ? 'active' : ''"  ng-click=selectLi(configLi.sref,$event)>
+                    <a class="" href="javascript:;" ui-sref={{configLi.sref}}>{{configLi.text | translate}}</a>
                     <i class="nav-angle" ng-if="configLi.children"></i>
                     <ul ng-if="configLi.children">
-                        <li class="second-nav" ng-repeat="child in configLi.children track by $index"><a href="javascript:;" ui-sref={{configLi.sref}} ng-click=selectLi(child.url,$event)>{{child.text | translate}}</a></li>
+                        <li class="second-nav" ng-repeat="child in configLi.children track by $index" ng-class="isActiveNav(child.sref) ? 'active' : ''" ng-click=selectLi(child.sref,$event)>
+                            <a href="javascript:;" ui-sref={{child.sref}} ui-sref-opt="{reload:true}">{{child.text | translate}}</a>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -31,106 +32,5 @@
             <!--<div class="info-content tc">-->
             <p class="tc"><span class="mr-15"></span>{{infoObj.text}}</p>
         </div>
-    </div>
-    <div class="layerBox">
-        <div ng-if="viewRuleShow" class="ConfigMain checkContent">
-            <div class="fl ml-50 checkItem">
-                <form action=""  class="configForm" >
-                    <dl class="mt-15 clearfix pap-type">
-                        <dt class="fl">PAP类型 ：</dt>
-                        <dd class="fl relative ml-5">
-                            <span>不启用</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="PAP_DISABLE">不启用</li><li data-value="PAP_SCHEDULE_RULE">启用PAP控制规则</li><li data-value="PAP_DEFAULT_RULE">启用PAP默认规则</li>
-                            </ul>
-                            <select ng-model="papTypeSelected" name="" id="papType"><option value="PAP_DISABLE">不启用</option><option value="PAP_SCHEDULE_RULE">启用PAP控制规则</option><option value="PAP_DEFAULT_RULE">启用PAP默认规则</option></select>
-                        </dd>
-                    </dl>
-                    <dl class="mt-15 clearfix schedule-point">
-                        <dt class="fl">起排工序 ：</dt>
-                        <dd class="fl relative ml-5" ng-class="disable.schedulePointSelected ? 'disabled' : ''">
-                            <span>首道工序</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="FIRST_PROCESS">首道工序</li><li data-value="LAST_PROCESS">末道工序</li><li data-value="KEY_PROCESS">关键工序</li>
-                            </ul>
-                            <select ng-model="schedulePointSelected"  name="" id="schedulePoint"><option value="FIRST_PROCESS">首道工序</option><option value="LAST_PROCESS">末道工序</option><option value="KEY_PROCESS">关键工序</option></select>
-                        </dd>
-                    </dl>
-                    <dl class="mt-15 clearfix"><dt class="fl">启用生产频度 ：</dt><dd class="fl ml-5"><label for="isFrequencyOn"><input id="isFrequencyOn" type="checkbox" ng-checked="scheduleCheckData.isFrequencyOn"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix">
-                        <dt class="fl">排程周期 ：</dt>
-                        <dd class="fl relative ml-5">
-                            <span>按天</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="BY_DAY">按天</li><li data-value="BY_WEEK">按周</li><li data-value="BY_TENDAY">按旬</li><li data-value="BY_HALFMONTH">按半月</li><li data-value="BY_MONTH">按月</li>
-                            </ul>
-                            <select ng-model="schedulePeriodSelected" name="" id="schedulePeriod"><option value="BY_DAY">按天</option><option value="BY_WEEK">按周</option><option value="BY_TENDAY">按旬</option><option value="BY_HALFMONTH">按半月</option><option value="BY_MONTH">按月</option></select>
-                        </dd>
-                    </dl>
-                    <dl class="mt-15 clearfix"><dt class="fl">最早起排日期 ：</dt><dd class="fl ml-5"><input id="minScheduleDay" class="Wdate" type="text" autocomplete="off"  ng-value="scheduleCheckData.minScheduleDay" onClick="WdatePicker({minDate:CurentTime(),dateFmt:'yyyy-MM-dd'})" /></dd></dl>
-                    <dl class="mt-15 clearfix"><dt class="fl">排程间隔 ：</dt><dd class="fl ml-5"><input disabled id="scheduleInterval" type="text" maxlength="2"  ng-value="scheduleCheckData.scheduleInterval" /><span class="info">(请输入0-90范围内的整数)</span></dd></dl>
-                    <dl class="mt-15 clearfix"><dt class="fl">锁定期 ：</dt><dd class="fl ml-5"><input disabled id="freezePeriod" type="text" maxlength="2"  ng-value="scheduleCheckData.freezePeriod"/><span class="info">(请输入1-90范围内的整数)</span></dd></dl>
-                    <dl class="mt-15 clearfix"><dt class="fl">是否使用非批量设备：</dt><dd class="fl"><label for="isUseNotMassEqu"><input id="isUseNotMassEqu" type="checkbox" ng-checked="scheduleCheckData.isUseNotMassEqu"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix scheduleCheck ">
-                        <dt class="fl">排程前校验 ：</dt>
-                        <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleFrontData track by $index" for="validataFrom{{$index}}"><input disabled id="validataFrom{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-20 mr-15"></span>{{data.chinese}}</label></dd>
-                    </dl>
-                    <dl class="mt-15 clearfix scheduleCheck">
-                        <dt class="fl">排程后校验 ：</dt>
-                        <dd style="width: 600px;" class="fl ml-_15"><label class="fl mb-10" ng-repeat="data in scheduleLaterData track by $index" for="validataLater{{$index}}"><input disabled id="validataLater{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select"><span class="column-content-checkbox ml-20 mr-15"></span>{{data.chinese}}</label></dd>
-                    </dl>
-                </form>
-                <div class="m-0-auto mt-30 mb-20 tc clearfix">
-                    <a class="save-sort" href="javascript:void(0);">确定</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!--排程方案查看规则代码-->
-<div style="display: none" class="addNewPlan">
-    <div class="layer-title">
-        <p>创建排程方案<span class="fr mr-20 close">×</span></p>
-    </div>
-    <div class="layer-content">
-        <p>创建排程方案 ：<input type="text" ng-model="newSchemeName" maxlength="10" class="planName"/></p>
-        <!--<div class="mt-20 relative">-->
-        <dl class="mt-30 clearfix">
-            <dt class="fl">复制排程方案 ：</dt>
-            <dd class="relative clearfix">
-                <select id="planSelect" name="">
-                    <option value="0">无</option>
-                    <option ng-repeat="data in planList track by $index" value={{data.schemeId}}>{{data.schemeName}}</option>
-                </select>
-                <!--<span class="fr current-name"></span>-->
-                <!--<ul class="scheduleDrag">-->
-                    <!--<li data-plan-id = "0">无</li>-->
-                    <!--<li ng-repeat="data in planList" data-plan-id={{data.schemeId}}>{{data.schemeName}}</li>-->
-                <!--</ul>-->
-            </dd>
-        </dl>
-        <p class="mt-30 tc">
-            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="recordTemporyPlan()">应用</a>
-            <a class="ml-20 mr-20 reset-config cancal" href="javascript:;">取消</a>
-        </p>
-        <!--</div>-->
-    </div>
-</div>
-<div style="display: none;" class="addNewRule">
-    <div class="layer-title">
-        <p>创建排程规则<span class="fr mr-20 close">×</span></p>
-    </div>
-    <div class="layer-content">
-        <p>创建排程规则 ：<input type="text" ng-model="newRuleName" maxlength="10" class="ruleName"/></p>
-        <div class="mt-20 relative">复制排程规则 ：
-            <select id="ruleSelect" name="">
-                <option value="0">无</option>
-                <option ng-repeat="data in ruleList track by $index" value={{data.ruleId}}>{{data.ruleName}}</option>
-            </select>
-        </div>
-        <p class="mt-30 tc">
-            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="postNewRule()">应用</a>
-            <a class="ml-20 mr-20 reset-config cancal" href="javascript:;">取消</a>
-        </p>
     </div>
 </div>

@@ -14,11 +14,8 @@
 
 <!--右边栏-->
 <div class="right-menu">
-	<!--<div class="cache-button">
-		<i class="cache-button-icon"></i>
-		暂存间
-	</div>-->
-	<div class="search-btn search-btn-normal right-menu-button" title="查询">
+	<!--一级页面查询-->
+	<div class="search-btn search-btn-normal right-menu-button">
 		<i class="search-btn-icon"></i>
 		<div class="search-box">
 			<div class="sale-order">
@@ -37,11 +34,21 @@
 		</div>
 		<div class="tip">搜索</div>
 	</div>
-	<div class="turn-to-back right-menu-button" ng-click="turn_to_back()" title="翻转">
+	<!--一级页面查询END-->
+	<!--翻转-->
+	<div class="turn-to-back right-menu-button" ng-click="turn_to_back()">
 		<i class="turn-to-back-icon"></i>
 		<div class="tip">翻转</div>
 	</div>
-	<div class="to-fact right-menu-button to-fact-normal change-one"  title="预转排实际"><!--ng-click="to_fact()"-->
+	<!--翻转END-->
+	<!--隐藏空白行-->
+	<div class="hide-tr right-menu-button " ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
+		<i class="hide-tr-icon"></i>
+		<div class="tip">隐藏空白行</div>
+	</div>
+	<!--隐藏空白行END-->
+	<!--预排转实际-->
+	<div class="to-fact right-menu-button to-fact-normal change-one"><!--ng-click="to_fact()"-->
 		<div class="cover_i" ng-click="open_tofact()"><i class="to-fact-icon" ></i></div>
 		<div class="to-fact-box">
 			<div class="fact-days">
@@ -57,80 +64,79 @@
 					<span>{{punitName}}</span>
 						<span class="sa_icon sub normal_sub"></span>
 						<input  type="text" class="each_days_input"/>
-						<span class="sa_icon add normal_add"></span>
-									
+						<span class="sa_icon add normal_add"></span>			
 				</div>				
 			</div>
-
 			<div class="start-to-fact" ng-click="to_fact()">确定</div>
 		</div>
 		<div class="tip">预转排实际</div>
-	</div>
-	
-	<div class="edit-again right-menu-button" ng-click="exter_differ()" title="外部差异">
+	</div>	
+	<!--预排转实际END-->
+	<!--外部差异-->
+	<div class="edit-again right-menu-button" ng-click="exter_differ()">
 		<i class="external-differ-icon"></i>
 		<span class="external-diff-num">{{differAllNum}}</span>		
 		<div class="tip">外部差异</div>
 	</div>
-	
-	
-	
+	<!--外部差异END-->
 </div>
 <div class="right-menu-switch"></div>
+<!--右边栏END-->
 
 <div class="pbody-wrap"><!-- 页面表格相关部分 -->
-    <div class="wrap-content"><!-- 页面主体内容 -->
-    	
-        <div class="table"><!-- 表格 -->
-            <div class="table-head"><!-- 表头部分 -->
+    <div class="wrap-content"><!-- 页面主体内容 --> 	
+    	<!--一级页面表格-->
+        <div class="table">
+        	<!-- 表头部分 -->
+            <div class="table-head">
             	<div style="display: flex;">
             		<div></div>
 	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">
 	            		<span>{{date.thisDate.substring(5,7)}}</span>月
 	            		<span>{{date.thisDate.substring(8,10)}}</span>日
 	            	</div>
-            	</div>
-	            	
-            </div><!-- .table-head END -->
-
-            <div class="table-body"><!-- 表格主体部分 -->
+            	</div>	            	
+            </div>
+			<!-- 表头部分END -->
+			<!-- 表格主体部分 -->
+            <div class="table-body">
             	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index">
-            			<div ng-repeat="cell in row track by $index" class="{{cell[0].frontClass}} table-td" ng-style="{opacity:cell[0].opacity}">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty">
+            			<div ng-repeat="cell in row track by $index" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
             				<!--反面-->
             				<div class="td-back">
-	            				<p>{{cell[0].changeModelNumber}}</p>
-	            				<p>{{cell[0].workTime}}</p>
-	            				<p>{{cell[0].cell_tasknum}}</p>
-	            				<p>{{cell[0].timePercent}}</p>
+            					<!--翻转页显示的信息-->
+	            				<p ng-repeat="back in cell.back">{{back}}</p>
+	            				<!--翻转页显示的信息END-->
 	            			</div>
+	            			<!--反面END-->
 	            			<!--正面-->
-            				<div class="td-front" ng-click="unit_click(cell)" ng-style="{cursor: cell[0].cursor}">
-            					<div ng-repeat="unit in cell track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
-	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
-	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="unit_click(cell.front)" ng-style="{cursor: cell['useData'].cursor}">
+            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
 	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
 	            				</div>
             				</div>
-	      
+	      					<!--正面END-->
 	            			<!--图标放在这一层，加浮动到指定位置-->
-	            			<div class="freeze_info"></div>
-	            			<div class="over-Capability"></div>
+	            			<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
+	            			<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
             			</div>
             		</div>
             	</div>
-            </div><!-- .table-body END -->
-			
+            </div>
+            <!-- 表格主体部分END -->
 			<!--上一页和下一页-->
 			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
             <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
-        </div><!-- .table END -->
+            <!--上一页和下一页END-->
+        </div>
+        <!--一级页面表格END-->
     </div><!-- .wrap-content END -->
 
 </div><!-- .pbody-wrap END -->
 
 
-
+<!--三级页面模版-->
 <div id="do_detail_dialog" title="派工单详细信息">
     <div class="do_detail_dialog" ng-style="{display : do_detail_dialog_show?'block':'none'}">
         <!--<p>销售订单：{{do_detail.saleOrderCode}}</p>
@@ -220,14 +226,15 @@
 		</table>
     </div>
 </div>
+<!--三级页面模版END-->
 
-<!--二级页面-->
-		
+<!--二级页面（此处二级页面暂时预留，等待AB测试结果，可删）-->		
 <div class="table-dialog-window table-window">
 	<div class="dialog-window-head">
 		<i class="close-window"></i>
 	</div>
 	<div class="dialog-window-body">
+		<!--筛选区-->
 		<div class="info-show">
 			<div class="window-search-box">
 				<span>开始时间</span>
@@ -256,55 +263,8 @@
 			</div>	
 			<div class="window-search-button" ng-click="change_window_table()">查询</div>
 		</div>
-		<div class="info-icon-btn tr">
-			<div class="table-sort-show">
-				<span class="set-order" ng-click="set_order()" title="排序"></span>
-				<div class="table-sort" ng-show="orderShow" onselectstart="return false">
-					<div class="countSortTitle">多级列表排序配置</div>
-					<div id="all-item" class="table-sort-itemList">
-						<div class="provide-item">
-							<h6 class="sort-title">可用字段</h6>
-							<nav>
-								<ul id="provide-item">
-									<li ng-repeat="data in columnOptionList track by $index" class="normal mt-5" data-keyname={{data.valueContent}} data-select="option" data-order="{{data.valueContent.slice(-1,-5) == 'desc' ? down : up}}"><div>{{ data.valueAlias }}</div><span class="itemOrder"></span></li>
-								</ul>
-							</nav>
-						</div>
-						<div class="middleBtn">
-							<span class="toggleBtn addAllItem"></span>
-							<span class="toggleBtn removeAllItem"></span>
-						</div>
-						<div class="sort-item">
-							<h6 class="sort-title">已排序字段 </h6>
-							<nav onselectstart="return false">
-								<ul id="sort-item">
-									<li ng-repeat="data in columnSelectList track by $index" class="normal mt-5" data-keyname={{data.valueContent}} data-select="select" data-order={{data.order}}><div>{{ data.valueAlias }}</div><span class="itemOrder"></span></li>
-								</ul>
-							</nav>
-						</div>
-					</div>
-					<div class="combine-item">
-						<dl class="relative"><dt class="fl">合并项：</dt>
-							<dd class="fl combine-menu">
-								<p></p>
-								<ul class="combine-drag">
-									<li data-value="数量">数量</li>
-								</ul>
-							</dd>
-						</dl>
-					</div>
-					<div class="m-0-auto mt-20 mb-20 tc clearfix">
-						<a href="javascript:;" class="save-sort" ng-click="refresh_order()">保存</a>
-					</div>
-				</div>
-			</div>
-			<span class="split"></span>
-			<span class="output-excel" ng-click="output_excel()" title="导出"></span>
-			<span class="split"></span>
-			<span class="print-table" ng-click="print()" title="打印"></span>
-		</div>
-		<div class="show-table">
-		
+		<!--筛选区END-->
+		<div class="show-table">		
 			<div class="table-space">
 				<table>
 					<thead>
@@ -331,8 +291,7 @@
 		</div>
 	</div>
 </div>
-
-<!--二级页面结束-->
+<!--二级页面END-->	
 
 <!--地点选择-->
 <div class="out-bg"><span class="point-click" ></span></div>

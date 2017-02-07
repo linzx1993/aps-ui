@@ -104,14 +104,14 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 			 	var i=1;    //循环次数
 			    function progress(){							
 					var progressVal = 0;
-					var sUrl=$rootScope.restful_api.aps_rate_confirm+"?schemeId="+sessionStorage.schemeId;
+					var sUrl = $rootScope.restful_api.aps_rate_confirm+"?schemeId="+sessionStorage.schemeId;
 					$http.get(sUrl).success(function(res){
 						//获取接口数据
 						progressVal = res.rate || 0;
 						progressbar.children("span").css("width", progressVal + "%");
 						progressLabel.text("保存"+" "+progressVal + "%");
 						if(progressVal){    //数据正确
-		        			var j=setTimeout(progress, 1000);
+		        			var j = setTimeout(progress, 1000);
 		        			if(sta){
 								progressbar.children("span").css("width","100%");
 								progressLabel.text( "保存完成" );

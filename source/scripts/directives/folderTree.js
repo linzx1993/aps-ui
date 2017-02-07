@@ -4,8 +4,16 @@ app.directive("folderTree", function() {
         scope: {
             currentFolder: '='
         },
-        repalce : true,
+        // replace : true,
         transclude : true,
-        templateUrl: 'template/tree.html',
+        templateUrl: 'dist/view/template/tree.html',
+        link : function ($scope,elem,attr) {
+            // console.log($scope);
+            // $scope.addId = function (data) {
+            //     // alert(1);
+            //     // console.log(data);
+            // }
+        }
     };
 });
+

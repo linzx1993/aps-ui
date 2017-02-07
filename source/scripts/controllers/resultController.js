@@ -72,8 +72,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
             //判断上一页下一页按钮是否能点
             checkQueryTime(startTime, endTime, today, maxEndTime);
         }else{
-    		//移除原有三级界面的jqueryUI dom
-    		$("#do_detail_dialog").parent().remove();
+    		//移除原有三级界面的jqueryUI dom    /* 2.7 modify */
+//  		$("#do_detail_dialog").parent().remove();
     		
     		$rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
     		
@@ -221,8 +221,6 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		$(".table").toggle();
 		$(".differ-btn").toggleClass("active");
 	}
-	
-    
     
     /**
 	 * 取消APS结果
@@ -323,7 +321,6 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			},function(){});
 			ifSearchMsg = false;
 			result_show_table(sessionStorage.locationId_res,sessionStorage.locationFilterList_res);  /*刷新数据*/
-			
 		})
 	}
 	
@@ -363,7 +360,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	/**
 	 * 针对PAP及删除PAP 进度的方法
 	 **/
-	$scope.newprogressBar_post=function(elements1, elements2, url,data,text,fn, fun){
+	$scope.newprogressBar_post = function(elements1, elements2, url,data,text,fn, fun){
 		var progressbar = $(elements1),
 			progressLabel = $(elements2);
 	
@@ -374,8 +371,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				$http.post(url,data).success(function(res){
 					fun(res);
 					progressVal = res.rate || 0;    //获取接口数据
-					progressbar.children("span").css("width", progressVal + "%"); 
-	   				progressLabel.text(text+" "+progressVal + "%");
+					var progWidth = 50 + progressVal/100*360 - 10;
+					progressbar.children("span").css("width", progWidth + "px"); 
+	   				progressLabel.text(text+" " + progressVal + "%");
 					if(progressVal || progressVal == 0) { //数据正确
 						if(progressVal < 100) {
 							var j = setTimeout(SetProgress, 1000);
@@ -510,12 +508,14 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 检验按钮 方法
 	 **/
 	$scope.check_aps = function($event){
+		$(".check-btn-div").hide();
 		ifSearchMsg = false;
 		if($event.target.className == "check-check-box"){
 			$scope.checkSwitch = !$scope.checkSwitch;
 			$(".jiaoyan-icon").parent().toggleClass("search-btn-click");
 			return;
 		}
+		$(".check-btn-div").hide()
 		$scope.confirm_check();
 	}
 	
@@ -527,21 +527,21 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		var thisInfo=checkRow.info;
 		$scope.checkRows = thisInfo;
 		var indexLayer = layer.open({
-              type: 1,
-              title: "异常原因",
-              shadeClose: true,
-              skin: 'yourclass',
-              content : $("#check_detail_dialog"),
-              success : function(){
-                    // 272是显示框正常宽度，450是高度
-                    $(".layui-layer").css({
-                        "left" : $event.pageX - 152,
-                        "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
-                    })
-                    $("#check_detail_dialog").on("click",".sure",function(){
-                        layer.close(indexLayer);
-                    })
-              }
+            type: 1,
+            title: "异常原因",
+            shadeClose: true,
+            skin: 'yourclass',
+            content : $("#check_detail_dialog"),
+            success : function(){
+                // 272是显示框正常宽度，450是高度
+                $(".layui-layer").css({
+                    "left" : $event.pageX - 152,
+                    "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
+                })
+                $("#check_detail_dialog").on("click",".sure",function(){
+                    layer.close(indexLayer);
+                })
+            }
         })
 	}
 	
@@ -549,8 +549,10 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 保存前校验 方法
 	 **/
 	$scope.save_check_aps = function(){
+		$(".check-btn-div").show();
 		ifSearchMsg = false;
 		$scope.confirm_check();
+		$(".check-btn-div").show()
 	}
 	
 	/**
@@ -598,7 +600,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				}	
 				$scope.listOne = list1;
 				if(res.status == 1){
-					progressbar.children("span").css("width", 100 + "%"); 
+					progressbar.children("span").css("width", "400px"); 
 	   				progressLabel.text("校验完成");
 	   				if(fn){
 	   					fn();

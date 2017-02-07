@@ -64,6 +64,7 @@
     height: 28px;
     color:#fff;
     line-height: 28px;
+    margin-left: 75px;
     text-align: center;
     background-color: #1E7CD9;
     border-radius: 3px;
@@ -130,24 +131,26 @@
     position: absolute;
     width: 138px;
     max-height: 150px;
-    border: 1px solid #CCC;
+    border: 1px solid #1E7CD9;
+    border-top: none;    
     background-color: #FFF;
     z-index: 40;
     overflow-y: auto;
 }
 .table-dialog-window .info-show .equipment-list li{
-    height: 20px;
-    padding: 2px 4px;
-    border-bottom: 1px solid #CCC;
-    line-height: 20px;
+    height: 14px;
+    padding: 8px 10px;
+    line-height: 14px;
     cursor: pointer;
+}
+.table-dialog-window .info-show .equipment-list li:hover{
+	color: #1E7CD9;
 }
 .table-dialog-window .info-show .equipment-list li:last-child{
     border-bottom: none;
 }
 .table-dialog-window .info-show .equipment-list .li-selected{
-    color: #FFF;
-    background-color: #3E7EC3;
+	color: #1e7cd9;
 }
 .table-window .show-table{
     flex: 1 1;
@@ -193,17 +196,31 @@
 .table-window .dialog-window-body .show-table table tbody{
     width: 100%;
 }
+.source-light{
+	color: #d88200;
+}
 .table-window .dialog-window-body .window-tr-onlook{
     background-color: #FCEFA1;
 }
 .dialog-window-body .show-table th,.dialog-window-body .show-table td{
     border: 1px solid #CCCCCC;
 }
-.dialog-window-body .show-table th,.dialog-window-body .show-table .sale-order-look,
-.dialog-window-body .show-table th,.dialog-window-body .show-table .sale-order-change{
+.dialog-window-body .show-table th{
     margin: 0 5px;
     color: #1E7CD9;
     cursor: pointer;
+}
+.dialog-window-body .show-table .sale-order-look,
+.dialog-window-body .show-table .sale-order-change{
+    margin: 0 5px;
+    /*color: #333333;*/
+    cursor: pointer;	
+}
+.dialog-window-body .show-table .sale-order-look:hover{
+	color: #1E7CD9;
+}
+.dialog-window-body .show-table .sale-order-change:hover{
+    color: #1E7CD9;
 }
 .dialog-window-body .show-table th{
     height: 36px;
@@ -232,16 +249,6 @@
     background:url(../images/selected.png) center #FFF;
     border:1px solid #1E7CD9;
 }
-.dialog-window-body .move-to-cache{
-    width: 60px;
-    height: 30px;
-    line-height: 30px;
-    cursor: pointer;
-    margin: 20px auto 0;
-    padding: 0 4px;
-    background-color: #3e7ec3;
-    color: #fff;
-}
 /***多列排序弹窗***/
 .countSortTitle {
     padding-left: 20px;
@@ -254,7 +261,6 @@
     width: 16px;
     height: 16px;
     background: url("../images/alert-close.png") no-repeat;
-    cursor: pointer;
 }
 /*-------新页面==二级页面--------*/
 .secondPage .table-dialog-window{

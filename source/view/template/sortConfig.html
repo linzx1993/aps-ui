@@ -1,5 +1,4 @@
 <div class="ConfigMain sortContent">
-    <h1 class="config-content-title">{{"Multi-columnSortConfiguration"| translate}}</h1>
     <div class="fl ml-45">
         <h3 class="mt-15 ml-20 fs-16">排序配置</h3>
         <div id="all-item" class="table-sort-itemList" onselectstart="return false">
@@ -27,7 +26,7 @@
         <div class="combine-item">
             <dl class="relative clearfix">
                 <dt class="fl">合并项：</dt>
-                <dd class="fl combine-menu" ng-class="combineObj.combineActive ? \'active\' : \'\'" ng-mouseleave="combineAndCountall.countObj.combineActive=true;">
+                <dd class="fl combine-menu" ng-class="combineObj.combineActive ? 'active' : ''" ng-mouseleave="combineAndCountall.countObj.combineActive=true;">
                     <p>
                         <span data-value={{data.value}} ng-repeat="data in combineObj.combine" ng-if="data.show">{{data.text}}<b class="ml-15 delete" ng-click="deleteDragItem(data,$event)"></b></span>
                     </p>
@@ -50,13 +49,23 @@
                 </dd>
             </dl>
         </div>
-        <div class="m-0-auto mt-30 mb-20 ml--30 tc clearfix">
+        <div id="columnWorkshop" class="location-list fl location-show">
+            <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+            <ul>
+                <li class="all-location">
+                    <i class="select-status" data-location-id="01"></i>
+                    <span class="ml-10 active open">
+                            <s class="open-btn mr-10"></s>
+                            春风车间
+                        </span>
+                    <folder-tree current-folder="folder"></folder-tree>
+                </li>
+            </ul>
+        </div>
+        <div class="m-0-auto mt-80 mb-20 tc clearfix">
             <a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveSortContent()">应用</a>
             <a class="ml-15 reset-config" href="javascript:void(0);" ng-click="resetSortConfig()">还原</a>
         </div>
     </div>
-    <div class="fl rightLocation location-show" style="position: absolute;top: 50px;right: 100px;">
-        <h6 class="tc mb-5">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
-        <div id="columnWorkshop" class="locationList ul-box"></div>
-    </div>
+
 </div>

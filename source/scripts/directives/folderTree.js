@@ -6,7 +6,7 @@ app.directive("folderTree", function() {
         },
         // replace : true,
         transclude : true,
-        templateUrl: 'dist/view/template/tree.html',
+        templateUrl: 'view/template/tree.html',
         link : function ($scope,elem,attr) {
             // console.log($scope);
             // $scope.addId = function (data) {

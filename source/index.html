@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>APS</title>
+		<link rel="stylesheet" href="styles/reset.css"/>
+		<link rel="stylesheet" href="styles/common.css" />
+		<link rel="stylesheet" href="styles/index.css" />
+		<link rel="stylesheet" href="styles/help.css" />
+		<link rel="stylesheet" href="styles/config.css" />
+		<link rel="stylesheet" href="styles/secondPage.css" />
+	</head>
+
+	<body ng-app="myApp" ng-controller="mainCtrl">
+		<div class="page-wrapper">
+
+			<!--head START-->
+			<div class="header">
+				<!-- 下面是用于测试的代码，生产环境要删掉-->
+				<div id="navigation" style="text-align: center">
+					<a ui-sref="home">主页</a>
+					<a ui-sref="preview">排程开始页面</a>
+					<a ui-sref="progress">进度条页</a>
+					<a ui-sref="result">排程结果页面</a>
+					<a ui-sref="config">参数配置页面</a>
+					<a href="./test/testVersion.html">显示当前版本</a>
+					<a ui-sref="help">帮助</a>
+					<a href="javascript:window.location.reload(true)">刷新</a>
+					<!--<a href="#/home">主页</a>-->
+					<!--<a href="#/preview">排程开始页面</a>-->
+					<!--<a href="#/progress">进度条页</a>-->
+					<!--<a href="#/result">排程结果页面</a>-->
+					<!--<a href="#/config">参数配置页面</a>-->
+					<!--<a href="./test/testVersion.html">显示当前版本</a>-->
+					<!--<a href="#/help">帮助</a>-->
+					<!--<a href="javascript:window.location.reload(true)">刷新</a>-->
+				</div>
+				<!-- 上面是用于测试的代码，生产环境要删掉-->
+			</div>
+			<!--head END-->
+
+			<div ui-view class="pbody">
+				<!-- 页面主体部分 -->
+			</div>
+			<!-- .pbody END -->
+
+			<!--dialog START-->
+			<div id="dialog-window" class="dialog-window" title="提示">
+				<p>
+					<!--{{dialog_text}}-->
+				</p>
+			</div>
+			<!--dialog END-->
+
+			<div class="cover" ></div>
+
+			<!--<div id="progressbar_one" class="progressbar_one pro_bar ">
+				<div class="progress-label_one pro_label ">前拉后推中</div>
+			</div>
+
+			<div id="progressbar_two" class="progressbar_two pro_bar " >
+				<div class="progress-label_two pro_label">确认保存中</div>
+			</div>
+
+			<div id="progressbar_three" class="progressbar_three pro_bar " >
+				<div class="progress-label_three pro_label">校验中</div>
+			</div>
+
+			<div id="progressbar_four" class="progressbar_four pro_bar " >
+				<div class="progress-label_four pro_label">删除前拉后推中</div>
+			</div>-->
+
+		</div>
+		<!-- .wrap-content END -->
+
+		<!-- 加载依赖包,线上可以使用压缩版 -->
+		<!--<script src="scripts/lib/angular1.5.js"></script>-->
+		<script src="scripts/lib/angular1.5.js"></script>
+		<!--<script src="scripts/lib/angular-route.js"></script>-->
+		<script src="scripts/lib/ui-router.js"></script>
+		<script src="scripts/lib/jquery-min.js"></script>
+		<script src="scripts/lib/angular-translate.js"></script>
+		<script src="scripts/lib/angular-translate-loader-static-files.min.js"></script>
+		<script src="scripts/lib/My97DatePicker/WdatePicker.js"></script>
+		<script src="scripts/lib/layer/layer.js"></script>
+		<script src="scripts/lib/jquery.dragsort-0.5.1.js"></script>
+		<!-- 加载入口 -->
+		<script src="scripts/app.js?t=20161111"></script>
+		<!-- 加载service -->
+		<script src="scripts/services/service.js?t=20161111"></script>
+		<script src="scripts/directives/folderTree.js"></script>
+		<!-- 加载controller -->
+		<script src="scripts/controllers/mainController.js?t=20161111"></script>
+		<script src="scripts/controllers/previewController.js?t=20161111"></script>
+		<script src="scripts/controllers/progressController.js?t=20161111"></script>
+		<script src="scripts/controllers/resultController.js?t=20161111"></script>
+
+		<!--<script src="scripts/controllers/configController.js?t=20161111"></script>-->
+		<script src="scripts/controllers/config/configController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/versionController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/firstPageController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/secondPageController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/ruleController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/planController.js?t=20161111"></script>
+		<script src="scripts/controllers/config/adminConfigController.js?t=20161111"></script>
+		<script src="scripts/controllers/helpController.js?t=20161111"></script>
+		<script src="scripts/services/dataService.js"></script>
+		<!-- 加载配置 -->
+		<script src="scripts/config/routeConfig.js?t=20161111"></script>
+		<!-- 加载UI显示相关JS -->
+		<!-- 加载本地测试数据，部署前删除 -->
+		<script src="test/data/test-json-v1.1.js?t=20161111"></script>
+	</body>
+
+</html>

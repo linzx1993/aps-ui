@@ -47,6 +47,7 @@ app
             }
             $scope.selectValue = val;
         };
+
         //保存数据
         $scope.saveDisplayDays = () => {
             let postData = {
@@ -124,5 +125,46 @@ app
         }
     }])
     .controller("displayFlipController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+        $scope.firstPage.title = "显示翻转";
+        /**
+         *根据点击的车间树获得相应的车间ID,显示对应一级页面是否翻转
+         */
+        let getDisplayFlipData = () =>{
+            $http.get($rootScope.restful_api.front_back + $scope.locationId)
+                .then((res) => {
+                    //获得get到的数据，渲染页面
+                    $scope.firstPage.flipList = res.data.optionList;
+                    $scope.selectValue = res.data.selectList[0].valueContent || 0;//默认不翻转
+                }, () => {
+                    layer.alert("获取显示翻转数据失败，请检查服务器");
+                });
+        };
+        getDisplayFlipData();
 
+        //保存数据
+        $scope.saveDisplayFlip = () =>{
+            console.log($scope.selectValue);
+            let selectObj = $scope.firstPage.flipList.filter((item)=>{
+                return item.valueContent === $scope.selectValue;
+            })[0];
+            let postData = {
+                "selectList" : [{
+                    valueContent : selectObj.valueContent,
+                    valueAlias : selectObj.valueAlias
+                }]
+            };
+            $http.put($rootScope.restful_api.front_back + $scope.locationId,postData)
+                .then((res)=>{
+                    if(res.data){
+                        $scope.info.success("数据保存成功")
+                    }else{
+                        $scope.info.fail("数据保存失败")
+                    }
+                },()=>{
+                    layer.alert("数据保存失败，请检查服务器");
+                });
+        }
+
+        //创建车间树
+        $scope.createWorkshop(true,getDisplayFlipData);
     }]);

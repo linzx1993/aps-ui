@@ -301,7 +301,7 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
      * Date 2017-02-07
      */
     $scope.createWorkshop = (singleSelect,getConfigData) => {
-        //为了存储树形数据，减少发送请求
+        //存储树形数据,如果有，则不发送请求
         if(!$scope.folder){
             $http.get($rootScope.restful_api.get_new_location)
                 .then((res) => {
@@ -313,10 +313,11 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
                 }, function(res){
                     layer.alert("读取车间失败，请检查服务器");
                 })
-                .then(() => {
-                    $("[data-location-id=" + $scope.locationId + "]").addClass("active");
-                })
         }
+        //先点击默认地点
+        $timeout(function(){
+            $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+        });
         var outerEle=$(".location-list");
         outerEle  //改变状态
             .on("click","ul span",function(){

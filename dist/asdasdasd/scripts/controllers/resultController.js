@@ -120,8 +120,8 @@
 				//判断上一页下一页按钮是否能点
 				checkQueryTime(startTime, endTime, today, maxEndTime);
 			} else {
-				//移除原有三级界面的jqueryUI dom    /* 2.7 modify */
-				//  		$("#do_detail_dialog").parent().remove();
+				//移除原有三级界面的jqueryUI dom
+				$("#do_detail_dialog").parent().remove();
 
 				$rootScope.getsessionStorage(sessionStorage.locationId_pre, sessionStorage.locationId_res);
 
@@ -413,8 +413,7 @@
 				$http.post(url, data).success(function (res) {
 					fun(res);
 					progressVal = res.rate || 0; //获取接口数据
-					var progWidth = 50 + progressVal / 100 * 360 - 10;
-					progressbar.children("span").css("width", progWidth + "px");
+					progressbar.children("span").css("width", progressVal + "%");
 					progressLabel.text(text + " " + progressVal + "%");
 					if (progressVal || progressVal == 0) {
 						//数据正确
@@ -543,14 +542,12 @@
 	  * 检验按钮 方法
 	  **/
 		$scope.check_aps = function ($event) {
-			$(".check-btn-div").hide();
 			ifSearchMsg = false;
 			if ($event.target.className == "check-check-box") {
 				$scope.checkSwitch = !$scope.checkSwitch;
 				$(".jiaoyan-icon").parent().toggleClass("search-btn-click");
 				return;
 			}
-			$(".check-btn-div").hide();
 			$scope.confirm_check();
 		};
 
@@ -584,10 +581,8 @@
 	  * 保存前校验 方法
 	  **/
 		$scope.save_check_aps = function () {
-			$(".check-btn-div").show();
 			ifSearchMsg = false;
 			$scope.confirm_check();
-			$(".check-btn-div").show();
 		};
 
 		/**
@@ -636,7 +631,7 @@
 					}
 					$scope.listOne = list1;
 					if (res.status == 1) {
-						progressbar.children("span").css("width", "400px");
+						progressbar.children("span").css("width", 100 + "%");
 						progressLabel.text("校验完成");
 						if (fn) {
 							fn();

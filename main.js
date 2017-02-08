@@ -4,3 +4,5 @@ require("./source/styles/common.css");
 require("./source/styles/index.css");
 require("./source/styles/secondPage.css");
 require("./source/styles/help.css");
+// require("./source/language/en-us.json");
+// require("./source/language/zh-cn.json");

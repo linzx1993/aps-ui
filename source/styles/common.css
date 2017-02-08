@@ -492,10 +492,6 @@ body .page-wrapper{
 	background-color: #fff;
 	box-sizing: border-box;
 }
-.location-list i.active {
-	background: url(../images/selected.png) no-repeat #fff;
-	border: none;
-}
 .location-list li span {
 	position: relative;
 	z-index: 11;
@@ -546,25 +542,19 @@ body .page-wrapper{
 .location-list folder-tree ul folder-tree{
 	display: none;
 }
-.location-list ul i.selectsome{
+.location-list i.selectsome,.location-list i.select-some{
 	background: url(../images/select-some.png) no-repeat ;
 	border: none;
 }
-.location-list ul i.disabled{
+.location-list i.active {
+	background: url(../images/selected.png) no-repeat #fff;
+	border: none;
+}
+.location-list i.disabled{
 	/*pointer-events: none;*/
 	opacity: .9;
 	background-color: #ccc;
 }
 .select-none{
-
-	-moz-user-select:none;/*火狐*/
-
-	-webkit-user-select:none;/*webkit浏览器*/
-
-	-ms-user-select:none;/*IE10*/
-
-	-khtml-user-select:none;/*早期浏览器*/
-
 	user-select:none;
-
 }

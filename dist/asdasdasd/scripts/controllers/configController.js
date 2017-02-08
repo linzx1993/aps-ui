@@ -55,6 +55,7 @@
 	__webpack_require__(4);
 	__webpack_require__(5);
 	__webpack_require__(6);
+	__webpack_require__(7);
 
 /***/ },
 /* 1 */
@@ -125,39 +126,12 @@
 /* 2 */
 /***/ function(module, exports) {
 
-	"use strict";
-
-	/**
-	 * Created by yiend on 2017/2/6.
-	 */
-	app.controller("versionController", ["$rootScope", "$scope", "$http", "$state", "tool", function ($rootScope, $scope, $http, $state, tool) {
-	    $http.get($rootScope.restful_api.public_version_number).then(function (res) {
-	        $scope.versionNumer = res.data.version;
-	        // 版本页面
-	        $scope.browser = tool.getBrowser().browser;
-	        $scope.version = tool.getBrowser().version;
-	    }, function () {
-	        layer.alert("获取系统版本失败，请检查服务器");
-	    });
-	}]);
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
 	/**
 	 * Created by yiend on 2017/1/14.
 	 */
 	'use strict';
 
-	app.controller("secondPageController", ["$rootScope", "$scope", "$state", function ($rootScope, $scope, $state) {
-	    $state.go('config.second.column'); //默认显示第一个tab
-	    $scope.secondPage = {
-	        title: "" };
-	}]).controller("columnController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
-	    //设置面包屑导航
-	    $scope.secondPage.showPageConfig = "显示排序项";
-
+	app.controller("columnController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
 	    /**
 	     *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
 	     */
@@ -172,7 +146,18 @@
 	    getColumnData();
 
 	    //获取数据，创造车间树
-	    $scope.createWorkshop(true, getColumnData);
+	    $scope.createWorkshop();
+
+	    //根据点击不同的车间选择不同的显示项
+	    $("#columnWorkshop").on("click", ".select-status", function (e) {
+	        //根据点击的车间ID
+	        $scope.locationId = e.target.getAttribute("data-location-id");
+	        $(".select-status").removeClass("active");
+	        $(e.target).addClass("active");
+	        //移除临时拖拽项
+	        $(".js-move").remove();
+	        getColumnData();
+	    });
 
 	    //初始化拖拽
 	    $scope.clickLiGetItem();
@@ -204,166 +189,418 @@
 	            $scope.info.fail("还原配置失败");
 	        });
 	    };
-	}]).controller("sortController", ["$rootScope", "$scope", "$http", "$window", "$location", "$timeout", "$q", "$templateCache", "scheduleTableViewModelService", function ($rootScope, $scope, $http, $window, $location, $timeout, $q, $templateCache, scheduleTableViewModelService) {
-	    //设置面包屑导航
-	    $scope.secondPage.showPageConfig = "多列排序项";
+	}]);
 
-	    function getSortConfig() {
-	        $http.get($rootScope.restful_api.sort_content_config + $scope.locationId).then(function (res) {
-	            //获得get到的数据，渲染页面
-	            $scope.setDisplayGetData(res);
-	        }, function () {
-	            $scope.info.fail("获取数据失败，请检查是否连上服务器");
-	        });
-	        //合并项
-	        $http.get($rootScope.restful_api.sort_combine_config + $scope.locationId).then(function (res) {
-	            $scope.combineItem = $.extend({}, res.data);
-	            $scope.combineObj = {
-	                combine: scheduleTableViewModelService.combinecountItem($scope.combineItem),
-	                combineDrag: true,
-	                combineActive: false
-	            };
-	        });
-	        //汇总项
-	        $http.get($rootScope.restful_api.sort_summary_config + $scope.locationId).then(function (res) {
-	            $scope.summaryItem = $.extend({}, res.data);
-	            $scope.summaryObj = {
-	                summary: scheduleTableViewModelService.combinecountItem($scope.summaryItem),
-	                summaryDrag: true,
-	                summaryActive: true
-	            };
-	        });
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by lzx on 2016/8/30.
+	 */
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	$("body").on("click", ".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi", function () {
+	    $(this).addClass("active").siblings().removeClass("active");
+	}).on("click", ".config-nav li", function (e) {
+	    e.stopPropagation();
+	    $(".config-nav li").removeClass("active");
+	    $(this).addClass("active");
+	    if ($(this).hasClass("drag")) {
+	        $(this).removeClass("drag");
+	        return;
 	    }
-	    //创建车间树
-	    $scope.createWorkshop(true, getSortConfig);
+	    $(this).addClass("active drag").siblings().removeClass("active drag");
+	});
+	app.controller("configController", ["$rootScope", "$scope", "$http", "$window", "$location", "$timeout", "$q", "$templateCache", "$state", "scheduleTableViewModelService", "tool", "dataService", function ($rootScope, $scope, $http, $window, $location, $timeout, $q, $templateCache, $state, scheduleTableViewModelService, tool, dataService) {
+	    //默认跳转初始版本页面
+	    $state.go('config.scheme');
+	    $http.get($rootScope.restful_api.public_version_number).then(function (res) {
+	        $scope.versionNumer = res.data.version;
+	    }, function () {
+	        layer.alert("获取系统版本失败，请检查服务器");
+	    });
+	    //***********************//
+	    //杜伟伟设置的代码，未知bug修正
+	    $("#do_detail_dialog_1").parent().remove();
+	    $("#do_detail_dialog").parent().remove();
+	    //生成车间树,设置车间选中
+	    $scope.columnWorkshop = true;
+	    $scope.locationId = $scope.locationId || "01";
+	    //判断是否在当前页面==>是否重新发送请求 = 设置初始页面
+	    $scope.currentPage = $scope.dataUrl = "view/adminManage.html";
+	    $timeout(function () {
+	        $scope.selectLi("view/version.html");
+	    }, 0);
+	    //自定义目录栏数据
+	    $scope.configLis = [{ text: "VersionNav", url: "view/version.html", "sref": ".version" }, { text: "displayConfiguration", url: "view/columnConfig.html", "sref": ".display",
+	        children: [{ text: "levelPage", url: "view/displayDays", "sref": ".first" }, { text: "secondaryPage", url: "view/columnConfig.html", "sref": ".second"
+	        }]
+	    }, { text: "ScheduleRuleSetting", url: "view/checkFrom.html", "sref": ".rule" }, { text: "SchedulingSchemeSettings", url: "view/schedulePlan.html", "sref": ".scheme" },
+	    // {text : "PAPRuleSetting", url : "view/papRule.html","sref":".papRule"},
+	    { text: "AdministratorConfigurationItem", url: "view/adminProperty.html", "sref": ".admin",
+	        children: [
+	        // {text : "车间属性",url : "view/workshopProperty.html","sref":".workshopProperty"},
+	        { text: "默认显示项", url: "view/adminDisplay.html", "sref": ".defaultDisplay" }]
+	    }];
+	    //点击li获得跳转的url进行局部刷新
+	    $scope.selectLi = function (gourl, event) {
+	        $timeout(function () {
+	            $scope.dataUrl = gourl;
+	        });
+	        //判断是否在当前页,是=>不变
+	        if ($scope.currentPage == gourl) {
+	            return;
+	        } else {
+	            // if($scope.currentPage == "view/schedulePlan.html"){
+	            // let move = layer.confirm('方案未保存，确定离开此界面', {
+	            //     btn: ['确定','取消'] //按钮
+	            // }, function(){
+	            //     layer.close(move);
+	            //     $scope.currentPage = gourl;
+	            // }, function(){
+	            //     layer.close(move);
+	            //     return;
+	            // });
+	            // }else{
+	            $scope.currentPage = gourl;
+	            // }
+	        }
+	        //每次第一次点进来默认点击车间树
+	        if (gourl !== "view/checkFrom.html" && gourl !== "view/schedulePlan.html") {
+	            $timeout(function () {
+	                $(".select-status[location-id=" + $scope.locationId + "]").trigger("click");
+	            }, 100);
+	        }
+	    };
+	    //版本页面
+	    $scope.browser = tool.getBrowser().browser;
+	    $scope.version = tool.getBrowser().version;
+	    /**************=======================相关零散代码========================************/
+	    //清楚后端缓存
+	    $scope.clearCache = function () {
+	        $http.post($rootScope.restful_api.clearCatch).success(function (res) {}).error(function (error) {});
+	    };
+	    //保存和还原弹出提示框
+	    $scope.infoObj = {
+	        mask: false,
+	        errorInfo: false,
+	        text: ""
+	    };
 
-	    //渲染数据
-	    getSortConfig();
+	    var Info = function () {
+	        function Info() {
+	            _classCallCheck(this, Info);
+	        }
 
-	    //初始化拖拽
-	    $scope.clickLiGetItem();
+	        _createClass(Info, [{
+	            key: "common",
+	            value: function common(str) {
+	                $scope.infoObj.mask = true;
+	                $scope.infoObj.text = str;
+	                $timeout(function () {
+	                    $scope.infoObj.mask = false;
+	                }, 2500);
+	            }
+	        }, {
+	            key: "msg",
+	            value: function msg(str) {
+	                this.common(str);
+	                //
+	            }
+	        }, {
+	            key: "success",
+	            value: function success(str) {
+	                this.common(str);
+	                $scope.infoObj.errorInfo = false;
+	            }
+	        }, {
+	            key: "fail",
+	            value: function fail(str) {
+	                this.common(str);
+	                $scope.infoObj.errorInfo = true;
+	            }
+	        }, {
+	            key: "hide",
+	            value: function hide() {
+	                $scope.infoObj.mask = false;
+	            }
+	        }]);
 
-	    /**多列排序信息配置点击保存进行发送数据**/
-	    $scope.saveSortContent = function () {
-	        var postData = $scope.getDisplayPostData("请至少选择一项进行排序");
-	        //检测数据是否正确
-	        if (!postData) {
+	        return Info;
+	    }();
+
+	    $scope.info = new Info();
+
+	    //管理删除
+	    $scope.startMange = function () {
+	        $scope.showManage = !$scope.showManage;
+	    };
+
+	    /**
+	     * 保存显示项发送数据
+	     * @param str: 错误时提示
+	     * @return 发送的数据
+	     */
+	    $scope.getDisplayPostData = function (str) {
+	        var resData = $scope.columnContentData;
+	        var selectValue = [];
+	        //获得选中的li
+	        $("#sort-item").find("li").each(function () {
+	            var attr = $(this).attr("data-keyname");
+	            selectValue.push(attr);
+	        });
+	        if (selectValue.length <= 0) {
+	            $scope.info.fail(str);
+	            return false;
+	        }
+	        //新建一个需要发送的数据
+	        var postData = {};
+	        postData.optionList = resData.optionList;
+	        postData.selectList = [];
+	        for (var i = 0, length = selectValue.length; i < length; i++) {
+	            for (var j = 0, len = resData.optionList.length; j < len; j++) {
+	                var compareOptionText = resData.optionList[j].valueContent.replace(":desc", "");
+	                if (compareOptionText == selectValue[i].replace(":desc", "")) {
+	                    if ($(".sort-item li").eq(i).attr("data-order") == "down") {
+	                        compareOptionText += ":desc";
+	                        resData.optionList[j].valueContent = compareOptionText;
+	                    }
+	                    postData.selectList.push(resData.optionList[j]);
+	                    break;
+	                }
+	            }
+	        }
+	        return postData;
+	    };
+
+	    /**
+	     * 获得get到的数据，渲染页面
+	     * @param res: get到的数据
+	     * @return 页面渲染时的格式
+	     */
+	    $scope.setDisplayGetData = function (res) {
+	        $scope.columnContentData = res.data;
+	        $scope.userConfigData = scheduleTableViewModelService.sortItem($scope.columnContentData); //获得返回到左边显示的项目
+	        $scope.userSelectConfigData = scheduleTableViewModelService.sortSelectItem($scope.columnContentData); //获得返回到右边显示的项目
+	    };
+
+	    $("body")
+	    //选择添加/删除车间
+	    .on("click", "#workshop .select-status", function (event) {
+	        var e = event || window.event;
+	        var target = e.target || e.srcElement;
+	        var id = target.getAttribute("location-id");
+	        var firstRule = $scope.ruleList[0];
+	        var containMenu = false; //点击车间是否由子车间已经被选择了
+	        //判断有没有排程规则
+	        if (!firstRule) {
+	            layer.alert("请先添加排程规则");
+	        }
+	        //子列表变为不可编辑状态
+	        //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
+	        if (id.length <= 4) {
+	            $(target).parent().next().find("i").addClass("disabled");
+	        }
+	        //开始添加,先判断是否有车间,没有车间直接添加
+	        if (!$scope.locationRuleList.length) {
+	            $scope.locationRuleList.push({
+	                locationId: id,
+	                locationName: target.nextElementSibling.innerHTML,
+	                ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
+	                ruleId: firstRule ? firstRule.ruleId : ""
+	            });
+	        } else {
+	            //=====判断点击车间是够已经被选择
+	            var repeatLocationId = $scope.locationRuleList.every(function (item, index, arr) {
+	                if (item.locationId == id) {
+	                    arr.splice(index, 1);
+	                }
+	                return item.locationId != id;
+	            });
+	            // debugger;
+	            // console.log(target.className);
+	            // let repeatLocationId = target.className.includes("selected");
+	            // console.log(repeatLocationId);
+	            //======
+	            //车间没被选中
+	            if (repeatLocationId) {
+	                //点击一级之后取消所有二级(有选中的二级情况下)
+	                for (var i = $scope.locationRuleList.length - 1; i >= 0; i--) {
+	                    if ($scope.locationRuleList[i].locationId.slice(0, id.length) == id) {
+	                        containMenu = true;
+	                        $scope.locationRuleList.splice(i, 1);
+	                    }
+	                }
+	                //====================（没有选中的二级情况下）
+	                $scope.locationRuleList.push({
+	                    locationId: id,
+	                    locationName: target.nextElementSibling.innerHTML,
+	                    ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
+	                    ruleId: firstRule ? firstRule.ruleId : ""
+	                });
+	                secondToFirst(target);
+	                //如果该元素有子集列表,该元素的子列表变为不可点击
+	                console.log(target.parentNode.nextElementSibling);
+	                if (target.parentNode.nextElementSibling && target.parentNode.nextElementSibling.nodeName === "UL") {
+	                    Array.prototype.forEach.call(target.parentNode.nextElementSibling.getElementsByClassName("select-status"), function (item, index) {
+	                        item.className += " disabled";
+	                    });
+	                }
+	            }
+	            //车间已被选中
+	            else {
+	                    //子列表变为可点击
+	                    $(target).parent().next().find("i").removeClass("disabled");
+	                }
+	        }
+	        //强制刷新dom
+	        $scope.$apply();
+	    })
+	    //合并项下拉代码
+	    .on("click", "dd.relative", function () {
+	        //判断是否可编辑，是否生效
+	        if ($(this).hasClass("not-edit")) {
 	            return;
 	        }
-	        $http.put($rootScope.restful_api.sort_content_config + $scope.locationId, postData).then(function (response) {
-	            if (response.data === true) {
-	                $scope.info.success("数据保存成功");
+	        $(".scheduleDrag").removeClass("draw");
+	        $(this).children(".scheduleDrag").toggleClass("draw");
+	    }).on("mouseleave", "dd.relative", function () {
+	        $(this).children(".scheduleDrag").removeClass("draw");
+	    }).on("click", "dd.relative li", function (e) {
+	        var index = $(this).index();
+	        $(this).parent().siblings("span").text($(this).text());
+	        var opts = $(this).parent().siblings("select")[0];
+	        opts.options[index].selected = "selected";
+	        $(this).parent().removeClass("draw");
+	        e.stopPropagation();
+	    });
+
+	    /**
+	     * 根据排程数据渲染页面
+	     * @param res: 获得到的排程规则数据
+	     * @return 页面渲染所需数据
+	     */
+	    $scope.setCheckData = function (res) {
+	        $scope.scheduleCheckData = $.extend({}, res);
+	        $scope.scheduleFrontData = scheduleTableViewModelService.validation_rules_from(res); //获得排程前需要的数据
+	        $scope.scheduleLaterData = scheduleTableViewModelService.validation_rules_later(res); //获得排程后需要的数据
+	        //设置选中的option
+	        $scope.schedulePointSelected = $scope.scheduleCheckData.schedulePoint;
+	        $scope.papTypeSelected = $scope.scheduleCheckData.papType;
+	        $scope.schedulePeriodSelected = $scope.scheduleCheckData.schedulePeriod;
+	        setTimeout(function () {
+	            //控制下拉列表
+	            Array.prototype.forEach.call($("dd.relative span"), function (item) {
+	                var select = $(item).siblings("select");
+	                var ul = $(item).siblings("ul");
+	                ul.find("li[data-value=" + $(item).attr("data-value") + "]").trigger("click");
+	                var text = $(item).siblings("select").find("option:selected").text();
+	                $(item).text(text);
+	            });
+	            //控制选中状态
+	        }, 0);
+	        //当前日期前的车间计划
+	        if (!$scope.scheduleCheckData.isLoadOverduePoolTask) {
+	            $("input[name=overduePeriod]").attr("disabled", "disabled");
+	        } else {
+	            $("input[name=overduePeriod]").removeAttr("disabled");
+	        }
+	    };
+
+	    $scope.createWorkshop = function () {
+	        //为了存储树形数据，减少发送请求
+	        if (!$scope.folder) {
+	            $http.get($rootScope.restful_api.get_new_location).then(function (res) {
+	                $scope.resWorkshop = res.data;
+	                $scope.folder = tool.getLocationTreeData($.extend({}, $scope.resWorkshop))[0]; //处理数据,并绑定到页面
+	                // $scope.folder = {
+	                //     children : tool.getLocationTreeData($.extend({},$scope.resWorkshop))
+	                // }
+	            }, function (res) {
+	                layer.alert("读取车间失败，请检查服务器");
+	            }).then(function () {
+	                $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+	            });
+	        }
+	        var outerEle = $(".location-list");
+	        outerEle //改变状态
+	        .on("click", "ul span", function () {
+	            if ($(this).next().find("ul li").length == 0) {
+	                return;
+	            } else {
+	                $(this).toggleClass("active").toggleClass("open");
+	                $(this).next().toggle();
 	            }
-	        }, function () {
-	            $scope.info.fail("数据保存失败");
+	            //设置前面线的高度
+	            var thisUL = $(this).parents("ul");
+	            var thisB = thisUL.children("b");
+	            var thisLI = thisUL.children("li");
+	            var thisHeight = 0;
+	            for (var i = 0; i < thisLI.length - 1; i++) {
+	                thisHeight += $(thisLI[i]).height();
+	            }
+	            // thisB.height(thisHeight + 100);
+	            //改变按钮的位置
+	            var bgPosition = $(".location-choose").width();
+	            $(".out-bg").width(bgPosition);
+	        }).on("click", "ul ul i", function () {
+	            //点击第一级下面的选框
+	            //改变状态
+	            changeSelectStatus($(this));
+	            //第一级只能单选
+	            $(this).parents("li").last().siblings("li").children("i").attr("class", "unselect");
+	            $(this).parents("li").last().siblings("li").find("i").attr("class", "unselect");
+	        }).on("click", "ul:eq(0)>li>i", function () {
+	            //点击第一级选框
+	            changeSelectStatus($(this));
+	            //第一级点击操作
+	            $(this).parent().siblings("li").children("i").attr("class", "unselect");
+	            $(this).parent().siblings("li").find("i").attr("class", "unselect");
+	            // debugger;
 	        });
-	        //合并项
-	        var combineP = document.getElementsByClassName("combine-item")[0].getElementsByTagName("span");
-	        $scope.combineItem.selectList = [];
+	    };
 
-	        var _loop = function _loop(i) {
-	            var value = combineP[i].getAttribute("data-value");
-	            $scope.combineItem.optionList.forEach(function (item) {
-	                if (item.valueContent == value) {
-	                    $scope.combineItem.selectList.push(item);
-	                }
-	            });
-	        };
-
-	        for (var i = 0; i < combineP.length; i++) {
-	            _loop(i);
-	        }
-	        //空的情况下暂时使用还原功能
-	        if ($scope.combineItem.selectList.length === 0) {
-	            $scope.combineItem.selectList = null;
-	            $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId, $scope.combineItem).then(function (response) {
-	                //$scope.info.success("数据保存成功");
-	            }, function (res) {
-	                $scope.info.fail("合并项保存失败");
-	            });
+	    function changeSelectStatus(thisSelect) {
+	        var thisSelect = thisSelect;
+	        //本身及所有后代的改变
+	        if (thisSelect.hasClass("selectsome") || thisSelect.hasClass("unselect")) {
+	            thisSelect.removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
+	            thisSelect.parent("li").find("folder-tree i").removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
 	        } else {
-	            $http.put($rootScope.restful_api.sort_combine_config + $scope.locationId, $scope.combineItem).then(function (response) {
-	                //$scope.info.success("数据保存成功");
-	            }, function () {
-	                $scope.info.fail("合并项保存失败");
-	            });
+	            thisSelect.removeClass("selected").addClass("unselect").removeClass("active");
+	            thisSelect.parent("li").find("folder-tree i").removeClass("selected").addClass("unselect").removeClass("active");
 	        }
-	        //汇总项
-	        var summaryP = document.getElementsByClassName("Summary-item")[0].getElementsByTagName("span");
-	        $scope.summaryItem.selectList = [];
-
-	        var _loop2 = function _loop2(i) {
-	            var value = summaryP[i].getAttribute("data-value");
-	            $scope.summaryItem.optionList.forEach(function (item) {
-	                if (item.valueContent == value) {
-	                    $scope.summaryItem.selectList.push(item);
-	                }
-	            });
-	        };
-
-	        for (var i = 0; i < summaryP.length; i++) {
-	            _loop2(i);
-	        }
-	        //空的情况下暂时使用还原功能
-	        if ($scope.summaryItem.selectList.length === 0) {
-	            $scope.summaryItem.selectList = null;
-	            $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId, $scope.summaryItem).then(function (response) {
-	                //$scope.info.success("数据保存成功");
-	            }, function (res) {
-	                $scope.info.fail("汇总项保存失败");
-	            });
-	        } else {
-	            $http.put($rootScope.restful_api.sort_summary_config + $scope.locationId, $scope.summaryItem).then(function (response) {
-	                //$scope.info.success("数据保存成功");
-	            }, function (res) {
-	                $scope.info.fail("汇总项保存失败");
-	            });
-	        }
-	    };
-
-	    /**多列排序信息还原数据**/
-	    $scope.resetSortConfig = function () {
-	        $http.delete($rootScope.restful_api.sort_content_config + $scope.locationId).then(function (res) {
-	            $("#all-item").find(".js-move").remove();
-	            //获得get到的数据，渲染页面
-	            $scope.setDisplayGetData(res);
-	            $scope.info.success("还原配置成功");
-	        }, function () {
-	            $scope.info.fail("还原配置失败");
+	        //处于其影响范围内的祖先的改变
+	        thisSelect.parents("folder-tree").each(function () {
+	            var thisTree = $(this);
+	            var thisStatus = thisTree.siblings(".selcetstatus");
+	            if (thisTree.find(".selected").length < 1) {
+	                thisStatus.removeClass("selected").removeClass("active").removeClass("selectsome").addClass("unselect");
+	            } else if (thisTree.find(".unselect").length < 1) {
+	                thisStatus.removeClass("selectsome").removeClass("unselect").removeClass("selectsome").addClass("selected").addClass("active");
+	            } else {
+	                thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("selectsome");
+	            }
 	        });
-	        //还原合并项
-	        $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId, null).then(function (response) {
-	            $scope.combineItem = $.extend({}, response.data);
-	            $scope.combineObj = {
-	                combine: scheduleTableViewModelService.combinecountItem($scope.combineItem),
-	                combineDrag: true,
-	                combineActive: false
-	            };
-	        }, function (res) {
-	            $scope.info.fail("合并项保存失败");
-	        });
-	        //还原汇总项
-	        $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId, null).then(function (response) {
-	            $scope.summaryItem = $.extend({}, response.data);
-	            $scope.summaryObj = {
-	                summary: scheduleTableViewModelService.combinecountItem($scope.summaryItem),
-	                summaryDrag: true,
-	                summaryActive: true
-	            };
-	        }, function (res) {
-	            $scope.info.fail("汇总项保存失败");
-	        });
-	    };
+	    }
 
-	    //删除||选中-合并和汇总项
-	    $scope.addItem = function (data, $event) {
-	        data.show = true;
-	        $event.stopPropagation();
-	    };
-	    $scope.deleteDragItem = function (data, $event) {
-	        data.show = false;
-	        //$event.target.parentNode.parentNode;
-	        //console.log($event.target.parentNode.parentNode.nextElementSibling);
+	    //拖拽区域进行初始化
+	    $scope.clickLiGetItem = function () {
+	        //每次点击后目录蓝需要重新获取移动的li(配置项)
+	        setTimeout(function () {
+	            new DragNewItem('all-item', 'provide-item', 'sort-item', {});
+	            $("#sort-item").find("li").each(function () {
+	                var span = $(this).children(".itemOrder");
+	                span.addClass(span.attr("ng-class"));
+	            });
+	        }, 50);
+	        //清除用户移动后未保存的项目
+	        $("#all-item").find(".js-move").remove();
 	    };
 	}]);
 
@@ -377,33 +614,19 @@
 	'use strict';
 
 	app.controller("firstPageController", ["$rootScope", "$scope", "$http", "$state", function ($rootScope, $scope, $http, $state) {
-	    //默认显示第一个tab---start
-	    $state.go('config.first.displayDays');
-	    //默认显示第一个tab---end
-	    $scope.firstPage = {
-	        title: "", //面包屑导航三级目录文字
-	        showItemLists: [], //显示天数
-	        combineItemList: [] };
+	    $state.go('config.first.displayDays'); //默认显示第一个tab
+	    $scope.firstPage = {};
+	    console.log(99999);
 	}]).controller("displayDaysController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
-	    //设置面包屑导航
-	    $scope.firstPage.title = "显示天数";
-
-	    /**
-	     *根据点击的车间树获得相应的车间ID,显示对应显示天数的数据
-	     */
-	    var getDisplayDayData = function getDisplayDayData() {
-	        $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId).then(function (res) {
-	            //获得get到的数据，渲染页面
-	            $scope.firstPage.showItemLists = res.data.selectList;
-	            $scope.firstPage.showItemLists.map(function (item) {
-	                item.valueContent = Number(item.valueContent);
-	            });
-	            $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
-	        }, function () {
-	            layer.alert("获取一级页面显示天数失败，请检查服务器");
+	    $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId).then(function (res) {
+	        $scope.firstPage.showItemLists = res.data.selectList;
+	        $scope.firstPage.showItemLists.map(function (item) {
+	            item.valueContent = Number(item.valueContent);
 	        });
-	    };
-	    getDisplayDayData();
+	        $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
+	    }, function () {
+	        layer.alert("获取一级页面显示天数，请检查服务器");
+	    });
 
 	    //显示输入数字范围
 	    $scope.validateNum = function (val) {
@@ -438,29 +661,11 @@
 	            layer.alert("数据保存失败，请检查服务器");
 	        });
 	    };
-
-	    //创建车间树
-	    $scope.createWorkshop(true, getDisplayDayData);
 	}]).controller("displayCombineController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {
-	    //设置面包屑导航
-	    $scope.firstPage.title = "显示合并项";
-
-	    /**
-	     *根据点击的车间树获得相应的车间ID,显示对应显示合并项的数据
-	     */
-	    var getDisplayCombineData = function getDisplayCombineData() {
-	        $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId).then(function (res) {
-	            //获得get到的数据，渲染页面
-	            $scope.firstPage.combineItemList = res.data.optionList;
-	            $scope.selectValue = res.data.selectList[0].valueContent;
-	        }, function () {
-	            layer.alert("获取显示合并项失败，请检查服务器");
-	        });
-	    };
-	    getDisplayCombineData();
-
-	    //创建车间树
-	    $scope.createWorkshop(true, getDisplayCombineData);
+	    $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId).then(function (res) {
+	        $scope.firstPage.combineItemList = res.data.optionList;
+	        $scope.selectValue = res.data.selectList[0].valueContent;
+	    });
 
 	    //保存数据
 	    $scope.saveDisplayCombine = function () {
@@ -472,6 +677,7 @@
 	        var selectObj = $scope.firstPage.combineItemList.filter(function (item) {
 	            return item.valueContent === $scope.selectValue;
 	        })[0];
+	        console.log(selectObj);
 	        var postData = {
 	            "selectList": [{
 	                valueContent: selectObj.valueContent,
@@ -488,7 +694,7 @@
 	            layer.alert("数据保存失败，请检查服务器");
 	        });
 	    };
-	}]).controller("displayFlipController", ["$rootScope", "$scope", "$http", function ($rootScope, $scope, $http) {}]);
+	}]);
 
 /***/ },
 /* 5 */
@@ -502,6 +708,8 @@
 	app.controller("planController", ["$rootScope", "$scope", "$http", "$window", "$location", "$timeout", "$q", "$templateCache", "scheduleTableViewModelService", "dataService", "tool", function ($rootScope, $scope, $http, $window, $location, $timeout, $q, $templateCache, scheduleTableViewModelService, dataService, tool) {
 	    $scope.ruleList = dataService.ruleList;
 	    $scope.columnWorkshop = false;
+	    //获取数据，创造车间树
+	    $scope.createWorkshop();
 
 	    //获取车间计划列表
 	    $http.get($rootScope.restful_api.all_schedule_plan).then(function (res) {
@@ -771,119 +979,107 @@
 	        event.stopPropagation();
 	    };
 
-	    $timeout(function () {
-	        $("#jWorkshop")
-	        //选择添加/删除车间
-	        .on("click", ".select-status", function (event) {
-	            var e = event || window.event;
-	            var target = e.target || e.srcElement;
-	            var id = target.getAttribute("data-location-id");
-	            var firstRule = dataService.ruleList[0];
-	            //判断有没有排程规则
-	            if (!firstRule) {
-	                layer.alert("请先添加排程规则");
+	    /**
+	     * 同级列表全部选中时，左侧列变为父级一个出现，移除所有同级的车间展示
+	     * @param target: 点击的元素
+	     * @return
+	     */
+	    var secondToFirst = function secondToFirst(target) {
+	        $(target).addClass("active");
+	        var parentUl = $(target).parent().parent();
+	        //如果全部选中，父级变为选中，左侧列表只显示父级
+	        //active的个数等于所有个数则表示选中所有父级
+	        if (parentUl.find(".active").length === parentUl.find(".select-status").length) {
+	            //设置为不选，。然后点击调用方法，全部选中
+	            //判断是否为第一级春风车间,不是则继续执行
+	            console.log(parentUl.parent());
+	            if (parentUl.parent().prev().length) {
+	                parentUl.parent().siblings(".select-status").attr("class", "select-status unselect");
+	                parentUl.parent().siblings(".select-status").trigger("click");
+	                //偷懒，先父级选中，所有子级不可选中
+	                Array.prototype.forEach.call(parentUl.find(".select-status"), function (item) {
+	                    item.className = "select-status active disabled";
+	                });
 	            }
-	            //子列表变为不可编辑状态
-	            //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
-	            // if(id.length <= 4){
-	            //     $(target).siblings("folder-tree").find("i").addClass("disabled");
-	            // }
-	            //开始添加,先判断是否有车间,没有车间直接添加
-	            if (!$scope.locationRuleList.length) {
+	            layer.msg("已合并为上一级车间", { time: 2000 });
+	            // let id = parentUl.previousElementSibling.firstElementChild.getAttribute("location-id");
+	        }
+	    };
+
+	    $("body")
+	    //选择添加/删除车间
+	    .on("click", "#jWorkshop .select-status", function (event) {
+	        var e = event || window.event;
+	        var target = e.target || e.srcElement;
+	        var id = target.getAttribute("data-location-id");
+	        var firstRule = dataService.ruleList[0];
+	        var containMenu = false; //点击车间是否由子车间已经被选择了
+	        //判断有没有排程规则
+	        if (!firstRule) {
+	            layer.alert("请先添加排程规则");
+	        }
+	        //子列表变为不可编辑状态
+	        //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
+	        // if(id.length <= 4){
+	        $(target).siblings("folder-tree").find("i").addClass("disabled");
+	        // }
+	        //开始添加,先判断是否有车间,没有车间直接添加
+	        if (!$scope.locationRuleList.length) {
+	            $scope.locationRuleList.push({
+	                locationId: id,
+	                locationName: target.nextElementSibling.innerText,
+	                ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
+	                ruleId: firstRule ? firstRule.ruleId : ""
+	            });
+	        } else {
+	            //=====判断点击车间是够已经被选择
+	            var repeatLocationId = $scope.locationRuleList.every(function (item, index, arr) {
+	                if (item.locationId == id) {
+	                    arr.splice(index, 1);
+	                }
+	                return item.locationId != id;
+	            });
+	            // debugger;
+	            // console.log(target.className);
+	            // let repeatLocationId = target.className.includes("selected");
+	            // console.log(repeatLocationId);
+	            //======
+	            //车间没被选中
+	            if (repeatLocationId) {
+	                //点击一级之后取消所有二级(有选中的二级情况下)
+	                for (var i = $scope.locationRuleList.length - 1; i >= 0; i--) {
+	                    if ($scope.locationRuleList[i].locationId.slice(0, id.length) == id) {
+	                        containMenu = true;
+	                        $scope.locationRuleList.splice(i, 1);
+	                    }
+	                }
+	                //====================（没有选中的二级情况下）
 	                $scope.locationRuleList.push({
 	                    locationId: id,
 	                    locationName: target.nextElementSibling.innerText,
 	                    ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
 	                    ruleId: firstRule ? firstRule.ruleId : ""
 	                });
-	            } else {
-	                //车间已被选中，则子列表变为可点击，未选中的状态
-	                if ($(target).hasClass("active")) {
-	                    $(target).parent().find("i").removeClass("disabled active");
-	                }
-	                //==========如果车间没被选中========
-	                else {
-	                        //点击一级之后取消所有二级(有选中的二级情况下)
-	                        for (var i = $scope.locationRuleList.length - 1; i >= 0; i--) {
-	                            if ($scope.locationRuleList[i].locationId.slice(0, id.length) === id) {
-	                                $scope.locationRuleList.splice(i, 1);
-	                            }
-	                        }
-	                        //====================（没有选中的二级情况下）
-	                        $scope.locationRuleList.push({
-	                            locationId: id,
-	                            locationName: target.nextElementSibling.innerText,
-	                            ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
-	                            ruleId: firstRule ? firstRule.ruleId : ""
-	                        });
-	                        //=========二级菜单合并为一级菜单--start===========
-	                        //同级列表全部选中时，左侧列变为父级一个出现，移除所有同级的车间展示
-	                        $(target).addClass("active");
-	                        var parentUl = $(target).parent().parent();
-	                        //如果全部选中，父级变为选中，左侧列表只显示父级
-	                        //active的个数等于所有个数则表示选中所有父级
-	                        if (parentUl.find(".active").length === parentUl.find(".select-status").length) {
-	                            //设置为不选，。然后点击调用方法，全部选中
-	                            //判断是否为第一级春风车间,不是则继续执行
-	                            console.log(parentUl.parent().prev().length);
-	                            if (parentUl.parent().prev().length) {
-	                                parentUl.parent().siblings(".select-status").attr("class", "select-status unselect");
-	                                parentUl.parent().siblings(".select-status").trigger("click");
-	                                //偷懒，先父级选中，所有子级不可选中
-	                                Array.prototype.forEach.call(parentUl.find(".select-status"), function (item) {
-	                                    item.className = "select-status active disabled";
-	                                });
-	                            }
-	                            layer.msg("已合并为上一级车间", { time: 2000 });
-	                            // let id = parentUl.previousElementSibling.firstElementChild.getAttribute("location-id");
-	                        }
-	                        //=========二级菜单合并为一级菜单--end===========
-
-	                        //如果该元素有子集列表,该元素的子列表变为不可点击
-	                        $(target).siblings("folder-tree").find("select-status").addClass("active disabled");
-	                    }
+	                secondToFirst(target);
+	                //如果该元素有子集列表,该元素的子列表变为不可点击
+	                $(target).siblings("folder-tree").find("select-status").addClass("active disabled");
+	                // if(target.parentNode.nextElementSibling && target.parentNode.nextElementSibling.nodeName === "UL"){
+	                //     Array.prototype.forEach.call(target.parentNode.nextElementSibling.getElementsByClassName("select-status"),function(item,index){
+	                //         item.className += " disabled";
+	                //     })
+	                // }
 	            }
-	            //强制刷新dom
-	            $scope.$apply();
-	        }).on("click", "disabled", function () {
-	            return false;
-	        });
-	    }, 1000);
-
-	    $scope.createPlanWorkshopTree = function () {
-	        $http.get($rootScope.restful_api.get_new_location).then(function (res) {
-	            $scope.resWorkshop = res.data;
-	            $scope.folder = tool.getLocationTreeData($.extend({}, $scope.resWorkshop))[0]; //处理数据,并绑定到页面
-	            // $scope.folder = {
-	            //     children : tool.getLocationTreeData($.extend({},$scope.resWorkshop))
-	            // }
-	        }, function (res) {
-	            layer.alert("读取车间失败，请检查服务器");
-	        }).then(function () {
-	            $timeout(function () {
-	                $("[data-location-id=" + $scope.locationId + "]").addClass("active");
-	                $("#jWorkshop").on("click", "ul span", function () {
-	                    if ($(this).next().find("ul li").length == 0) {
-	                        return;
-	                    } else {
-	                        $(this).toggleClass("active").toggleClass("open");
-	                        $(this).next().toggle();
-	                    }
-	                    //设置前面线的高度
-	                    var thisUL = $(this).parents("ul");
-	                    var thisLI = thisUL.children("li");
-	                    var thisHeight = 0;
-	                    for (var i = 0; i < thisLI.length - 1; i++) {
-	                        thisHeight += $(thisLI[i]).height();
-	                    }
-	                    //改变按钮的位置
-	                    var bgPosition = $(".location-choose").width();
-	                    $(".out-bg").width(bgPosition);
-	                });
-	            });
-	        });
-	    };
-	    $scope.createPlanWorkshopTree();
+	            //车间已被选中
+	            else {
+	                    //子列表变为可点击
+	                    $(target).parent().next().find("i").removeClass("disabled");
+	                }
+	        }
+	        //强制刷新dom
+	        $scope.$apply();
+	    }).on("click", "disabled", function () {
+	        return false;
+	    });
 	}]);
 
 /***/ },
@@ -1229,6 +1425,186 @@
 	                $scope.notEdit.scheduleInterval = true;
 	            });
 	        }
+	    });
+	}]);
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	/**
+	 * Created by yiend on 2017/1/15.
+	 */
+	app.controller("sortController", ["$rootScope", "$scope", "$http", "$window", "$location", "$timeout", "$q", "$templateCache", "scheduleTableViewModelService", function ($rootScope, $scope, $http, $window, $location, $timeout, $q, $templateCache, scheduleTableViewModelService) {
+	    function getSortConfig() {
+	        $http.get($rootScope.restful_api.sort_content_config + $scope.locationId).then(function (res) {
+	            //获得get到的数据，渲染页面
+	            $scope.setDisplayGetData(res);
+	        }, function () {
+	            $scope.info.fail("获取数据失败，请检查是否连上服务器");
+	        });
+	        //合并项
+	        $http.get($rootScope.restful_api.sort_combine_config + $scope.locationId).then(function (res) {
+	            $scope.combineItem = $.extend({}, res.data);
+	            $scope.combineObj = {
+	                combine: scheduleTableViewModelService.combinecountItem($scope.combineItem),
+	                combineDrag: true,
+	                combineActive: false
+	            };
+	        });
+	        //汇总项
+	        $http.get($rootScope.restful_api.sort_summary_config + $scope.locationId).then(function (res) {
+	            $scope.summaryItem = $.extend({}, res.data);
+	            $scope.summaryObj = {
+	                summary: scheduleTableViewModelService.combinecountItem($scope.summaryItem),
+	                summaryDrag: true,
+	                summaryActive: true
+	            };
+	        });
+	    }
+	    //创建车间树
+	    $scope.createWorkshop();
+
+	    //渲染数据
+	    getSortConfig();
+
+	    //初始化拖拽
+	    $scope.clickLiGetItem();
+
+	    /**多列排序信息配置点击保存进行发送数据**/
+	    $scope.saveSortContent = function () {
+	        var postData = $scope.getDisplayPostData("请至少选择一项进行排序");
+	        //检测数据是否正确
+	        if (!postData) {
+	            return;
+	        }
+	        $http.put($rootScope.restful_api.sort_content_config + $scope.locationId, postData).then(function (response) {
+	            if (response.data === true) {
+	                $scope.info.success("数据保存成功");
+	            }
+	        }, function () {
+	            $scope.info.fail("数据保存失败");
+	        });
+	        //合并项
+	        var combineP = document.getElementsByClassName("combine-item")[0].getElementsByTagName("span");
+	        $scope.combineItem.selectList = [];
+
+	        var _loop = function _loop(i) {
+	            var value = combineP[i].getAttribute("data-value");
+	            $scope.combineItem.optionList.forEach(function (item) {
+	                if (item.valueContent == value) {
+	                    $scope.combineItem.selectList.push(item);
+	                }
+	            });
+	        };
+
+	        for (var i = 0; i < combineP.length; i++) {
+	            _loop(i);
+	        }
+	        //空的情况下暂时使用还原功能
+	        if ($scope.combineItem.selectList.length === 0) {
+	            $scope.combineItem.selectList = null;
+	            $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId, $scope.combineItem).then(function (response) {
+	                //$scope.info.success("数据保存成功");
+	            }, function (res) {
+	                $scope.info.fail("合并项保存失败");
+	            });
+	        } else {
+	            $http.put($rootScope.restful_api.sort_combine_config + $scope.locationId, $scope.combineItem).then(function (response) {
+	                //$scope.info.success("数据保存成功");
+	            }, function () {
+	                $scope.info.fail("合并项保存失败");
+	            });
+	        }
+	        //汇总项
+	        var summaryP = document.getElementsByClassName("Summary-item")[0].getElementsByTagName("span");
+	        $scope.summaryItem.selectList = [];
+
+	        var _loop2 = function _loop2(i) {
+	            var value = summaryP[i].getAttribute("data-value");
+	            $scope.summaryItem.optionList.forEach(function (item) {
+	                if (item.valueContent == value) {
+	                    $scope.summaryItem.selectList.push(item);
+	                }
+	            });
+	        };
+
+	        for (var i = 0; i < summaryP.length; i++) {
+	            _loop2(i);
+	        }
+	        //空的情况下暂时使用还原功能
+	        if ($scope.summaryItem.selectList.length === 0) {
+	            $scope.summaryItem.selectList = null;
+	            $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId, $scope.summaryItem).then(function (response) {
+	                //$scope.info.success("数据保存成功");
+	            }, function (res) {
+	                $scope.info.fail("汇总项保存失败");
+	            });
+	        } else {
+	            $http.put($rootScope.restful_api.sort_summary_config + $scope.locationId, $scope.summaryItem).then(function (response) {
+	                //$scope.info.success("数据保存成功");
+	            }, function (res) {
+	                $scope.info.fail("汇总项保存失败");
+	            });
+	        }
+	    };
+
+	    /**多列排序信息还原数据**/
+	    $scope.resetSortConfig = function () {
+	        $http.delete($rootScope.restful_api.sort_content_config + $scope.locationId).then(function (res) {
+	            $("#all-item").find(".js-move").remove();
+	            //获得get到的数据，渲染页面
+	            $scope.setDisplayGetData(res);
+	            $scope.info.success("还原配置成功");
+	        }, function () {
+	            $scope.info.fail("还原配置失败");
+	        });
+	        //还原合并项
+	        $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId, null).then(function (response) {
+	            $scope.combineItem = $.extend({}, response.data);
+	            $scope.combineObj = {
+	                combine: scheduleTableViewModelService.combinecountItem($scope.combineItem),
+	                combineDrag: true,
+	                combineActive: false
+	            };
+	        }, function (res) {
+	            $scope.info.fail("合并项保存失败");
+	        });
+	        //还原汇总项
+	        $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId, null).then(function (response) {
+	            $scope.summaryItem = $.extend({}, response.data);
+	            $scope.summaryObj = {
+	                summary: scheduleTableViewModelService.combinecountItem($scope.summaryItem),
+	                summaryDrag: true,
+	                summaryActive: true
+	            };
+	        }, function (res) {
+	            $scope.info.fail("汇总项保存失败");
+	        });
+	    };
+
+	    //删除||选中-合并和汇总项
+	    $scope.addItem = function (data, $event) {
+	        data.show = true;
+	        $event.stopPropagation();
+	    };
+	    $scope.deleteDragItem = function (data, $event) {
+	        data.show = false;
+	        //$event.target.parentNode.parentNode;
+	        //console.log($event.target.parentNode.parentNode.nextElementSibling);
+	    };
+	    //根据点击不同的车间选择不同的显示项
+	    $("#columnWorkshop").on("click", ".select-status", function (e) {
+	        //根据点击的车间ID
+	        $scope.locationId = e.target.getAttribute("data-location-id");
+	        $(".select-status").removeClass("active");
+	        $(e.target).addClass("active");
+	        //移除临时拖拽项
+	        $(".js-move").remove();
+	        //根据不同的车间ID进行显示
+	        getSortConfig();
 	    });
 	}]);
 

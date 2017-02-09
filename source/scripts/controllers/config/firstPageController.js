@@ -6,6 +6,7 @@ app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
         //默认显示第一个tab---start
         $state.go('config.first.displayDays');
+        $scope.activeNav = "first";
         //默认显示第一个tab---end
         $scope.firstPage = {
             title : "",//面包屑导航三级目录文字

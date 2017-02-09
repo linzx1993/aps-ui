@@ -4,24 +4,16 @@
 'use strict';
 $("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",function(){
     $(this).addClass("active").siblings().removeClass("active");
-})
-    .on("click",".config-nav li",function(e){
-        e.stopPropagation();
-        if($(this).hasClass("drag")){
-            $(this).removeClass("drag");
-            return;
-        }
-        $(this).addClass("drag").siblings().removeClass("drag");
-    });
+});
 app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
     //默认跳转初始版本页面
-    $state.go('config.scheme');
+    $state.go('config.version');
     //目录li加上class-active
     $scope.activeNav = ".version";
 
     //添加目录class-active
     $scope.isActiveNav = function(val){
-        return $scope.activeNav ==  val;
+        return $scope.activeNav ===  val;
     };
     //***********************//
     //生成车间树,设置车间选中
@@ -64,13 +56,21 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     $scope.selectLi = (sref,event) => {
         //为li加上class-active
         $scope.activeNav = sref;
-        $timeout(function(){
-            $(".second-nav").css("pointer-events","auto").find(".active").css("pointer-events","none");
-        });
+        // $timeout(function(){
+        //     $(".second-nav").css("pointer-events","auto").find(".active").css("pointer-events","none");
+        // });
         //每次第一次点进来默认点击车间树
         $timeout(() => {
             $(`.select-status[location-id=${$scope.locationId}]`).trigger("click");
         },100);
+        //下拉代码
+        if($(event.target).parent().hasClass("drag")){
+            $(this).removeClass("drag");
+            return;
+        }
+        $(event.target).parent().addClass("drag").siblings().removeClass("drag");
+        console.log(sref);
+        event.stopPropagation();
     };
 
     /**************=======================相关零散代码========================************/
@@ -317,42 +317,21 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         //先点击默认地点
         $timeout(function(){
             $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+            $(".all-location span").eq(0).trigger("click");
         });
         var outerEle=$(".location-list");
         outerEle  //改变状态
             .on("click","ul span",function(){
-                if($(this).next().find("ul li").length == 0){
-                    return;
-                }else{
-                    $(this).toggleClass("active").toggleClass("open");
-                    $(this).next().toggle();
-                }
+                $(this).toggleClass("active open").next().toggle();
                 //设置前面线的高度
                 let thisUL = $(this).parents("ul");
                 let thisB = thisUL.children("b");
-                let thisLI = thisUL.children("li")
+                let thisLI = thisUL.children("li");
                 let thisHeight = 0;
                 for(var i = 0;i < thisLI.length-1;i++){
                     thisHeight += $(thisLI[i]).height();
                 }
-                thisB.height(thisHeight + 100);
-                //改变按钮的位置
-                var bgPosition=$(".location-choose").width();
-                $(".out-bg").width(bgPosition);
-            })
-            .on("click","ul ul i",function(){  //点击第一级下面的选框
-                //改变状态
-                changeSelectStatus($(this));
-                //第一级只能单选
-                $(this).parents("li").last().siblings("li").children("i").attr("class","unselect");
-                $(this).parents("li").last().siblings("li").find("i").attr("class","unselect");
-            })
-            .on("click","ul:eq(0)>li>i",function(){  //点击第一级选框
-                changeSelectStatus($(this));
-                //第一级点击操作
-                $(this).parent().siblings("li").children("i").attr("class","unselect");
-                $(this).parent().siblings("li").find("i").attr("class","unselect");
-                // debugger;
+                thisB.height(thisHeight + 120);
             });
 
         //根据点击不同的车间选择不同的显示项
@@ -369,28 +348,29 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         }
     };
 
+    //改变状态
     function changeSelectStatus(thisSelect){
         var thisSelect = thisSelect;
         //本身及所有后代的改变
-        if(!thisSelect.hasClass("active")){
-            thisSelect.removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
-            thisSelect.parent("li").find("folder-tree i").removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
+        if(thisSelect.hasClass("select-some") || thisSelect.hasClass("unselect")){
+            thisSelect.attr("class","select-status active");
+            thisSelect.parent("li").find("ul i").attr("class","select-status active");
         }else{
-        //     thisSelect.removeClass("selected").addClass("unselect").removeClass("active");
-        //     thisSelect.parent("li").find("folder-tree i").removeClass("selected").addClass("unselect").removeClass("active");
+            thisSelect.attr("class","select-status");
+            thisSelect.parent("li").find("ul i").attr("class","select-status");
         }
-        //处于其影响范围内的祖先的改变
-        thisSelect.parents("folder-tree").each(function(){
-            var thisTree = $(this);
-            var thisStatus = thisTree.siblings(".selcetstatus");
-            if(thisTree.find(".selected").length<1){
-                thisStatus.removeClass("selected").removeClass("active").removeClass("selectsome").addClass("unselect");
-            }else if(thisTree.find(".unselect").length<1){
-                thisStatus.removeClass("selectsome").removeClass("unselect").removeClass("selectsome").addClass("selected").addClass("active");
-            }else{
-                thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("selectsome");
-            }
-        })
+        // //处于其影响范围内的祖先的改变
+        // thisSelect.parents("ul").each(function(){
+        //     var thisTree = $(this);
+        //     var thisStatus = thisTree.siblings(".select-status");
+        //     if(thisTree.find(".selected").length < 1){
+        //         thisStatus.attr("class","select-status")
+        //     }else if(thisTree.find(".unselect").length < 1){
+        //         thisStatus.attr("class","select-status active")
+        //     }else{
+        //         thisStatus.attr("class","select-status select-some")
+        //     }
+        // })
     }
 
     //拖拽区域进行初始化

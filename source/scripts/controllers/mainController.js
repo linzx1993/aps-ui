@@ -127,7 +127,7 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 							}
 							//如果时间超过1小时，停止加载 ，弹框提示
 							if(i > 3600){
-								layer.alert("进度失败，请联系技术人员处理");
+								layer.alert("进度查询超时，请联系技术人员处理");
 								clearTimeout(j);
 								progressbar.hide(20);   
 								$(".cover").hide();            	

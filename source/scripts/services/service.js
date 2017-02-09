@@ -1452,7 +1452,7 @@ DragNewItem.prototype = {
 //临时项的升序和降序
 $("body")
 	.on("click", ".sort-item .itemOrder", function (e) {
-		var parent = $(this).parent()
+		var parent = $(this).parent();
 		var attr = parent.attr("data-keyname");
 		if ($(this).hasClass("desc")) {
 			parent.attr("data-order", "up").attr("data-keyname",attr.replace(":desc",""));

@@ -4,7 +4,7 @@ app.directive("folderTree", function() {
         scope: {
             currentFolder: '='
         },
-        // replace : true,
+        replace : true,
         transclude : true,
         templateUrl: 'view/template/tree.html',
         link : function ($scope,elem,attr) {

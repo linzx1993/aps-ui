@@ -100,24 +100,26 @@ $config-content-height : $config-box-height -  $title-height;
 }
 
 /*二级目录样式*/
-.configLi ul {
-    max-height: 0;
-    background-color: #2c3642;
-    @include transition(max-height, 1s);
-}
-
-.configLi.drag ul {
-    max-height: 150px;
-    @include transition(max-height, 1s);
-}
-
-.configLi li {
-    padding-left: 20px;
-}
-
-.configLi li a:hover {
-    margin-left: -20px;
-    padding-left: 40px;
+.configLi{
+    ul{
+        max-height: 0;
+        background-color: #2c3642;
+        @include transition(max-height, 1s);
+    }
+    &.drag ul {
+        max-height: 150px;
+        @include transition(max-height, 1s);
+    }
+    li {
+        padding-left: 20px;
+    }
+    li a:hover {
+        margin-left: -20px;
+        padding-left: 40px;
+    }
+    //.second-nav.active{
+    //    pointer-events: none;
+    //}
 }
 
 /*=========参数配置页面右边内容栏=========*/

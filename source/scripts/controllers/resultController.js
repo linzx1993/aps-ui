@@ -192,10 +192,18 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					$scope.differTableBodyViewModel = scheduleTableViewModelService.jsonDifferTableBodyViewModel($scope.differentiation);
 					
 					ifDiffer = true;
-					if(respones.data && ifDiffer){
+					//判断对象是否为空
+					function isEmptyObject(obj){
+					    for(var i in obj){
+					        return true;
+					    }
+					    return false;
+					}
+					
+					if(isEmptyObject(respones) && ifDiffer){
 						layer.msg('差异化结果已高亮，请查看', {time: 3500,icon: 1});
 						ifDiffer = false;
-					}else if(!respones.data && ifDiffer){
+					}else if(!isEmptyObject(respones) && ifDiffer){
 						layer.msg('无差异化结果', {time: 3500,icon: 2});
 						ifDiffer = false;
 					}
@@ -372,8 +380,12 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 					fun(res);
 					progressVal = res.rate || 0;    //获取接口数据
 					var progWidth = 50 + progressVal/100*360 - 10;
-					progressbar.children("span").css("width", progWidth + "px"); 
+					progressbar.children("span").animate({"width":progWidth + "px"});
+					if(progressVal < 10){
+						progressVal = 10;
+					}					
 	   				progressLabel.text(text+" " + progressVal + "%");
+	   				
 					if(progressVal || progressVal == 0) { //数据正确
 						if(progressVal < 100) {
 							var j = setTimeout(SetProgress, 1000);
@@ -385,6 +397,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 							}
 						} else {
 							progressLabel.text(text+"完成");
+							$(".pro_bars span").removeClass("progressbar-gif").addClass("progressbar-static");
 							fn(); //参数
 						}
 					} else { //如果数据错误		      					      				
@@ -402,9 +415,10 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
 	var p_info = $(".pap-alert");
 	p_info.on("click","b",function(){
-		$(this).next("p").toggle();
-		$(this).siblings(".pap-alert-tri").toggle();
-		$(this).parent().siblings().find("p").hide();
+		var j_thisB = $(this);
+		j_thisB.next("p").toggle();
+		j_thisB.siblings(".pap-alert-tri").toggle();
+		j_thisB.parent().siblings().find("p").hide();
 	});
 	
 	/**
@@ -428,12 +442,15 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	$scope.hideButton = function(){
 		$http.post($rootScope.restful_api.aps_config,JSON.parse(sessionStorage.getItem("papBodyData"))).then(
 			function(res){
+				var j_btn_foBa = $(".tab-fo-ba"),
+					j_btn_del_foBa = $(".tab-del-fo-ba");
+				
 				if(res.data){
-					$(".tab-fo-ba").show();
-					$(".tab-del-fo-ba").show();
+					j_btn_foBa.show();
+					j_btn_del_foBa.show();
 				}else{
-					$(".tab-fo-ba").hide();
-					$(".tab-del-fo-ba").hide();
+					j_btn_foBa.hide();
+					j_btn_del_foBa.hide();
 				}
 			},
 			function(res){}
@@ -508,14 +525,13 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 检验按钮 方法
 	 **/
 	$scope.check_aps = function($event){
-		$(".check-btn-div").hide();
 		ifSearchMsg = false;
 		if($event.target.className == "check-check-box"){
 			$scope.checkSwitch = !$scope.checkSwitch;
 			$(".jiaoyan-icon").parent().toggleClass("search-btn-click");
 			return;
 		}
-		$(".check-btn-div").hide()
+		$(".check-btn-div").hide();
 		$scope.confirm_check();
 	}
 	
@@ -549,10 +565,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 保存前校验 方法
 	 **/
 	$scope.save_check_aps = function(){
-		$(".check-btn-div").show();
 		ifSearchMsg = false;
 		$scope.confirm_check();
-		$(".check-btn-div").show()
+		$(".check-btn-div").show();
 	}
 	
 	/**
@@ -566,8 +581,8 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		progressbar.show();    //进度条
 		$(".wrap-alert").show();           //提示信息
 		$(".cover").show();
-		
-		progressbar.children("span").css("width", 0 + "%");
+		progressbar.children("span").css("width","0px");
+		progressbar.children("span").animate({"width":"40px"});
 		function progress(){
 			$http.post($rootScope.restful_api.aps_check,JSON.parse(sessionStorage.getItem("cancel_data"))).success(function(res) {				
 				var scheduleValidateMap=res.scheduleValidateMap;
@@ -600,8 +615,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				}	
 				$scope.listOne = list1;
 				if(res.status == 1){
-					progressbar.children("span").css("width", "400px"); 
+					progressbar.children("span").animate({"width":"400px"}); 
 	   				progressLabel.text("校验完成");
+	   				$(".pro_bars span").removeClass("progressbar-gif").addClass("progressbar-static");
 	   				if(fn){
 	   					fn();
 	   				}
@@ -676,22 +692,22 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 **/
 	$scope.differ_show=function(workDate,equipmentId){
 		var thisWorkDate = workDate,
-			newId=equipmentId.split("_"),
+			newId = equipmentId.split("_"),
 			thisEquipmentId = equipmentId,
 			thisEquipmentName = [],
 			aEquipment = '',
 			sUrl = '';
 		aEquipment = [thisEquipmentId];
-
+		
 		for(var i in aEquipment){
         	thisEquipmentName.push(goEquipment[aEquipment[i]].punitName); 
        }
 		sUrl = $rootScope.restful_api.secondPage_differ+"workDate=" + thisWorkDate + "&equipmentId=" + newId[0]+"&equipmentType="+newId[1]+"&schemeId="+sessionStorage.schemeId;		
 		$http.get(sUrl).success(function(res){	
 		/*以工单为判断*/   
-			var taskLeft=res.leftList,
-				taskRight=res.rightList,
-				taskCompare=res.compareList;
+			var taskLeft = res.leftList,
+				taskRight = res.rightList,
+				taskCompare = res.compareList;
 	
 			for(var i in taskCompare){
 				var rowNum;
@@ -761,12 +777,12 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 			            obj[val.poolTaskId].taskNum += val.taskNum;
 			        } else {
 			            obj[val.poolTaskId] = {
-			                poolTaskId: val.poolTaskId,
-			                taskNum: val.taskNum,
-			                poolTaskStartTime:val.poolTaskStartTime,
-			                poolTaskEndTime:val.poolTaskEndTime,
-			                saleOrderCode:val.saleOrderCode,
-			                materialName:val.materialName
+			                poolTaskId : val.poolTaskId,
+			                taskNum : val.taskNum,
+			                poolTaskStartTime : val.poolTaskStartTime,
+			                poolTaskEndTime : val.poolTaskEndTime,
+			                saleOrderCode : val.saleOrderCode,
+			                materialName : val.materialName
 			            };
 			        }
 			    });
@@ -916,7 +932,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				$scope.auto_width(".cover-headsPool_left",".tablePool_left");
 				$scope.auto_width(".cover-headsPool_right",".tablePool_right");
 			},200)
-			$("body").removeClass("selct-none");  //移除选中样式
+			$("body").removeClass("select-none");  //移除选中样式
 		    document.onmousemove = null;
 		}
 		//滚动条
@@ -2045,23 +2061,23 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
             function changeSelectStatus(thisSelect){   
             	var thisSelect = thisSelect;
             	//本身及所有后代的改变
-            	if(thisSelect.hasClass("selectsome") || thisSelect.hasClass("unselect")){
-            		thisSelect.removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
-            		thisSelect.parent("li").find("folder-tree i").removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
+            	if(thisSelect.hasClass("select-some") || thisSelect.hasClass("unselect")){
+            		thisSelect.removeClass("select-some").removeClass("unselect").addClass("selected").addClass("active");
+            		thisSelect.parent("li").find("ul i").removeClass("select-some").removeClass("unselect").addClass("selected").addClass("active");
             	}else{
             		thisSelect.removeClass("selected").addClass("unselect").removeClass("active");
-            		thisSelect.parent("li").find("folder-tree i").removeClass("selected").addClass("unselect").removeClass("active");
+            		thisSelect.parent("li").find("ul i").removeClass("selected").addClass("unselect").removeClass("active");
             	}
             	//处于其影响范围内的祖先的改变
-            	thisSelect.parents("folder-tree").each(function(){
+            	thisSelect.parents("ul").each(function(){
             		var thisTree = $(this);
             		var thisStatus = thisTree.siblings(".selcetstatus");
             		if(thisTree.find(".selected").length < 1){
-            			thisStatus.removeClass("selected").removeClass("active").removeClass("selectsome").addClass("unselect");
+            			thisStatus.removeClass("selected").removeClass("active").removeClass("select-some").addClass("unselect");
             		}else if(thisTree.find(".unselect").length < 1){
-            			thisStatus.removeClass("selectsome").removeClass("unselect").removeClass("selectsome").addClass("selected").addClass("active");
+            			thisStatus.removeClass("select-some").removeClass("unselect").removeClass("select-some").addClass("selected").addClass("active");
             		}else{
-            			thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("selectsome");
+            			thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("select-some");
             		}
             	})
             }
@@ -2135,8 +2151,9 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 				
 				//切换方案  默认勾中第一个地点
 			    $timeout(function(){
-					var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i");
+					var defaultEle = $(".location-list").children("ul").children("li:eq(0)").children("i");
 					var defaultId = defaultEle.attr("location-id");
+
 //					if(sessionStorage.locationId_res && sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res)>-1){
 //						//判断缓存是否为当前地点树的地点
 //						$("i[location-id="+sessionStorage.locationId_res+"]").click();	
@@ -2295,7 +2312,7 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 	 * 默认勾中第一个
 	 **/
     $timeout(function(){
-    	var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i")
+    	var defaultEle = $(".location-list").children("ul").children("li:eq(0)").children("i")
 		var defaultId = defaultEle.attr("location-id");
 		if(sessionStorage.locationId_res && sessionStorage.defaultList_res.indexOf(sessionStorage.locationId_res) > -1){
 			//判断缓存是否为当前地点树的地点
@@ -2431,7 +2448,6 @@ app.controller('resultCtrl', function($scope, $rootScope, $http, $window, $locat
 		    			cnName:"个工序"
 		    		};
         		}
-	        		
         	},
         	function(res){
         		$rootScope.showType = {

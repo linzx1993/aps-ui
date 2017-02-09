@@ -78,16 +78,13 @@
   -webkit-transition: max-height 1s;
   -ms-transition: max-height 1s;
   transition: max-height 1s; }
-
 .configLi.drag ul {
   max-height: 150px;
   -webkit-transition: max-height 1s;
   -ms-transition: max-height 1s;
   transition: max-height 1s; }
-
 .configLi li {
   padding-left: 20px; }
-
 .configLi li a:hover {
   margin-left: -20px;
   padding-left: 40px; }

@@ -53,11 +53,24 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                     })
             }
         });
+
+    //**********妥协代码start*********//
     //执行拖拽
     $timeout(function(){
         $(".gridly").dragsort({ dragSelector: "li", dragEnd: function() { }, dragBetween: false, placeHolderTemplate: "<li></li>" });
-    });
+        var timeClick;
+        $(".gridly li").on("mousedown",".workshop-ruleNav",function (e) {
+            timeClick = new Date();
+            e.stopPropagation();
+        }).on("mouseup",".workshop-ruleNav",function (e) {
 
+            if(new Date() - timeClick > 300){
+            }else{
+                e.stopPropagation();
+            }
+        });
+    },1000);
+    //**********妥协代码end*********//
     //初始化车间树==查看不同计划时调用
     $scope.setWorkshop = () => {
         let workshopTree = $("#jWorkshop");
@@ -65,18 +78,15 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
         workshopTree.find("i").attr("class","select-status");
         workshopTree.find("ul ul span").removeClass("item-select");
         //第一次进入，没有数据
-        if(!$scope.locationRuleList){
-        }else{
+        if($scope.locationRuleList){
             $scope.locationRuleList.forEach((item) => {
                 let selectI =  workshopTree.find("i[data-location-id=" + item.locationId + "]");
                 selectI.siblings("span").addClass("item-select");
                 selectI.addClass("active");
                 //子地点全部选中，且设置为disable不可更改
-                selectI.siblings("folder-tree").find("select-status").addClass("active disabled")
+                selectI.siblings("folder-tree").find("select-status").addClass("active")
             })
         }
-
-
     };
 
     /**排程方案保存进行发送数据**/
@@ -332,10 +342,6 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                                 // return;
                             }
                             //子列表变为不可编辑状态
-                            //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
-                            // if(id.length <= 4){
-                            //     $(target).siblings("folder-tree").find("i").addClass("disabled");
-                            // }
                                 //选中状态下，取消左侧菜单里本车间
                                 //未选中状态下，点击一级之后取消左侧菜单里面所有的子级车间(有选中的二级情况下)==>主要是为了取消子级车间
                                 //因为不管选不选中都要执行这一段代码，所以提取到了最头上
@@ -353,15 +359,33 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
 
                             //车间已被选中，则子列表变为可点击，未选中的状态
                             if($(target).hasClass("active")){
+                                if(parentSelectStatus.hasClass("active")){
+                                    $scope.locationRuleList = $scope.locationRuleList.filter((item) => {
+                                        return item.locationId !== id.slice(0,id.length-2);
+                                    });
+                                    Array.prototype.forEach.call(parentLi.siblings("li"),(item)=>{
+                                        let liItem = $(item);
+                                        console.log(liItem.children(".item-select"));
+                                        $scope.locationRuleList.push({
+                                            locationId : liItem.children("i").attr("data-location-id"),
+                                            locationName : liItem.children("span").text(),
+                                            ruleName : firstRule ? firstRule.ruleName : "请选择排程规则",
+                                            ruleId : firstRule ? firstRule.ruleId : ""
+                                        })
+                                    })
+                                }
+
+                                //==========class的变化--start========
                                 $(target).parent().find("i").attr("class","select-status");
                                 activeLiLength = parentUl.find(".active").length;
                                 if(activeLiLength === 0){
                                     parentSelectStatus.attr("class","select-status");
                                     //继续向上查找，查看爷车间是否需要变化
-
                                 }else{
                                     parentSelectStatus.attr("class","select-status select-some");
                                 }
+                                //==========class的变化--end========
+
                             }
                             //==========如果车间没被选中========
                             else {
@@ -369,7 +393,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                                 $(target).addClass("active");
                                 activeLiLength = parentUl.find(".active").length;
                                 Array.prototype.forEach.call(parentLi.find("folder-tree .select-status"),function(item){
-                                    item.className = "select-status active disabled";
+                                    item.className = "select-status active";
                                 });
 
                                 //左侧菜单出现本车间的信息
@@ -391,7 +415,6 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                                         parentSelectStatus.trigger("click");
                                         //偷懒，先父级选中，所有子级不可选中
                                         // Array.prototype.forEach.call(parentUl.find(".select-status"),function(item){
-                                        //     item.className = "select-status active disabled";
                                         // });
                                     }
                                     layer.msg("已合并为上一级车间",{time : 2000});

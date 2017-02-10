@@ -811,10 +811,10 @@ body {
 	background: url(images/APS-background.jpg) fixed top center  no-repeat;
 }
 body .page-wrapper{
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	overflow: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: auto;
 }
 .header {
 	flex: 0 0 68px;
@@ -902,7 +902,7 @@ body .page-wrapper{
 }
 /*==========响应式区域--左右箭头=========*/
 @media screen and (max-width: 1650px) {
-
+	
 	.wrap-content .table .page-select{
 		top: -93px;
 		left: 0;
@@ -919,7 +919,7 @@ body .page-wrapper{
 		left: 0;
 		right: auto;
 		height: 80px;
-	}
+	}	
 }
 /*==========响应式区域结束=========*/
 /*================合并项=================*/
@@ -1224,107 +1224,105 @@ body .page-wrapper{
 .pbody .active .user-info-box{
 	display: block;
 }
-/*单选框，多选框样式*/
-
 
 /*地点树css*/
 .location-list{
-	position: relative;
+  position: relative;
 }
 .location-list ul{
-	text-align: left;
+  text-align: left;
 }
 .location-list li {
-	position: relative;
-	margin-top: 20px;
-	margin-left: 60px;
-	/*width: 200px;*/
-	line-height: 30px;
-	z-index: 10;
+  position: relative;
+  margin-top: 20px;
+  margin-left: 60px;
+  /*width: 200px;*/
+  line-height: 30px;
+  z-index: 10;
 }
 .location-list li i{
-	position: absolute;
-	top: 6px;
-	left:-15px;
+  position: absolute;
+  top: 6px;
+  left:-15px;
 }
 .location-list .column-border {
-	position: absolute;
-	top: 14px;
-	left: 27px;
-	bottom: 15px;
-	content: "";
-	width: 2px;
-	z-index: 9;
-	background-color: #B3B3B3;
-}
+  position: absolute;
+  top: 14px;
+  left: 27px;
+  bottom: 15px;
+  content: "";
+  width: 2px;
+  z-index: 9;
+  background-color: #B3B3B3; 
+ }
 
 .location-list li:after {
-	content: "";
-	position: absolute;
-	top: 13px;
-	left: -33px;
-	width: 18px;
-	height: 2px;
-	background-color: #B3B3B3;
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: -33px;
+  width: 18px;
+  height: 2px;
+  background-color: #B3B3B3; 
 }
 .location-list i {
-	width: 16px;
-	height: 16px;
-	border: 1px solid #ccc;
-	background-color: #fff;
-	box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  box-sizing: border-box; 
 }
 .location-list li span {
-	position: relative;
-	z-index: 11;
-	min-width: 78px;
-	padding: 0 10px;
-	height: 30px;
-	line-height: 30px;
-	background-color: #d9d9d9;
-	cursor: pointer;
+  position: relative;
+  z-index: 11;
+  min-width: 78px;
+  padding: 0 10px;
+  height: 30px;
+  line-height: 30px;
+  background-color: #d9d9d9;
+  cursor: pointer; 
 }
 .location-list li span.active {
-	color: #fff;
-	background-color: #1e7cd9;
+  color: #fff;
+  background-color: #1e7cd9; 
 }
 .location-list .open-btn {
-	position: relative;
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	background-color: #666;
-	border-radius: 50%;
-	vertical-align: -2px;
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: #666;
+  border-radius: 50%;
+  vertical-align: -2px; 
 }
 .location-list .open-btn:after, .location-list .open-btn:before {
-	content: "";
-	position: absolute;
-	top: 4px;
-	left: 7px;
-	width: 2px;
-	height: 8px;
-	background-color: #d9d9d9;
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 2px;
+  height: 8px;
+  background-color: #d9d9d9; 
 }
 .location-list .open-btn:before {
-	width: 8px;
-	height: 2px;
-	top: 7px;
-	left: 4px;
+  width: 8px;
+  height: 2px;
+  top: 7px;
+  left: 4px; 
 }
 .location-list span.active .open-btn {
-	background-color: #fff;
+  background-color: #fff; 
 }
 .location-list span.active .open-btn:after {
-	width: 0;
+  width: 0; 
 }
 .location-list span.open .open-btn:before {
-	background-color: #1e7cd9;
-}
-.location-list folder-tree ul folder-tree{
+  background-color: #1e7cd9; 
+ }
+.location-list ul ul{
 	display: none;
 }
-.location-list i.selectsome,.location-list i.select-some{
+.location-list ul i.select-some{
 	background: url(images/select-some.png) no-repeat;
 	border: none;
 }
@@ -1332,13 +1330,23 @@ body .page-wrapper{
 	background: url(images/selected.png) no-repeat #fff;
 	border: none;
 }
-.location-list i.disabled{
+.location-list ul i.disabled{
 	/*pointer-events: none;*/
 	opacity: .9;
 	background-color: #ccc;
 }
 .select-none{
-	user-select:none;
+
+-moz-user-select:none;/*火狐*/
+
+-webkit-user-select:none;/*webkit浏览器*/
+
+-ms-user-select:none;/*IE10*/
+
+-khtml-user-select:none;/*早期浏览器*/
+
+user-select:none;
+
 }/*
  * 页面表格内容样式文件。
  */

@@ -1,4 +1,46 @@
-webpackJsonp([5,7],[
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
 /* 0 */
 /***/ function(module, exports) {
 
@@ -14,12 +56,14 @@ webpackJsonp([5,7],[
 			$scope.failAlert = false;
 			$scope.successAlert = true;
 			$timeout(function () {
-				var lastText = $(".pbody-wrap .wrap-info ul").find("li:last-child").find("span").eq(1).text();
-				if (lastText == "自动排程完成") {
-					$(".pbody-wrap .wrap-info ul").find("li:last-child").find(".in-state-icon-success").show();
-				} else if (lastText == "自动排程失败") {
-					$(".pbody-wrap .wrap-info ul").find("li:last-child").find(".in-state-icon-fail").show();
-				}
+				$(".pbody-wrap .wrap-info ul").find("li").each(function () {
+					var stateText = $(this).find("span").eq(1).text();
+					if (stateText == "自动排程完成") {
+						$(this).find(".in-state-icon-success").show();
+					} else if (stateText == "自动排程失败") {
+						$(this).find(".in-state-icon-fail").show();
+					}
+				});
 				// 遍历
 				$(".pbody-wrap .wrap-info ul").find("li").each(function () {
 					var stateText = $(this).find("span").eq(1).text();
@@ -28,6 +72,9 @@ webpackJsonp([5,7],[
 						$scope.successAlert = false;
 					}
 				});
+
+				//将动图替换为静止图
+				$(".pro_bars span").removeClass("progressbar-gif").addClass("progressbar-static");
 			}, 50);
 			$scope.btnShow = true;
 		}, function (res) {
@@ -119,13 +166,19 @@ webpackJsonp([5,7],[
 			$location.path("/result");
 		};
 		//提示
-		$scope.alertMsg = function (x, $event) {
+		$scope.alertMsg = function (info, $event) {
 			$event.stopPropagation();
-			var briefInfoMap = x.briefInfoMap;
-			$scope.doTaskNum = briefInfoMap.doTaskNum;
-			$scope.undoTaskNum = briefInfoMap.undoTaskNum;
-			$scope.totalTaskNum = briefInfoMap.totalTaskNum;
-			$scope.useTime = briefInfoMap.useTime;
+			var state = info.state;
+			if (state == "自动排程完成") {
+				var briefInfoMap = info.briefInfoMap;
+				$scope.doTaskNum = "已排任务：" + briefInfoMap.doTaskNum + "个";
+				$scope.undoTaskNum = "剩余任务：" + briefInfoMap.undoTaskNum + "个";
+				$scope.totalTaskNum = "总任务数：" + briefInfoMap.totalTaskNum + "个";
+				$scope.useTime = "排程所花时间：" + briefInfoMap.useTime + "秒";
+			} else if (state == "自动排程失败") {
+				var briefInfo = info.briefInfo;
+				$scope.detail = briefInfo;
+			}
 
 			$(".pbody-wrap .wrap-info li b").removeClass("click-detail");
 			$($event.target).addClass("click-detail");
@@ -136,7 +189,7 @@ webpackJsonp([5,7],[
 				var body = $("body");
 				var scrollTop = $(document).scrollTop(),
 				    scrollLeft = $(document).scrollLeft();
-				var d_left = $($event.target).offset().left + 56 + scrollLeft;
+				var d_left = $($event.target).offset().left + 56 + scrollLeft + 5;
 				var d_top = $($event.target).offset().top - 71 + scrollTop;
 				var targetHeight = $($event.target).css("top").split("px");
 				var targetParentHeight = $($event.target).parent().parent().parent().css("top").split("px");
@@ -166,4 +219,4 @@ webpackJsonp([5,7],[
 	});
 
 /***/ }
-]);
+/******/ ]);

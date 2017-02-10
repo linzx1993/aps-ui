@@ -1,7 +1,10 @@
 /**
  * Created by yiend on 2017/1/16.
  */
-app.controller("ruleController",["$rootScope","$scope","$http","$timeout","scheduleTableViewModelService","dataService","tool", function($rootScope,$scope,$http,$timeout,scheduleTableViewModelService,dataService,tool){
+app.controller("ruleController",["$rootScope","$scope","$http","$timeout","scheduleTableViewModelService","tool", function($rootScope,$scope,$http,$timeout,scheduleTableViewModelService,tool){
+    //显示正确的目录class-active
+    $scope.configNav.activeNav = ".rule";
+
     $scope.columnWorkshop = false;
         $scope.disable = {
             schedulePointSelected : false,//pap排程规则下拉列表==>
@@ -11,7 +14,6 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
             schedulePointSelected : false,
             scheduleInterval:false
         };
-    // $scope.ruleList = dataService.ruleList;
     $http.get($rootScope.restful_api.all_schedule_rule)
         .success((res) => {
             $scope.ruleList = $.extend([],res);

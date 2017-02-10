@@ -20,7 +20,7 @@ module.exports = {
         // configController: __dirname + "/configControllerDemo",
         // config : __dirname + "/source/css/config.scss"
         // reset : __dirname + "/source/styles/reset.css",
-        main : __dirname + "/main.js",
+        // main : __dirname + "/main.js",
     },
     output: {
         path: __dirname + "/dist",
@@ -54,7 +54,7 @@ module.exports = {
     plugins : [
         // new webpack.HotModuleReplacementPlugin()//热加载插件
         // new webpack.optimize.UglifyJsPlugin(),//压缩js代码
-        new webpack.optimize.CommonsChunkPlugin('common.js'),
+        // new webpack.optimize.CommonsChunkPlugin('common.js'),
         new ExtractTextPlugin("./styles/[name].css"),//相对于output的path进行定位
         //将css，js文件内联到html中
         new HtmlWebpackPlugin({

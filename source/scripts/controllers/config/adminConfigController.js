@@ -2,6 +2,9 @@
  * Created by yiend on 2017/1/16.
  */
 app.controller("adminConfigController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService) {
+    //显示正确的目录class-active
+    $scope.configNav.activeNav = ".admin";
+
     let getColumnData = () =>{
         $http.get($rootScope.restful_api.reset_show_column + $scope.locationId)
             .then((res) => {

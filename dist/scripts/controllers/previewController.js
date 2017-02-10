@@ -1,4 +1,46 @@
-webpackJsonp([4,7],[
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
 /* 0 */
 /***/ function(module, exports) {
 
@@ -883,7 +925,7 @@ webpackJsonp([4,7],[
 			var outerEle = $(".location-list");
 			outerEle //改变状态
 			.on("click", "ul span", function () {
-				if ($(this).next().find("ul li").length == 0) {
+				if ($(this).next().find("li").length == 0) {
 					return;
 				} else {
 					$(this).toggleClass("active").toggleClass("open");
@@ -906,14 +948,14 @@ webpackJsonp([4,7],[
 				//改变状态
 				changeSelectStatus($(this));
 				//第一级只能单选
-				$(this).parents("li").last().siblings("li").children("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
-				$(this).parents("li").last().siblings("li").find("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
+				$(this).parents("li").last().siblings("li").children("i").removeClass("active").removeClass("selected").removeClass("select-some").addClass("unselect");
+				$(this).parents("li").last().siblings("li").find("i").removeClass("active").removeClass("selected").removeClass("select-some").addClass("unselect");
 			}).on("click", "ul:eq(0)>li>i", function () {
 				//点击第一级选框
 				changeSelectStatus($(this));
 				//第一级点击操作
-				$(this).parent().siblings("li").children("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
-				$(this).parent().siblings("li").find("i").removeClass("active").removeClass("selected").removeClass("selectsome").addClass("unselect");
+				$(this).parent().siblings("li").children("i").removeClass("active").removeClass("selected").removeClass("select-some").addClass("unselect");
+				$(this).parent().siblings("li").find("i").removeClass("active").removeClass("selected").removeClass("select-some").addClass("unselect");
 			});
 			$timeout(function () {
 				//如果没有子地点 ,移除 s 标签
@@ -931,23 +973,23 @@ webpackJsonp([4,7],[
 			function changeSelectStatus(thisSelect) {
 				var thisSelect = thisSelect;
 				//本身及所有后代的改变
-				if (thisSelect.hasClass("selectsome") || thisSelect.hasClass("unselect")) {
-					thisSelect.removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
-					thisSelect.parent("li").find("folder-tree i").removeClass("selectsome").removeClass("unselect").addClass("selected").addClass("active");
+				if (thisSelect.hasClass("select-some") || thisSelect.hasClass("unselect")) {
+					thisSelect.removeClass("select-some").removeClass("unselect").addClass("selected").addClass("active");
+					thisSelect.parent("li").find("ul i").removeClass("select-some").removeClass("unselect").addClass("selected").addClass("active");
 				} else {
 					thisSelect.removeClass("selected").addClass("unselect").removeClass("active");
-					thisSelect.parent("li").find("folder-tree i").removeClass("selected").addClass("unselect").removeClass("active");
+					thisSelect.parent("li").find("ul i").removeClass("selected").addClass("unselect").removeClass("active");
 				}
 				//处于其影响范围内的祖先的改变
-				thisSelect.parents("folder-tree").each(function () {
+				thisSelect.parents("ul").each(function () {
 					var thisTree = $(this);
 					var thisStatus = thisTree.siblings(".selcetstatus");
 					if (thisTree.find(".selected").length < 1) {
-						thisStatus.removeClass("selected").removeClass("active").removeClass("selectsome").addClass("unselect");
+						thisStatus.removeClass("selected").removeClass("active").removeClass("select-some").addClass("unselect");
 					} else if (thisTree.find(".unselect").length < 1) {
-						thisStatus.removeClass("selectsome").removeClass("unselect").removeClass("selectsome").addClass("selected").addClass("active");
+						thisStatus.removeClass("select-some").removeClass("unselect").removeClass("select-some").addClass("selected").addClass("active");
 					} else {
-						thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("selectsome");
+						thisStatus.removeClass("unselect").removeClass("selected").removeClass("active").addClass("select-some");
 					}
 				});
 			}
@@ -957,7 +999,7 @@ webpackJsonp([4,7],[
 	  * 判断是否有缓存,有则取缓存,没有则默认显示第一个
 	  **/
 		$timeout(function () {
-			var defaultEle = $(".location-list").children("folder-tree").children("ul").children("li:eq(0)").children("i");
+			var defaultEle = $(".location-list").children("ul").children("li:eq(0)").children("i");
 			var defaultId = defaultEle.attr("location-id");
 			var defaultList = $rootScope.defaultList;
 			//是否存在该用户缓存信息
@@ -1056,7 +1098,7 @@ webpackJsonp([4,7],[
 
 			var urlLocationid;
 			var body_locationid = [];
-			var allSelecteds = $(".selectsome");
+			var allSelecteds = $(".select-some");
 			//全勾中
 			if (allSelecteds.length == 0) {
 				for (var i = 0; i < locationList.length; i++) {
@@ -1120,16 +1162,16 @@ webpackJsonp([4,7],[
 
 			//更改为默认第一级展开状态,并将地点树隐藏
 			$(".location-list span").removeClass("open").removeClass("active");
-			var folderTree = $(".location-list").find("folder-tree");
-			for (var i = 1; i < folderTree.length; i++) {
-				$(folderTree[i]).hide();
+			var folderUl = $(".location-list").find("ul");
+			for (var i = 1; i < folderUl.length; i++) {
+				$(folderUl[i]).hide();
 			}
 			$(".location-choose").animate({ left: "-280px" }, 300);
 			$(".point-click").css("background-position", "0px 0px");
 			$(".out-bg").animate({ width: "64px" }, 300);
 			//设置前面线的高度
-			var thisB = $(folderTree[0]).children("ul").children("b");
-			thisB.height($(folderTree[0]).children("ul").height() - 30);
+			var thisB = $(folderUl[0]).children("b");
+			thisB.height($(folderUl[0]).height() - 30);
 
 			$scope.get_differall_num();
 		};
@@ -1369,4 +1411,4 @@ webpackJsonp([4,7],[
 	});
 
 /***/ }
-]);
+/******/ ]);

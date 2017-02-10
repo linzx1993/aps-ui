@@ -3,7 +3,9 @@
  */
 app.controller("planController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService","dataService","tool", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService,dataService,tool){
     $scope.ruleList = dataService.ruleList;
-    $scope.columnWorkshop = false;
+
+    //显示正确的目录class-active
+    $scope.configNav.activeNav = ".scheme";
 
     //获取车间计划列表
     $http.get($rootScope.restful_api.all_schedule_plan)
@@ -84,7 +86,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                 selectI.siblings("span").addClass("item-select");
                 selectI.addClass("active");
                 //子地点全部选中，且设置为disable不可更改
-                selectI.siblings("folder-tree").find("select-status").addClass("active")
+                selectI.siblings("ul").find("select-status").addClass("active")
             })
         }
     };
@@ -311,14 +313,14 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
             })
             .then(() => {
                 $timeout(function () {
+                    //展开一级列表
+                    $(".all-location span").eq(0).next().show();
+                    //显示选中的车间
                     $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+
                     $("#jWorkshop").on("click","ul span",function(){
-                        if($(this).next().find("ul li").length == 0){
-                            return;
-                        }else{
-                            $(this).toggleClass("active").toggleClass("open");
-                            $(this).next().toggle();
-                        }
+                        $(this).toggleClass("active").toggleClass("open");
+                        $(this).next().toggle();
                         //设置前面线的高度
                         let thisUL = $(this).parents("ul");
                         let thisLI = thisUL.children("li");
@@ -355,7 +357,7 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                             let parentUl = parentLi.parent();
                             let activeLiLength;//所有选中的子车间的长度
                             let selectStatusLength = parentUl.find(".select-status").length;//所有子车间的长度
-                            let parentSelectStatus = parentUl.parent().siblings(".select-status");//父车间的checkbox（i标签）
+                            let parentSelectStatus = parentUl.siblings(".select-status");//父车间的checkbox（i标签）
 
                             //车间已被选中，则子列表变为可点击，未选中的状态
                             if($(target).hasClass("active")){
@@ -363,9 +365,9 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                                     $scope.locationRuleList = $scope.locationRuleList.filter((item) => {
                                         return item.locationId !== id.slice(0,id.length-2);
                                     });
+                                    //一级车间取消，变为剩下的二级车间
                                     Array.prototype.forEach.call(parentLi.siblings("li"),(item)=>{
                                         let liItem = $(item);
-                                        console.log(liItem.children(".item-select"));
                                         $scope.locationRuleList.push({
                                             locationId : liItem.children("i").attr("data-location-id"),
                                             locationName : liItem.children("span").text(),
@@ -391,10 +393,10 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                             else {
                                 //所有子车间加上active的class
                                 $(target).addClass("active");
-                                activeLiLength = parentUl.find(".active").length;
-                                Array.prototype.forEach.call(parentLi.find("folder-tree .select-status"),function(item){
+                                Array.prototype.forEach.call($(target).siblings("ul").find(".select-status"),function(item){
                                     item.className = "select-status active";
                                 });
+                                activeLiLength = parentUl.find(".active").length;
 
                                 //左侧菜单出现本车间的信息
                                 $scope.locationRuleList.push({
@@ -407,16 +409,17 @@ app.controller("planController",["$rootScope","$scope","$http", "$window", "$loc
                                 //同级列表全部选中时，左侧列变为父级一个出现，移除所有同级的车间展示
                                 //如果全部选中，父级变为选中，左侧列表只显示父级
                                 //active的个数等于所有个数则表示选中所有父级，
+                                console.log(activeLiLength);
+                                console.log(selectStatusLength);
                                 if (activeLiLength === selectStatusLength){
                                     //设置为不选，。然后点击调用方法，全部选中
                                     //判断是否为第一级春风车间,不是则继续执行
-                                    if(parentUl.parent().prev().length){
+                                        console.log(parentSelectStatus);
                                         parentSelectStatus.attr("class","select-status");
                                         parentSelectStatus.trigger("click");
                                         //偷懒，先父级选中，所有子级不可选中
                                         // Array.prototype.forEach.call(parentUl.find(".select-status"),function(item){
                                         // });
-                                    }
                                     layer.msg("已合并为上一级车间",{time : 2000});
                                 }else if(activeLiLength !== 0){
                                     //没有全部选中，添加class->select-some

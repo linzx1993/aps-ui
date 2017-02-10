@@ -2,6 +2,9 @@
  * Created by yiend on 2017/2/6.
  */
 app.controller("versionController",["$rootScope","$scope","$http","$state","tool", function($rootScope,$scope,$http,$state,tool){
+    //显示正确的目录class-active
+    $scope.configNav.activeNav = ".version";
+
     $http.get($rootScope.restful_api.public_version_number)
         .then((res) => {
             $scope.versionNumer =res.data.version;

@@ -5,15 +5,14 @@
 $("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",function(){
     $(this).addClass("active").siblings().removeClass("active");
 });
-app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","dataService", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,dataService){
+app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool){
     //默认跳转初始版本页面
-    $state.go('config.version');
-    //目录li加上class-active
-    $scope.activeNav = ".version";
+    $state.go('config.scheme');
+    $scope.configNav = {};
 
     //添加目录class-active
     $scope.isActiveNav = function(val){
-        return $scope.activeNav ===  val;
+        return $scope.configNav.activeNav ===  val;
     };
     //***********************//
     //生成车间树,设置车间选中
@@ -55,7 +54,7 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     //
     $scope.selectLi = (sref,event) => {
         //为li加上class-active
-        $scope.activeNav = sref;
+        $scope.configNav.activeNav = sref;
         // $timeout(function(){
         //     $(".second-nav").css("pointer-events","auto").find(".active").css("pointer-events","none");
         // });
@@ -64,12 +63,12 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
             $(`.select-status[location-id=${$scope.locationId}]`).trigger("click");
         },100);
         //下拉代码
-        if($(event.target).parent().hasClass("drag")){
-            $(this).removeClass("drag");
+        let Li = $(event.target).parent();
+        if(Li.hasClass("drag")){
+            Li.removeClass("drag");
             return;
         }
-        $(event.target).parent().addClass("drag").siblings().removeClass("drag");
-        console.log(sref);
+        Li.addClass("drag").siblings().removeClass("drag");
         event.stopPropagation();
     };
 
@@ -168,77 +167,6 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     };
 
     $("body")
-    //选择添加/删除车间
-        .on("click", "#workshop .select-status", function(event) {
-            var e = event || window.event;
-            var target = e.target || e.srcElement;
-            var id = target.getAttribute("location-id");
-            var firstRule = $scope.ruleList[0];
-            var containMenu = false; //点击车间是否由子车间已经被选择了
-            //判断有没有排程规则
-            if(!firstRule) {
-                layer.alert("请先添加排程规则");
-            }
-            //子列表变为不可编辑状态
-            //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
-            if(id.length <= 4) {
-                $(target).parent().next().find("i").addClass("disabled");
-            }
-            //开始添加,先判断是否有车间,没有车间直接添加
-            if(!$scope.locationRuleList.length) {
-                $scope.locationRuleList.push({
-                    locationId: id,
-                    locationName: target.nextElementSibling.innerHTML,
-                    ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
-                    ruleId: firstRule ? firstRule.ruleId : ""
-                });
-            } else {
-                //=====判断点击车间是够已经被选择
-                var repeatLocationId = $scope.locationRuleList.every(function(item, index, arr) {
-                    if(item.locationId == id) {
-                        arr.splice(index, 1);
-                    }
-                    return item.locationId != id;
-                });
-                // debugger;
-                // console.log(target.className);
-                // let repeatLocationId = target.className.includes("selected");
-                // console.log(repeatLocationId);
-                //======
-                //车间没被选中
-                if(repeatLocationId) {
-                    //点击一级之后取消所有二级(有选中的二级情况下)
-                    for(var i = $scope.locationRuleList.length - 1; i >= 0; i--) {
-                        if($scope.locationRuleList[i].locationId.slice(0, id.length) == id) {
-                            containMenu = true;
-                            $scope.locationRuleList.splice(i, 1);
-                        }
-                    }
-                    //====================（没有选中的二级情况下）
-                    $scope.locationRuleList.push({
-                        locationId: id,
-                        locationName: target.nextElementSibling.innerHTML,
-                        ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
-                        ruleId: firstRule ? firstRule.ruleId : ""
-                    });
-                    secondToFirst(target);
-                    //如果该元素有子集列表,该元素的子列表变为不可点击
-                    console.log(target.parentNode.nextElementSibling);
-                    if(target.parentNode.nextElementSibling && target.parentNode.nextElementSibling.nodeName === "UL") {
-                        Array.prototype.forEach.call(target.parentNode.nextElementSibling.getElementsByClassName("select-status"), function(item, index) {
-                            item.className += " disabled";
-                        });
-                    }
-                }
-                //车间已被选中
-                else {
-                    //子列表变为可点击
-                    $(target).parent().next().find("i").removeClass("disabled");
-                }
-            }
-            //强制刷新dom
-            $scope.$apply();
-        })
         //合并项下拉代码
         .on("click","dd.relative",function(){
             //判断是否可编辑，是否生效

@@ -4,7 +4,11 @@
 'use strict';
 app
     .controller("secondPageController",["$rootScope","$scope","$state",function($rootScope,$scope,$state){
+        //显示正确的目录class-active
+        $scope.configNav.activeNav = ".second";
+
         $state.go('config.second.column');//默认显示第一个tab
+
         $scope.secondPage = {
             title : "",//面包屑导航三级目录文字
         };

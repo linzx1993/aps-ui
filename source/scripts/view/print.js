@@ -5,12 +5,13 @@
 (function(){
 	console.log("a");
 	var $body = $("body");
-	
+
 	//默认纵向
 	creatPrint(creatPrint);
 	
 	
 	$body.on("click","button",function(){
+        var printType;
 		var thisWidth = "";
 		if($(this).hasClass("transverse")){
 			printType = "transverse";

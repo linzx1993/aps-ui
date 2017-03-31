@@ -1,4 +1,4 @@
-require("./source/styles/config.scss");
+require("./source/styles/scss/config.scss");
 require("./source/styles/reset.css");
 require("./source/styles/common.css");
 require("./source/styles/index.css");

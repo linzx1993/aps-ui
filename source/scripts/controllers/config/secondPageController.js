@@ -5,29 +5,32 @@
 app
     .controller("secondPageController",["$rootScope","$scope","$state",function($rootScope,$scope,$state){
         //显示正确的目录class-active
-        $scope.configNav.activeNav = ".second";
+        $scope.configNav.activeNav = ".workUnit";
 
-        $state.go('config.second.column');//默认显示第一个tab
+        $state.go('config.workUnit.column');//默认显示第一个tab
 
         $scope.secondPage = {
             title : "",//面包屑导航三级目录文字
         };
     }])
-    .controller("columnController",["$rootScope","$scope","$http",function($rootScope,$scope,$http){
+    .controller("columnController",["$rootScope","$scope","$http","http",function($rootScope,$scope,$http,http){
         //设置面包屑导航
-        $scope.secondPage.showPageConfig = "显示排序项";
+        $scope.secondPage.showPageConfig = "显示项";
 
         /**
          *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
          */
         let getColumnData = () =>{
-            $http.get($rootScope.restful_api.column_content_config + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.column_content_config + $scope.locationId,
+				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                }, () => {
+                },
+				errorFn: () => {
                     $scope.info.fail("获取数据失败，请检查是否连上服务器")
-                });
+                }
+			});
         };
         getColumnData();
 
@@ -44,61 +47,75 @@ app
             if(!postData){
                 return;
             }
-            $http.put($rootScope.restful_api.column_content_config + $scope.locationId,postData)
-                .then(function(response){
+			http.put({
+				url: $rootScope.restful_api.column_content_config + $scope.locationId,
+				data: postData,
+				successFn: function(response){
                     if(response.data === true){
                         $scope.info.success("数据保存成功");
                     }
-                },function(){
+                },
+				errorFn: function(){
                     $scope.info.fail("数据保存失败");
-                })
+                }
+			});
         };
 
         /**列信息还原数据**/
         $scope.resetColumnConfig = () => {
-            $http.delete($rootScope.restful_api.column_content_config + $scope.locationId)
-                .then(function(res){
+			http.delete({
+				url: $rootScope.restful_api.column_content_config + $scope.locationId,
+				successFn: function(res){
                     $("#all-item").find(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
                     $scope.info.success("还原配置成功");
-                },function(){
+                },
+				errorFn: function(){
                     $scope.info.fail("还原配置失败");
-                })
+                }
+			});
         };
     }])
-    .controller("sortController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService) {
+    .controller("sortController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService","http",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService,http) {
         //设置面包屑导航
         $scope.secondPage.showPageConfig = "多列排序项";
 
         function getSortConfig(){
-            $http.get($rootScope.restful_api.sort_content_config + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.sort_content_config + $scope.locationId,
+				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                }, () => {
+                },
+				errorFn: () => {
                     $scope.info.fail("获取数据失败，请检查是否连上服务器")
-                });
+                }
+			});
             //合并项
-            $http.get($rootScope.restful_api.sort_combine_config + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.sort_combine_config + $scope.locationId,
+				successFn: (res) => {
                     $scope.combineItem = $.extend({}, res.data);
                     $scope.combineObj = {
                         combine: scheduleTableViewModelService.combinecountItem($scope.combineItem),
                         combineDrag: true,
                         combineActive: false
                     }
-                });
+                }
+			});
             //汇总项
-            $http.get($rootScope.restful_api.sort_summary_config + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.sort_summary_config + $scope.locationId,
+				successFn: (res) => {
                     $scope.summaryItem = $.extend({}, res.data);
                     $scope.summaryObj = {
                         summary: scheduleTableViewModelService.combinecountItem($scope.summaryItem),
                         summaryDrag: true,
                         summaryActive: true
                     }
-                });
+                }
+			});	
         }
         //创建车间树
         $scope.createWorkshop(true,getSortConfig);
@@ -116,14 +133,18 @@ app
             if(!postData){
                 return;
             }
-            $http.put($rootScope.restful_api.sort_content_config + $scope.locationId,postData)
-                .then(function(response){
+			http.put({
+				url: $rootScope.restful_api.sort_content_config + $scope.locationId,
+				data: postData,
+				successFn: function(response){
                     if(response.data === true){
                         $scope.info.success("数据保存成功");
                     }
-                },function(){
+                },
+				errorFn: function(){
                     $scope.info.fail("数据保存失败");
-                });
+                }
+			});
             //合并项
             let combineP = document.getElementsByClassName("combine-item")[0].getElementsByTagName("span");
             $scope.combineItem.selectList = [];
@@ -138,19 +159,26 @@ app
             //空的情况下暂时使用还原功能
             if($scope.combineItem.selectList.length === 0){
                 $scope.combineItem.selectList = null;
-                $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId,$scope.combineItem)
-                    .then(function(response){
+				http.delete({
+					url: $rootScope.restful_api.sort_combine_config + $scope.locationId,
+					successFn: function(response){
                         //$scope.info.success("数据保存成功");
-                    },function(res){
+                    },
+					errorFn: function(res){
                         $scope.info.fail("合并项保存失败");
-                    })
+                    }
+				});
             }else{
-                $http.put($rootScope.restful_api.sort_combine_config + $scope.locationId,$scope.combineItem)
-                    .then(function(response){
+				http.put({
+					url: $rootScope.restful_api.sort_combine_config + $scope.locationId,
+					data: $scope.combineItem,
+					successFn: function(response){
                         //$scope.info.success("数据保存成功");
-                    },function(){
+                    },
+					errorFn: function(){
                         $scope.info.fail("合并项保存失败");
-                    })
+                    }
+				});
             }
             //汇总项
             let summaryP = document.getElementsByClassName("Summary-item")[0].getElementsByTagName("span");
@@ -166,57 +194,73 @@ app
             //空的情况下暂时使用还原功能
             if($scope.summaryItem.selectList.length === 0){
                 $scope.summaryItem.selectList = null;
-                $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId,$scope.summaryItem)
-                    .then(function(response){
+				http.delete({
+					url: $rootScope.restful_api.sort_summary_config + $scope.locationId,
+					successFn: function(response){
                         //$scope.info.success("数据保存成功");
-                    },function(res){
+                    },
+					errorFn: function(res){
                         $scope.info.fail("汇总项保存失败");
-                    })
+                    }
+				});
             }else{
-                $http.put($rootScope.restful_api.sort_summary_config + $scope.locationId,$scope.summaryItem)
-                    .then(function(response){
+				http.put({
+					url: $rootScope.restful_api.sort_summary_config + $scope.locationId,
+					data: $scope.summaryItem,
+					successFn: function(response){
                         //$scope.info.success("数据保存成功");
-                    },function(res){
+                    },
+					errorFn: function(res){
                         $scope.info.fail("汇总项保存失败");
-                    })
+                    }
+				});
             }
         };
 
         /**多列排序信息还原数据**/
         $scope.resetSortConfig = () => {
-            $http.delete($rootScope.restful_api.sort_content_config + $scope.locationId)
-                .then(function(res){
+			http.delete({
+				url: $rootScope.restful_api.sort_content_config + $scope.locationId,
+				successFn:function(res){
                     $("#all-item").find(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
                     $scope.info.success("还原配置成功");
-                },function(){
+                },
+				errorFn: function(){
                     $scope.info.fail("还原配置失败");
-                });
+                }
+			});
             //还原合并项
-            $http.delete($rootScope.restful_api.sort_combine_config + $scope.locationId,null)
-                .then(function(response){
+			http.delete({
+				url: $rootScope.restful_api.sort_combine_config + $scope.locationId,
+				successFn: function(response){
                     $scope.combineItem = $.extend({},response.data);
                     $scope.combineObj = {
                         combine : scheduleTableViewModelService.combinecountItem($scope.combineItem),
                         combineDrag : true,
                         combineActive : false
                     }
-                },function(res){
+                },
+				errorFn:　function(res){
                     $scope.info.fail("合并项保存失败");
-                });
+                }
+			});
             //还原汇总项
-            $http.delete($rootScope.restful_api.sort_summary_config + $scope.locationId,null)
-                .then(function(response){
+			http.delete({
+				url: $rootScope.restful_api.sort_summary_config + $scope.locationId,
+				successFn: function(response){
                     $scope.summaryItem = $.extend({},response.data);
                     $scope.summaryObj = {
                         summary : scheduleTableViewModelService.combinecountItem($scope.summaryItem),
                         summaryDrag : true,
                         summaryActive : true
                     }
-                },function(res){
+                },
+				errorFn: function(res){
                     $scope.info.fail("汇总项保存失败");
-                })
+                }
+			});
         };
 
         //删除||选中-合并和汇总项

@@ -1,17 +1,20 @@
 /**
  * Created by yiend on 2017/2/6.
  */
-app.controller("versionController",["$rootScope","$scope","$http","$state","tool", function($rootScope,$scope,$http,$state,tool){
+app.controller("versionController",["$rootScope","$scope","$http","$state","tool","http", function($rootScope,$scope,$http,$state,tool,http){
     //显示正确的目录class-active
     $scope.configNav.activeNav = ".version";
-
-    $http.get($rootScope.restful_api.public_version_number)
-        .then((res) => {
+	
+	http.get({
+		url: $rootScope.restful_api.public_version_number,
+		successFn: (res) => {
             $scope.versionNumer =res.data.version;
             // 版本页面
             $scope.browser = tool.getBrowser().browser;
             $scope.version = tool.getBrowser().version;
-        },function(){
+        },
+		errorFn: function(){
             layer.alert("获取系统版本失败，请检查服务器");
-        });
+        }
+	});
 }]);

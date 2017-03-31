@@ -39,8 +39,6 @@ const md5 = require("gulp-md5-plus");
 const assetRev = require('gulp-asset-rev'),
     rev = require('gulp-rev'),//- 对文件名加MD5后缀
     revCollector = require('gulp-rev-collector');//路径替换
-//删除文件
-const del = require("del");
 //顺序执行任务
 const runSequence = require('run-sequence');
 const sequence = require("gulp-sequence");
@@ -85,8 +83,9 @@ gulp.task("copyCss",function(){
     if(isProduct){
         gulp.src(config.styles.src)
             // .pipe(rename({ suffix: '.min' }))
-            .pipe(sourcemaps.init())
+            // .pipe(sourcemaps.init())
             .pipe(sass().on('error', sass.logError))
+            // .pipe(sourcemaps.write('.'))
             .pipe(minifycss())
             .pipe(rev())
             .pipe(gulp.dest(config.styles.css.dest))
@@ -114,11 +113,9 @@ gulp.task("concat",function(){
 });
 
 gulp.task("copyJs",function(){
-    gulp.src("source/scripts/lib/**/*.*")
-        .pipe(gulp.dest("dist/scripts/lib"));
     //发布环境进行压缩，改名，加上hash
     if(isProduct){
-        gulp.src([config.scripts.src])
+        gulp.src([config.scripts.src,"!source/scripts/lib/**/*.*"])
             .pipe(babel({presets: ['es2015']}))
             // .pipe(uglify())
             .pipe(rev())
@@ -131,10 +128,10 @@ gulp.task("copyJs",function(){
         gulp.src([config.scripts.src,"!source/scripts/lib/**/*.*"])
             .pipe(babel({presets: ['es2015']}))
             .pipe(gulp.dest(config.scripts.dest));
-        gulp.src("source/scripts/lib/**/*.*")
-            .pipe(gulp.dest(config.scripts.dest));
     }
     // //将一些图片相关文件进行迁移
+    gulp.src("source/scripts/lib/**/*.*")
+        .pipe(gulp.dest(config.scripts.dest));
 
 });
 
@@ -169,7 +166,7 @@ gulp.task('clean', function() {
     gulp.src(['dist/*',"rev/*"], {read: false})
         .pipe(clean());
 });
-
+//==================================监测所有文件实时刷新==========================================//
 //自动监测方案一
 gulp.task('watch', ["clean"],function() {
     if(isProduct){
@@ -185,10 +182,15 @@ gulp.task('watch', ["clean"],function() {
         }
     });
     gulp.watch(config.scripts.controllers.src,["concat"]);
-    gulp.watch([config.scripts.src,"!" + config.scripts.controllers.src],['copyJs']);
+    // gulp.watch([config.scripts.src,"!" + config.scripts.controllers.src],['copyJs']);
     gulp.watch(config.styles.src,['copyCss']);
     gulp.watch(config.view.src,['copyHtml']);
 });
+
+//==================================只监测scss文件，改变时自动编译，但不实时刷新==========================================//
+gulp.task("watchScss",function () {
+    gulp.watch(config.styles.src,["copyCss"]);
+})
 
 //==================================发布产品，添加版本号==========================================//
 gulp.task('revCssAndJs', function(){
@@ -207,12 +209,12 @@ gulp.task('revHtml',["revCssAndJs"], function() {
 
 //生成环境：1、删除dist目录 2、编译sass，编译ES6，加上版本号，并把编译后的结果发送到dist目录；3、合并js请求
 //先执行gulp default,然后执行 gulp revHtml,原因：js文件生成滞后，无法获取js的rev.json文件进行替换版本号
-gulp.task('default',function (cb) {
+gulp.task('default',["clean",'copyHtml', 'copyCss','concat',"copyJs","copyImage","copyLanguage"],function (cb) {
     if(!isProduct){
         console.log("\033[36m-------------------------------------\n开发状态下，请将isProduct设置为true\n-------------------------------------");
         return;
     }
-    sequence("clean",['copyHtml', 'copyCss','concat',"copyJs","copyImage","copyLanguage"],"revHtml")(cb)
+    // sequence("clean",['copyHtml', 'copyCss','concat',"copyJs","copyImage","copyLanguage"],"revHtml")(cb)
 });
 
 //============================================================================//

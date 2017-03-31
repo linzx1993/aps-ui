@@ -15,9 +15,9 @@
   "workshopProperties" : "Workshop properties",
   "defaultDisplayItem" : "The default display item",
   "displayConfiguration" : "display configuration",
-  "firstPageTitle" : "levelPage",
-  "secondaryPage" : "secondary page",
-  "threePages" : "three pages",
+  "WorkArea" : "Work area",
+  "WorkUnit" : "Work unit",
+  "WorkMenu" : "Work menu",
   "100001": "Login",
   "100002": "Register"
 }

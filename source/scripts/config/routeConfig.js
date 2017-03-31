@@ -3,8 +3,8 @@
  */
 app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function($stateProvider,$urlRouterProvider,$translateProvider) {
     // 在这里定义路由
-    // $urlRouterProvider.otherwise('/home');
-    // $urlRouterProvider.when("", "/home");
+    $urlRouterProvider.otherwise('/preview');
+    $urlRouterProvider.when("", "/preview");
     $stateProvider
         .state('home',{
             url:'/home',
@@ -60,36 +60,36 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
          // // 配置页-显示
          .state('config.display',{
              url:'/display',
-             templateUrl:'view/template/displaySecondPage.html',
+             templateUrl:'view/template/workArea/displayFirstPage.html',
              controller: function($state){
-                 $state.go('config.first.displayDays');//默认显示第一个tab
+                 $state.go('config.workArea.displayDays');//默认显示第一个tab
              }
          })
          // 配置页-一级页面
-         .state('config.first',{
-             url:'/first',
-             templateUrl:'view/template/displayFirstPage.html',
+         .state('config.workArea',{
+             url:'/workArea',
+             templateUrl:'view/template/workArea/displayFirstPage.html',
              controller : "firstPageController",
          })
          // 配置页-一级页面-显示天数
-        .state('config.first.displayDays',{
+        .state('config.workArea.displayDays',{
             url:'/displayDays',
-            templateUrl:'view/template/displayDays.html',
+            templateUrl:'view/template/workArea/displayDays.html',
         })
         // 配置页-一级页面-显示合并项
-        .state('config.first.displayCombine',{
+        .state('config.workArea.displayCombine',{
             url:'/displayCombine',
-            templateUrl:'view/template/displayCombine.html',
+            templateUrl:'view/template/workArea/displayCombine.html',
         })
         // 配置页-一级页面-翻转显示
-        .state('config.first.displayFlip',{
+        .state('config.workArea.displayFlip',{
             url:'/flip',
-            templateUrl:'view/template/displayFlip.html',
+            templateUrl:'view/template/workArea/displayFlip.html',
         })
          //配置页-二级页面
-         .state('config.second',{
-             url:'/second',
-             templateUrl:'view/template/displaySecondPage.html',
+         .state('config.workUnit',{
+             url:'/workUnit',
+             templateUrl:'view/template/workUnit/displaySecondPage.html',
              controller: "secondPageController",
              // abstract:true
              // views: {
@@ -102,22 +102,35 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              // }
          })
          //配置页-二级页面-显示排序
-        .state('config.second.column',{
+        .state('config.workUnit.column',{
             url:'/column',
-            templateUrl:'view/template/columnConfig.html',
+            templateUrl:'view/template/workUnit/columnConfig.html',
             controller : "columnController",
         })
          //配置页-二级页面-多列排序
-        .state('config.second.sortColumn',{
+        .state('config.workUnit.sortColumn',{
             url:'/sortColumn',
-            templateUrl:'view/template/sortConfig.html',
+            templateUrl:'view/template/workUnit/sortConfig.html',
             controller : "sortController"
         })
-         //配置页-三级页面
-         .state('config.three',{
-             url:'/three',
-             templateUrl:'view/template/columnConfig.html',
+         //配置页-功能模块
+         .state('config.workMenu',{
+             url:'/function',
+             templateUrl:'view/template/workMenu/functionPage.html',
+             controller :　"functionModuleController",
          })
+         //配置页-功能模块-任务池列信息
+         .state('config.workMenu.task',{
+             url:'/task',
+             templateUrl:'view/template/workMenu/taskColumn.html',
+             controller :　"taskColumnController",
+         })
+         //配置页-功能模块-暂存间信息
+        .state('config.workMenu.cache',{
+            url:'/task',
+            templateUrl:'view/template/workMenu/cacheRoom.html',
+            controller :　"cacheRoomController",
+        })
          .state('config.rule',{
              url:'/rule',
              templateUrl:'view/template/scheduleRule.html',

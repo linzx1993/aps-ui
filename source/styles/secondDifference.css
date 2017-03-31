@@ -1,0 +1,255 @@
+@charset "UTF-8";
+.table-dialog-differ {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -355px;
+  margin-left: -635px;
+  width: 1270px;
+  height: 710px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  z-index: 5; }
+  .table-dialog-differ .differ-line {
+    position: absolute;
+    left: 634px;
+    top: 88px;
+    width: 1px;
+    height: 440px;
+    background-color: #ccc; }
+  .table-dialog-differ .table-window-button {
+    position: absolute;
+    bottom: 20px;
+    left: 604px;
+    width: 60px;
+    height: 24px;
+    line-height: 24px;
+    color: #333;
+    text-align: center;
+    background-color: #d9d9d9;
+    border: 2px solid #d9d9d9;
+    cursor: pointer; }
+    .table-dialog-differ .table-window-button:hover {
+      border-color: #808080; }
+  .table-dialog-differ .differ-wrap-table {
+    position: absolute;
+    left: 0;
+    top: 50px;
+    width: 554px;
+    overflow: hidden; }
+  .table-dialog-differ .differ-wrap-table {
+    position: absolute;
+    left: 0;
+    top: 50px;
+    width: 554px;
+    overflow: hidden; }
+  .table-dialog-differ .differ-table-task {
+    height: 440px; }
+    .table-dialog-differ .differ-table-task .show-table-differ {
+      height: 436px; }
+  .table-dialog-differ .differ-table-pool {
+    height: 540px; }
+    .table-dialog-differ .differ-table-pool .show-table-differ {
+      height: 536px; }
+
+.table-window-alert {
+  width: 1270px;
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 1px solid #ccc;
+  color: #333;
+  background-color: #f0f0f0;
+  text-align: center;
+  font-size: 16px; }
+  .table-window-alert .alert-info {
+    position: absolute;
+    left: 605px; }
+  .table-window-alert .alert-same {
+    font-size: 14px;
+    float: right; }
+  .table-window-alert .alert-line {
+    display: inline-block;
+    font-size: 20px;
+    color: #bfbfbf;
+    margin-right: 60px; }
+  .table-window-alert .alert-close {
+    float: right;
+    margin: 12px -47px 0 0;
+    width: 20px;
+    height: 20px;
+    background: url(../images/alert-close.png) no-repeat;
+    cursor: pointer;
+    z-index: 88; }
+    .table-window-alert .alert-close:hover {
+      background-color: #e8e8e8; }
+
+.differ-show {
+  position: absolute;
+  bottom: 70px;
+  left: 40px;
+  width: 1190px;
+  height: 80px;
+  border: 1px #ccc solid;
+  background-color: #fefefe; }
+  .differ-show .differ-show-info {
+    display: none;
+    position: absolute;
+    width: 50px;
+    text-align: center;
+    border-top: 1px solid #ccc;
+    border-right: 1px solid #ccc; }
+  .differ-show .differ-show-top {
+    height: 30px;
+    background-color: #ededed; }
+  .differ-show .differ-show-front {
+    top: 30px;
+    height: 25px; }
+  .differ-show .differ-show-back {
+    top: 55px;
+    height: 25px; }
+
+/* 显示差异    */
+#show {
+  position: absolute;
+  left: 50px;
+  width: 1140px;
+  text-align: center; }
+  #show td, #show th {
+    border: 1px #ccc solid; }
+  #show thead tr {
+    background-color: #ededed;
+    height: 30px;
+    font-family: "宋体"; }
+
+.table-window-differ {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 554px;
+  height: auto; }
+  .table-window-differ .dialog-window-heads {
+    height: 50px;
+    width: 554px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 18px; }
+  .table-window-differ .show-table-differ {
+    position: absolute;
+    top: 0;
+    width: 874px;
+    font-size: 14px; }
+    .table-window-differ .show-table-differ .table-space-differ {
+      height: auto;
+      width: 874px; }
+    .table-window-differ .show-table-differ table {
+      border-collapse: collapse;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      border: 1px solid #ccc; }
+      .table-window-differ .show-table-differ table tbody {
+        width: 100%; }
+      .table-window-differ .show-table-differ table thead {
+        width: 100%;
+        height: 30px;
+        line-height: 30px; }
+      .table-window-differ .show-table-differ table th {
+        height: 30px;
+        line-height: 30px;
+        table-layout: fixed;
+        margin: 0 5px;
+        color: #fff;
+        background-color: #437eba;
+        border: 1px solid #ccc;
+        font-weight: normal;
+        cursor: pointer; }
+      .table-window-differ .show-table-differ table tr {
+        height: 30px;
+        line-height: 30px;
+        padding: 0; }
+        .table-window-differ .show-table-differ table tr:nth-child(even) {
+          background-color: #edeeed; }
+        .table-window-differ .show-table-differ table tr:hover {
+          border: 1px #333 solid;
+          background-color: #ccc;
+          cursor: pointer; }
+      .table-window-differ .show-table-differ table td, .table-window-differ .show-table-differ table #show th, #show .table-window-differ .show-table-differ table th {
+        border: 1px solid #ccc; }
+  .table-window-differ .cover-heads {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 30px;
+    line-height: 28px;
+    font-size: 14px;
+    text-align: center;
+    z-index: 12; }
+    .table-window-differ .cover-heads div {
+      float: left;
+      display: inline;
+      height: 100%;
+      border: 1px solid #ccc;
+      background-color: #3e7ec3;
+      color: #fff; }
+
+.table-window-left {
+  left: 40px; }
+
+.table-window-right {
+  left: 674px; }
+
+.isPooltaskId {
+  display: none; }
+  .isPooltaskId .differ-line {
+    height: 530px; }
+
+.switch-result {
+  font-size: 12px;
+  font-weight: bold;
+  color: #1e7cd9; }
+
+.isPoolBtn:hover {
+  cursor: pointer; }
+
+.isTaskBtn:hover {
+  cursor: pointer; }
+
+/*  range滑块       */
+.slider-track {
+  height: 2px;
+  width: 90px;
+  background-color: #ccc;
+  position: relative;
+  float: right;
+  margin: -20px 90px 0 0; }
+  .slider-track .slider-thumb {
+    display: block;
+    position: absolute;
+    left: 46px;
+    z-index: 8;
+    margin: -10px 0 0 -5px;
+    width: 10px;
+    height: 20px;
+    background: url(../images/img03.png);
+    cursor: pointer; }
+
+.slider-bg {
+  position: absolute;
+  top: 22px;
+  right: 60px;
+  width: 120px;
+  z-index: 4; }
+  .slider-bg li {
+    float: left;
+    margin-right: 20px;
+    margin-top: -6px;
+    height: 8px;
+    width: 2px;
+    background-color: #ccc; }
+  .slider-bg li.ul-outer {
+    height: 12px; }
+  .slider-bg li.ul-inner {
+    margin-top: -4px; }
+
+/*# sourceMappingURL=secondDifference.css.map */

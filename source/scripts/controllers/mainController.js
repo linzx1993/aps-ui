@@ -1,7 +1,7 @@
 /**
  * Created by duww on 2017/1/9.
  */
-app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $location, $interval,$timeout,$q,scheduleTableViewModelService,tool) {
+app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $location, $interval,$timeout,$q,scheduleTableViewModelService,tool,http,$state) {
 	/**
 	 * 翻转
 	 **/
@@ -33,6 +33,7 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 					thisFront.stop(false,false);
 
 					//调用jquery动画函数
+					//有空改css动画
 					thisFront.animate({opacity:thisOpacity},{
 						step: function(n){
 							ry = (1-n)*180;
@@ -48,11 +49,23 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 		});
 	}
 	
+	
+	/**
+	 * 切换显示模型（大格子/小个子）
+	 **/
+	$scope.change_model_text = "切换月计划";
+	$scope.change_model = function(){
+		$scope.isSmall = !$scope.isSmall;
+		$scope.change_model_text = $scope.change_model_text == "切换月计划" ? "切换周计划" : "切换月计划";
+	}
+	
 	/**
 	 * 隐藏空白行
 	 **/
+	$scope.hide_empty_text = "隐藏空白行";
 	$scope.hide_tr = function(){
 		$scope.hide_empty = !$scope.hide_empty;
+		$scope.hide_empty_text = $scope.hide_empty_text == "隐藏空白行" ? "显示空白行" : "隐藏空白行";
 	}
 	
 	/**
@@ -62,6 +75,7 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 		$('.wrap-alert').hide(50);
 		$('#progressbar_one').hide(50);
 		$('.cover').hide(50);
+		$(".check-btn-div").hide();
 		
 		$('.progress-label_one').text("校验中");
 		$('.pbody-wrap').find("ul li").empty();   //清空上一次操作
@@ -73,7 +87,9 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
     $scope.save_aps = function(){
     	var progressbar = $("#progressbar_one"),
 			progressLabel = $("#progress-label_one");
-		progressLabel.text("保存 0%");
+		progressbar.children("span").css("width","0px");
+		progressLabel.text("保存 10%");
+		progressbar.children("span").animate({"width":"10%"});
         if($rootScope.local_test){
             /**
              * 本地测试方法
@@ -82,9 +98,10 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
         }else{
             var sta = false;   //状态变量
             //点击开始保存按钮
-            $http.post($rootScope.restful_api.aps_save, JSON.parse(sessionStorage.getItem("cancel_data"))).then(
-                //成功
-                function(response){
+			http.post({
+				url: $rootScope.restful_api.aps_save,
+				data: JSON.parse(sessionStorage.getItem("cancel_data")),
+				successFn: function(response){
                 	 $(".cover").show();
                     if(response.data){ 
                         sta = true;
@@ -92,51 +109,65 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
                         layer.alert("保存排程结果失败，返回参数错误,请联系技术人员处理");
                     }
                 },
-                //失败
-                function(response){
+				errorFn: function(response){
                     layer.alert("保存排程结果失败，请联系技术人员处理");
                     progressbar.hide();
                     $(".cover").hide();
                 }
-            );
+			});
 			//进度部分         
 			$(function(){
 			 	var i=1;    //循环次数
+			 	var timeCount;
 			    function progress(){							
 					var progressVal = 0;
 					var sUrl = $rootScope.restful_api.aps_rate_confirm+"?schemeId="+sessionStorage.schemeId;
-					$http.get(sUrl).success(function(res){
-						//获取接口数据
-						progressVal = res.rate || 0;
-						progressbar.children("span").css("width", progressVal + "%");
-						progressLabel.text("保存"+" "+progressVal + "%");
-						if(progressVal){    //数据正确
-		        			var j = setTimeout(progress, 1000);
-		        			if(sta){
-								progressbar.children("span").css("width","100%");
-								progressLabel.text( "保存完成" );
-								progressbar.hide(20);
-								clearTimeout(j);
+					http.get({
+						url: sUrl,
+						successFn: function(res){
+							res = res.data;
+							//获取接口数据
+							progressVal = res.rate || 0;
+							if(progressVal < 10){
+								progressVal = 10;
+							}						
+
+							if(progressVal || progressVal == 0){    //数据正确
+								timeCount = setTimeout(progress, 1000);
+
+								progressbar.children("span").animate({"width" : progressVal + "%"});
+								progressLabel.text("保存"+" "+progressVal + "%");
+
+								if(progressVal == 100){
+									progressbar.children("span").animate({"width" : "100%"});
+									progressLabel.text( "保存完成" );
+
+									$timeout(function(){
+										progressbar.hide();
+										$(".cover").hide();									
+										$location.path("/preview");
+									},1000)
+									clearTimeout(timeCount);
+
+								}else{
+									clearTimeout(timeCount);
+									progressbar.hide(20);
+									layer.alert("保存失败！");
+									$(".cover").hide();
+								}
+								//如果时间超过1小时，停止加载 ，弹框提示
+								if(i > 3600){
+									layer.alert("进度查询超时，请联系技术人员处理");
+									clearTimeout(timeCount);
+									progressbar.hide(20);   
+									$(".cover").hide();            	
+								}
+							}else{         //如果数据错误		      					      				
+								layer.alert("进度失败，请联系技术人员处理");
 								$(".cover").hide();
-								$location.path("/preview");
-							}else{
-								clearTimeout(j);
-								progressbar.hide(20);
-								layer.alert("保存失败！");
-								$(".cover").hide();
+								progressbar.hide(20);   //进度条加载完成后隐藏
 							}
-							//如果时间超过1小时，停止加载 ，弹框提示
-							if(i > 3600){
-								layer.alert("进度查询超时，请联系技术人员处理");
-								clearTimeout(j);
-								progressbar.hide(20);   
-								$(".cover").hide();            	
-					    	}
-		      			}else{         //如果数据错误		      					      				
-		      				layer.alert("进度失败，请联系技术人员处理");
-		      				$(".cover").hide();
-		      				progressbar.hide(20);   //进度条加载完成后隐藏
-		      			}
+						}
 					});
 					i++;   //循环加一
 				}	    		
@@ -145,6 +176,31 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
         }
    }
 	
+	/**
+	 * 改变地点重新获取基础数据(锁定期、显示天数、合并规则、默认翻转)
+	 **/
+	$scope.refreshBaseInfo = function(){
+		
+	}
+	
+	/**
+	 * 记录跳转路径（仅限参配和帮助页面）
+	 **/
+	$scope.historyUrl = [];
+	$scope.refreshHistoryUrl = function(){
+		$scope.historyUrl.push($location.$$url);
+		console.log($scope.historyUrl);
+	}
+	
+	/**
+	 * 点击返回,删除历史记录最后一条并跳转
+	 **/
+	$scope.historyUrlBack = function(){
+		var lastUrl = $scope.historyUrl.pop().split("/");
+		lastUrl.shift();
+		console.log(lastUrl.join("."));
+		$state.go(lastUrl.join("."));
+	}
 	
 	//右边栏弹出小提示	
 	$(function(){
@@ -209,7 +265,7 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 			})
 			//打开和收起右边栏
 			.on("click",".right-menu-switch",function(){
-				thisPositionX = $(this).css("background-position-x");
+				var thisPositionX = $(this).css("background-position-x");
 				if(!!window.ActiveXObject || "ActiveXObject" in window){
 					var thisPosition = $(this).css("background-position").split(" ");
 					thisPositionX = thisPosition[0];
@@ -224,20 +280,14 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 					$(this).css("background-position-x","0");
 				}
 			})
-			//后退
-			.on("click",".page-back",function(){
-				history.back();
-			})
 			//打开和收起左边栏
 			.on("click",".point-click",function(){
 				var widDiv=$(".location-choose").width();
-				if($(this).css("background-position") == "-24px 0px"){
-					$(".location-choose").animate({left:"-"+widDiv},500);
-					$(this).css("background-position","0px 0px");
+				if($(this).hasClass("active")){
+					$(".location-choose,.point-click").removeClass("active");
 					$(".out-bg").animate({width:"64px"},500);
 				}else{
-					$(".location-choose").animate({left:"0px"},500);
-					$(this).css("background-position","-24px 0px");
+					$(".location-choose,.point-click").addClass("active");
 					$(".out-bg").animate({width:widDiv},500);
 				}
 			})
@@ -322,9 +372,39 @@ app.controller('mainCtrl', function($scope, $rootScope, $http, $window, $locatio
 			//隐藏设备下拉框
 			$(".equipment-list").remove();
 			$(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
+			//隐藏点击左键出现的目录
+			$("#jLeftClickNav").hide();
 		});
 	});
-	
-	
 
-})
+    /**
+     *desc:点击左键出现的小目录
+     *time:2017-03-23
+     *author:linzx
+     *@param:
+     *@return:
+     **/
+    $scope.showRightClickSmallNav = function (cell,event,page) {
+    	$scope.leftNavLiShow = {
+    		"workUnit" : true,// 工作单元==二级新页面
+			"changeEquipment" : false,// 换装页面
+			"equipmentDetails" : false//设备详情页面===手动微调页
+		};
+		//只有设备表头才有换装选项
+		if(cell[0]&&cell[0].type == 1){
+            $scope.leftNavLiShow.changeEquipment = true;
+		}
+		// 手动微调页同时处于表格主体，有手动微调选项出现
+		if(page === "result" && cell[0]&&cell[0].type != 1){
+            $scope.leftNavLiShow.equipmentDetails = true;
+		}
+    	$scope.selectCellFront = cell;
+        let navX = event.pageX + document.body.scrollLeft,
+			navY = event.pageY + document.body.scrollTop;
+        $("#jLeftClickNav").show().css({
+        	left : navX,
+			top : navY
+		});
+        event.stopPropagation();
+    }
+});

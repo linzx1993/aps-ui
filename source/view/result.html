@@ -4,8 +4,8 @@
 	<span ng-click="cancel_aps()">取消排程</span>
 	<span class="user-info">
 		<ul class="user-info-box">
-			<li><a href="#/config">参数配置</a></li>
-			<li><a href="#/help">帮助</a></li>
+			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
+			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
 			<li class="out-login">退出</li>
 		</ul>
 		{{userName||"用户"}}</span>
@@ -24,21 +24,27 @@
 		<div class="search-box">
 			<div class="sale-order">
 				<span>订单号：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
 			<div class="material-name">
 				<span>物料名：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
 			<div class="material-code">
 				<span>物料编码：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
+			<label for="hide_search_empty">是否开启查询过滤</label>
+			<input type="checkbox" name="hide_search_empty" id="hide_search_empty" ng-model="hide_search_empty" />	
 			<div class="start-search" ng-click="search()">查询</div>
 		</div>
 		<div class="tip">搜索</div>
 	</div>
 	
+	<div class="change-model right-menu-button" ng-click="change_model()">
+		<i class="change-model-icon"></i>
+		<div class="tip">{{change_model_text}}</div>
+	</div>
 	<div class="turn-to-back right-menu-button turnback" ng-click="turn_to_back()">
 		<i class="turn-to-back-icon"></i>
 		<div class="tip">翻转</div>
@@ -50,7 +56,7 @@
 	<!--隐藏空白行-->
 	<div class="hide-tr right-menu-button" ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
 		<i class="hide-tr-icon"></i>
-		<div class="tip">隐藏空白行</div>
+		<div class="tip">{{hide_empty_text}}</div>
 	</div>
 	<!--隐藏空白行END-->
 	<div class="right-menu-button change-one" ng-click="check_aps($event)">
@@ -79,34 +85,32 @@
         <!--详细信息弹出框建议格式-->
         <table >
 			<tr ng-repeat="x in checkRows">
-				<td>{{($index+1)+"、"+x}}</td>
+				<td>{{($index+1) + "、" + x}}</td>
 			</tr>
 		</table>
 		<!--<a style="" class="sure" href="javascript:;">确定</a>-->
     </div>
 </div>
 <!--校验详细信息end-->
+
+<!--pap详细信息-->
+<div style="display: none;" id="check_detail_dialog_pap" title="异常原因">
+    <div class="check_detail_dialog">
+        <!--详细信息弹出框建议格式-->
+        <table >
+			<tr ng-repeat="x in lists">
+				<td>{{($index+1) + "、" + x}}</td>
+			</tr>
+		</table>
+    </div>
+</div>
+<!--pap详细信息end-->
 <div class="pbody-wrap"><!-- 页面表格相关部分 -->
 	
 	<div id="progressbar_one" class="pro_bars">
-	    <span></span>
+	    <span class="progressbar-gif"></span>
 	    <div id="progress-label_one" class="pro_labels"></div>
-	</div>
-	
-	<!--<div id="progressbar_two" class="pro_bars">
-	    <span></span>
-	    <div id="progress-label_two" class="pro_labels"></div>
-	</div>
-
-	<div id="progressbar_three" class="pro_bars">
-	    <span></span>
-	    <div id="progress-label_three" class="pro_labels"></div>
-	</div>
-	
-	<div id="progressbar_four" class="pro_bars">
-	    <span></span>
-	    <div id="progress-label_four" class="pro_labels"></div>
-	</div>-->
+	</div>	
 	
 	<!--校验提示信息  开始-->
 	<div class="wrap-alert" >
@@ -121,7 +125,7 @@
 		    	<b class="in-icons" style="display: none;" ng-click="confirm_dialog(checkRow,$event)" data-info={{checkRow.info}}>详情</b>
 		    </li>
 		 </ul>
-		 <div class="check-btn-div" ng-show="checkBtnShow">
+		 <div class="check-btn-div" style="display: none;">
 			 <div class="check-btn check-confirm" >确定</div>
 			 <div class="check-btn check-cancel" >取消</div>		 	
 		 </div>
@@ -134,17 +138,16 @@
 		<button ng-click="pap_close()"></button>
 		<h3 ><span></span>当前提示信息</h3>
 		<ul >
-		   <li ng-repeat="list in Lists track by $index">
+		    <li ng-repeat="list in Lists track by $index">
 				<span class="pap-pkid">{{"pkId:"+" "+list.pkId}}</span>
 		    	<span class="pap-state">{{"当前状态："+" "+list.state}}</span>
 		    	<span class="pap-info"></span>
-		    	<b class="in-icons" data-info={{list.info}} >详情</b>
-		    	<p class="pap-in-alert">
+		    	<b class="in-icons" data-info={{list.info}} ng-click="pap_dialog(list,$event)">详情</b>
+		    	<!--<p class="pap-in-alert">
 		    		<i class="pap-alert-head">&nbsp;&nbsp;&nbsp;&nbsp;异常原因</i>
-		    		&nbsp;&nbsp;&nbsp;&nbsp;{{list.info}}
+		    		<i class="pap-alert-content">&nbsp;&nbsp;&nbsp;&nbsp;{{list.info}}</i>
 		    	</p>
-		    	<u class="pap-alert-tri"></u>
-		    	
+		    	<u class="pap-alert-tri"></u>-->
 		    </li>
 		 </ul>
 	</div>
@@ -176,11 +179,12 @@
 
     <div class="wrap-content"><!-- 页面主体内容 -->
     		
-        <div class="table"><!-- 表格 -->
+        <div id="table" class="table j-table" ng-hide="isSmall || ifDiffer"><!-- 表格 -->
             <div class="table-head"><!-- 表头部分 -->
             	<div style="display: flex;">
-	            	<div></div>
-	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date,$event)" ng-right-click="date_click(date,$event)">
+					<div class="current-show-location-name">{{currentShowLocationName}}</div>
+	            	<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date,$event)" ng-right-click="date_click(date,$event)">-->
+					<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'result')">
 	            		<span>{{date.thisDate.substring(5,7)}}</span>月
 	            		<span>{{date.thisDate.substring(8,10)}}</span>日
 	            	</div>
@@ -189,14 +193,14 @@
 
             <div class="table-body"><!-- 表格主体部分 -->
             	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty">
-            			<div  ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
+            			<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
             				<!--背面-->
 	            			<div class="td-back">
 	            				<p ng-repeat="back in cell.back">{{back}}</p>
 	            			</div>
 	            			<!--正面-->
-            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="unit_click(cell.front,$event)" ng-right-click="unit_click(cell.front,$event)" ng-style="{cursor: cell['useData'].cursor}">
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-style="{cursor: cell['useData'].cursor}" ng-right-click="showRightClickSmallNav(cell.front,$event,'result')">
             					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
 	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
 	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
@@ -204,8 +208,8 @@
 	            				</div>
             				</div>	            			
 	            			<!--图标放在这一层，加浮动到指定位置-->
-	            			<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
-	            			<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
+	            			<div class="freeze_info" ng-show="cell['useData'].isLock"></div>
+	            			<div class="over-Capability" ng-show="cell['useData'].isOver"></div>
             			</div>
             		</div>
             	</div>
@@ -213,10 +217,10 @@
             <span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
             <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
         </div><!-- .table END -->
-		<div style="display: none" class="table diffe-table"><!-- 表格 -->
+		<div class="j-table table diffe-table" ng-hide="isSmall || !ifDiffer"><!-- 表格 -->
 			<div class="table-head"><!-- 表头部分 -->
 				<div style="display: flex;">
-					<div></div>
+					<div class="current-show-location-name">{{currentShowLocationName}}</div>
 					<div ng-repeat="date in tableHeadViewModel track by $index" style="cursor: default;">
 						<span>{{date.thisDate.substring(5,7)}}</span>月
 						<span>{{date.thisDate.substring(8,10)}}</span>日
@@ -226,7 +230,7 @@
 
 			<div class="table-body"><!-- 表格主体部分 -->
 				<div class="table-content">
-					<div class="differSameItem mb-10" ng-repeat="differ in differTableBodyViewModel track by $index">
+					<div class="differSameItem mb-10" ng-repeat="differ in differTableBodyViewModel track by $index" ng-hide="differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty || differ[0][0]['useData'].isSearchEmpty && differ[1][0]['useData'].isSearchEmpty && hide_search_empty">
 						<div class="table-tr" ng-repeat="row in differ track by $index">
 							<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell['useData'].dateId}} >
 								<!--背面-->
@@ -240,8 +244,70 @@
 									</div>
 								</div>
 								<!--图标放在这一层，加浮动到指定位置-->
-								<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
-	            				<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
+								<div class="freeze_info" ng-show="cell['useData'].isLock"></div>
+	            				<div class="over-Capability" ng-show="cell['useData'].isOver"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div><!-- .table-body END -->
+			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
+			<span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
+		</div><!-- .table END -->
+   		<!--小格子-->
+   		<div class="small-table j-table" ng-show="isSmall && !ifDiffer"><!-- 表格 -->
+            
+            <div class="table-head"><!-- 表头部分 -->
+            	<div style="display: flex;">
+	            	<div>{{currentShowLocationName}}</div>
+	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'result')">
+	            		{{date.thisDate.substring(5,10)}}
+	            	</div>
+	            </div>
+            </div><!-- .table-head END -->
+            <div class="table-body"><!-- 表格主体部分 -->
+            	<div class="table-content">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
+            			<div  ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
+	            			<!--正面-->
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-right-click="showRightClickSmallNav(cell.front,$event,'result')" ng-style="{cursor: cell['useData'].cursor}">
+            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
+	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
+	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
+	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+	            				</div>
+	            				<!--临时显示物料名称-->
+								<div class="show_materialName" ng-style="{color:cell['useData'].textColor,fontSize:'12px'}" title={{cell['useData'].materialName}} ng-hide="show_materialName">{{cell['useData'].materialName}}</div>            
+            				</div>		
+            			</div>
+            		</div>
+            	</div>
+            </div><!-- .table-body END -->
+            <span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
+            <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
+        </div><!-- .table END -->
+        <!--小格子差异化-->
+        <div class="j-table small-table diffe-table" ng-show="isSmall && ifDiffer"><!-- 表格 -->
+			<div class="table-head"><!-- 表头部分 -->
+				<div style="display: flex;">
+					<div class="current-show-location-name">{{currentShowLocationName}}</div>
+					<div ng-repeat="date in tableHeadViewModel track by $index" style="cursor: default;">
+						{{date.thisDate.substring(5,10)}}
+					</div>
+				</div>
+			</div><!-- .table-head END -->
+
+			<div class="table-body"><!-- 表格主体部分 -->
+				<div class="table-content">
+					<div class="differSameItem" ng-repeat="differ in differTableBodyViewModel track by $index" ng-hide="differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty || differ[0][0]['useData'].isSearchEmpty && differ[1][0]['useData'].isSearchEmpty && hide_search_empty">
+						<div class="table-tr" ng-repeat="row in differ track by $index">
+							<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell['useData'].dateId}} >
+								<!--正面-->
+								<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="differ_unit_click(cell.front,$event)">
+									<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
+										<div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -253,7 +319,9 @@
     </div><!-- .wrap-content END -->
 
 </div><!-- .pbody-wrap END -->
-
+<!--右键点击小目录-->
+<right-click-nav></right-click-nav>
+<!--右键点击小目录-->
 
 <!--透明遮盖层-->
 <div class="cover" ng-style="{display : cover_show?'block':'none'}"></div>
@@ -627,7 +695,11 @@
 	<span class="point-click" ></span>
 	<div class="read-show">
 		<h1 class="location-title location-title-res">请选择需要显示的地点</h1>
-		<p class="location-scheme-select"></p>
+		<!--<p class="location-scheme-select"></p>-->
+		<p class="location-scheme-select">
+			<span class="scheme-header" style="display: inline-block;width: 48px;height: 30px;color: #fff;">方案：</span>
+			<span class="scheme-select" ></span>
+		</p>
 		<ul class="location-scheme-option">
 			<li ng-repeat="x in resData" data-schemeId={{x.schemeId}} ng-click="scheme_btn(x.schemeId)">{{x.schemeName}}</li>
 		</ul>

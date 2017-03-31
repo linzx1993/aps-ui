@@ -5,9 +5,9 @@
 app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
         //默认显示第一个tab---start
-        $state.go('config.first.displayDays');
+        $state.go('config.workArea.displayDays');
         //显示正确的目录class-active
-        $scope.configNav.activeNav = ".first";
+        $scope.configNav.activeNav = ".workArea";
         //默认显示第一个tab---end
         $scope.firstPage = {
             title : "",//面包屑导航三级目录文字
@@ -15,7 +15,7 @@ app
             combineItemList : [],//显示合并项数组
         };
     }])
-    .controller("displayDaysController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+    .controller("displayDaysController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
         //设置面包屑导航
         $scope.firstPage.title = "显示天数";
 
@@ -23,17 +23,20 @@ app
          *根据点击的车间树获得相应的车间ID,显示对应显示天数的数据
          */
         let getDisplayDayData = () =>{
-            $http.get($rootScope.restful_api.firstPage_display_days + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.firstPage_display_days + $scope.locationId,
+				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.firstPage.showItemLists = res.data.selectList;
                     $scope.firstPage.showItemLists.map((item)=>{
                         item.valueContent = Number(item.valueContent);
                     });
                     $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
-                }, () => {
+                },
+				errorFn: () => {
                     layer.alert("获取一级页面显示天数失败，请检查服务器");
-                });
+                }
+			})
         };
         getDisplayDayData();
 
@@ -61,22 +64,26 @@ app
                 obj.valueAlias = item.valueAlias;
                 postData.selectList.push(obj);
             });
-            $http.put($rootScope.restful_api.firstPage_display_days + $scope.locationId,postData)
-                .then((res)=>{
+			http.put({
+				url: $rootScope.restful_api.firstPage_display_days + $scope.locationId,
+				data: postData,
+				successFn: (res)=>{
                     if(res.data){
                         $scope.info.success("数据保存成功")
                     }else{
                         $scope.info.fail("数据保存失败")
                     }
-                },()=>{
+                },
+				errorFn: ()=>{
                     layer.alert("数据保存失败，请检查服务器");
-                });
+                }
+			})
         };
 
         //创建车间树
         $scope.createWorkshop(true,getDisplayDayData);
     }])
-    .controller("displayCombineController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+    .controller("displayCombineController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
         //设置面包屑导航
         $scope.firstPage.title = "显示合并项";
 
@@ -84,14 +91,17 @@ app
          *根据点击的车间树获得相应的车间ID,显示对应显示合并项的数据
          */
         let getDisplayCombineData = () =>{
-            $http.get($rootScope.restful_api.firstPage_display_combine + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.firstPage_display_combine + $scope.locationId,
+				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.firstPage.combineItemList = res.data.optionList;
                     $scope.selectValue = res.data.selectList[0].valueContent;
-                }, () => {
+                },
+				errorFn: () => {
                     layer.alert("获取显示合并项失败，请检查服务器");
-                });
+                }
+			});
         };
         getDisplayCombineData();
 
@@ -114,32 +124,39 @@ app
                     valueAlias : selectObj.valueAlias
                 }]
             };
-            $http.put($rootScope.restful_api.firstPage_display_combine + $scope.locationId,postData)
-                .then((res)=>{
+			http.put({
+				url: $rootScope.restful_api.firstPage_display_combine + $scope.locationId,
+                data:postData,
+				successFn: (res)=>{
                     if(res.data){
                         $scope.info.success("数据保存成功")
                     }else{
                         $scope.info.fail("数据保存失败")
                     }
-                },()=>{
+                },
+				errorFn: ()=>{
                     layer.alert("数据保存失败，请检查服务器");
-                });
+                }
+			});
         }
     }])
-    .controller("displayFlipController",["$rootScope","$scope","$http", function($rootScope,$scope,$http){
+    .controller("displayFlipController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
         $scope.firstPage.title = "显示翻转";
         /**
          *根据点击的车间树获得相应的车间ID,显示对应一级页面是否翻转
          */
         let getDisplayFlipData = () =>{
-            $http.get($rootScope.restful_api.front_back + $scope.locationId)
-                .then((res) => {
+			http.get({
+				url: $rootScope.restful_api.firstPage_display_flip + $scope.locationId,
+				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.firstPage.flipList = res.data.optionList;
                     $scope.selectValue = res.data.selectList[0].valueContent || 0;//默认不翻转
-                }, () => {
+                },
+				errorFn: () => {
                     layer.alert("获取显示翻转数据失败，请检查服务器");
-                });
+                }
+			});
         };
         getDisplayFlipData();
 
@@ -155,18 +172,22 @@ app
                     valueAlias : selectObj.valueAlias
                 }]
             };
-            $http.put($rootScope.restful_api.front_back + $scope.locationId,postData)
-                .then((res)=>{
+			http.put({
+				url: $rootScope.restful_api.firstPage_display_flip + $scope.locationId,
+				data: postData,
+				successFn: (res)=>{
                     if(res.data){
                         $scope.info.success("数据保存成功")
                     }else{
                         $scope.info.fail("数据保存失败")
                     }
-                },()=>{
+                },
+				errorFn: ()=>{
                     layer.alert("数据保存失败，请检查服务器");
-                });
+                }
+			})
         }
 
         //创建车间树
         $scope.createWorkshop(true,getDisplayFlipData);
-    }]);
+    }])

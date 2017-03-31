@@ -1,0 +1,27 @@
+/*常用颜色*/
+$themeColor : #1E7CD9;/*主题色*/
+$borderColor : #b3b3b3;/*表格灰框颜色*/
+.c-theme-color{color: $themeColor;}
+@mixin scale($n) {
+  -webkit-transform: scale($n);
+  -ms-transform: scale($n);
+  transform: scale($n);
+}
+
+@mixin transform-origin($x,$y) {
+  -webkit-transform-origin: $x $y;
+  -ms-transform-origin: $x $y;
+  transform-origin: $x $y;
+}
+
+@mixin transition($prop,$time) {
+  -webkit-transition: $prop $time;
+  -ms-transition: $prop $time;
+  transition: $prop $time;
+}
+
+@mixin rotate($deg) {
+  -webkit-transform: rotate($deg);
+  -ms-transform: rotate($deg);
+  transform: rotate($deg);
+}

@@ -6,7 +6,7 @@
  * Created by xujun on 2016/6/30.
  */
 var loginOutUrl = "";
-var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(function($rootScope,$http){//全局配置
+var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(function($rootScope,$http,http){//全局配置
         //注意，这个页面内容稍后要移到单独的配置表里去
 
         /**
@@ -32,6 +32,7 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
             $rootScope.local_test = true;//使用本地json测试的标识
         }else if($rootScope.active == "local") {
             $rootScope.api_domain = "127.0.0.1:8080";
+            // $rootScope.api_domain = "192.168.118.73:8080";
         }else{
             alert("配置错误，请指定正确的运行环境");
         }
@@ -55,21 +56,30 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 //			localStorage.removeItem("from");
 //			window.location.href = thisUrl;
 //		}
-
+		
+		//错误码对象
+		$rootScope.errorCode = {
+			0 : "未知错误！",
+			50 : "参数为空！",
+			51 : "参数格式错误！",
+			52 : "参数范围错误！",
+			101 : "无效资源！",
+			102 : "无资源访问权限！",
+			103 : "待删除资源正在使用中！",
+			1004 : "该方案正在排程中！",
+			1005 : "该方案下的地点正在排程中！"
+		}
+		
         //车间ID,地点信息，全局变量。具体到某个API时，可以取这个值的子集去传
         $rootScope.locationIdList = ["0104"];
         $rootScope.locationIdListOne = "0104";
 		var currentLocation = $rootScope.current_location;
-        //restful API,每个URL中带userId参数，以后放到authorization中去
         
 		$rootScope.getsessionStorage = function(locationID_pre,locationID_res,fromPre){
 			var locationID_pre = locationID_pre;
 			var locationID_res = locationID_res;
-			if(fromPre){
-				var thisID = locationID_pre;
-			}else{
-				var thisID = locationID_res;
-			}
+			
+			var thisID = fromPre ? locationID_pre : locationID_res;
 			
 			$rootScope.restful_api = {
 				//一级页面结果页
@@ -94,6 +104,10 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 				"cache_movein_part":"http://"+$rootScope.api_domain+"/api/manual/storage/put/location/"+locationID_res+"/part",
 				//部分移出暂存间
 				"cache_moveout_part":"http://"+$rootScope.api_domain+"/api/manual/storage/remove/location/"+locationID_res+"/part",
+                //设备结果页二级页面-换装接口/api/schedule/result/last/location/0104/retool
+                "pre_sourceUrl_retool":"http://"+$rootScope.api_domain+"/api/schedule/result/last/location/"+locationID_pre+"/retool",
+                //手动微调页二级页面-换装接口/api/schedule/result/temp/location/010401/retool
+                "res_sourceUrl_retool":"http://"+$rootScope.api_domain+"/api/schedule/result/temp/location/"+locationID_res+"/retool",
 				//结果页二级页面
 				"pre_sourceUrl":"http://"+$rootScope.api_domain+"/api/schedule/result/last/location/"+locationID_pre+"/report",
 				//结果页导出Excel
@@ -138,40 +152,46 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 	            "plan_to_fact" : "http://" + $rootScope.api_domain + "/api/adjust/dispatchorder/preschedule/confirm",
 	            //清除后端缓存
 	            "clearCatch" : "http://" + $rootScope.api_domain + "/api/aps/cache/routing",
+				//版本号
+				"public_version_number" : "http://" + $rootScope.api_domain + "/public/info/version",
 				//一级页面显示天数
 				"firstPage_display_days" : "http://" + $rootScope.api_domain + "/api/aps/config/user/schedule/view/schedule-day-number?locationId=",
 				//一级页面合并项选择
 				"firstPage_display_combine" : "http://" + $rootScope.api_domain + "/api/aps/config/user/schedule/view/schedule-unit-type?locationId=",
-	            //列信息配置
-	            "column_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column?locationId=",
+				//一级页面翻转项
+				"firstPage_display_flip" : "http://" + $rootScope.api_domain + "/api/aps/config/admin/default/primary/view/view-turn-over?locationId=",
+				//二级页面列信息配置
+	            "column_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column?locationId=",
 	            //多列排序信息配置
-	            "sort_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column_order?locationId=",
+	            "sort_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column-order?locationId=",
 	            //合并项配置
 	            "sort_combine_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column_merge?locationId=",
 	            //汇总项配置
 	            "sort_summary_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column_summary?locationId=",
-	            //pap规则配置
-	            "papRule_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-pap-adjust_use_pap?locationId=",
+                //任务池列信息
+                "task_column_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/pool-task-change/view/column?locationId=",
+                //暂存间显示项
+                "cache_room_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/storage/report-column?locationId=",
 	            //管理员配置页面
-	            "admin_content_config" : "http://" + $rootScope.api_domain + "/api/admin/aps/config/aps-system-workshop_type?locationId=",	            
+	            "admin_content_config" : "http://" + $rootScope.api_domain + "/api/admin/aps/config/aps-system-workshop_type?locationId=",
+				//获取所有规则ID
+				"all_schedule_rule" : "http://" + $rootScope.api_domain + "/api/aps/rule/user/brief",
+				//删除，修改，创建单个排程规则
+				"single_schedule_rule" : "http://" + $rootScope.api_domain + "/api/aps/rule/",
+				//删除，修改，创建单个排程方案
+				"single_schedule_plan" : "http://" + $rootScope.api_domain + "/api/aps/scheme/",
+				//获取所有排程方案
+				"all_schedule_plan" : "http://" + $rootScope.api_domain + "/api/aps/scheme/user/brief",
 	        	//退出登录
 	        	"login_out" : "http://" + $rootScope.api_domain + "/api/aps/login/loginOut",
-	            //获取所有规则ID
-	            "all_schedule_rule" : "http://" + $rootScope.api_domain + "/api/aps/rule/user/brief",
-	            //删除，修改，创建单个排程规则
-	            "single_schedule_rule" : "http://" + $rootScope.api_domain + "/api/aps/rule/",
-	            //获取所有排程方案
-	            "all_schedule_plan" : "http://" + $rootScope.api_domain + "/api/aps/scheme/user/brief",
-	            //删除，修改，创建单个排程方案
-	            "single_schedule_plan" : "http://" + $rootScope.api_domain + "/api/aps/scheme/",
-	            //版本号
-	            "public_version_number" : "http://" + $rootScope.api_domain + "/public/info/version",
-	            //获取锁定期   
+	            //获取锁定期
 	            "get_lock_days" : "http://" + $rootScope.api_domain + "/api/aps/setting/location/" + locationID_pre +"/lockdate",
 	            //获取冻结期
 	            "get_freeze_days" : "http://" + $rootScope.api_domain + "/api/adjust/location/" + locationID_res + "/freezedate",
 	            //配置页无修改地点树
 	            "get_new_location" : "http://" + $rootScope.api_domain + "/api/location/cache/writable",
+	            //获取用户最后一次登录地点获取
+				"view_last_location" : "http://" + $rootScope.api_domain + "/api/aps/config/user/lastLocation/view-last-location",
 	            //显示项恢复默认配置
 	            "reset_show_column":"http://" + $rootScope.api_domain + "/api/aps/config/admin/default/report/view/view-report-column?locationId=",
 	            //再编辑
@@ -181,7 +201,7 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 	            //外部差异
 	            "exter_differ" : "http://" + $rootScope.api_domain + "/api/aps/change/" + locationID_pre +"/pool_task/list?",
 	            //默认翻转状态
-	            "front_back" : "http://" + $rootScope.api_domain + "/api/aps/config/admin/default/primary/view/view-turn-over?locationId=sys",
+	            "front_back" : "http://" + $rootScope.api_domain + "/api/aps/config/admin/default/primary/view/view-turn-over?locationId=" + thisID,
 	            //AB测试
 	            "ABexperiment" : "http://" + $rootScope.api_domain + "/debug/abexperiment/adjustreport/usage/incr",
 	            //获取AB测试
@@ -196,72 +216,47 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 		loginOutUrl = $rootScope.restful_api.login_out;
 		
         $rootScope.clearCache = function(){
-            $http.post($rootScope.restful_api.clearCatch)
-                .success(function(res){
-                })
-				.error(function(error){
-				})
+			http.post({
+				url : $rootScope.restful_api.clearCatch,
+				successFn : function(res){},
+				errorFn : 	function(res){}
+			});
         }
-        //获取默认翻转状态
-        $http.get($rootScope.restful_api.front_back).then(
-    		function(res){
-    			var info = res.data.selectList;
-    			$rootScope.frontBack = info[0].valueContent == 1 ? false : true;
-    		},
-    		function(res){
-    			
-    		}
-    	);
         
         $rootScope.userId = 1;  //单点登录暂时没有开启，没有userId，现统一设置为1 /* 开启之后即可删除  */
         
-        // //使用token取用户信息
-		// if(localStorage.getItem("token")){
-		// 	$http.get($rootScope.restful_api.user_info).then(
-		// 		function(res){
-		// 			if(res.data){
-		// 				$rootScope.userName = res.data.nickName;
-		// 				$rootScope.userId = res.data.userId;
-		// 			}else{
-		// 				layer.alert('获取用户名失败！', {
-		// 					skin: 'layer-alert-themecolor' //样式类名
-		// 				});
-		// 			}
-		// 		},
-		// 		function(res){
-		// 			layer.alert('获取用户名失败！', {
-		// 				skin: 'layer-alert-themecolor' //样式类名
-		// 			});
-		// 		}
-		// 	);
-		// }
+        //使用token取用户信息
+		if(localStorage.getItem("token")){
+			http.get({
+				url : $rootScope.restful_api.user_info,
+				successFn : function(res){
+								$rootScope.userName = res.data.nickName;
+								$rootScope.userId = res.data.userId;
+							},
+				errorFn : 	function(res){
+								layer.alert('获取用户名失败！', {
+									skin: 'layer-alert-themecolor' //样式类名
+								});
+							}
+			});
+		}
 
-//		$http.get($rootScope.restful_api.getAB).then(
-//			function(res){
-//				console.log(res);
-//			},
-//			function(res){
-//				console.log(res);
-//			}
-//		);
 		//离开页面时保存AB测试信息
 		window.onbeforeunload = function(){
 			if($rootScope.clickTimes.adjust > 0){
-				$http.post($rootScope.restful_api.ABexperiment + "?op=adjust&num=" + $rootScope.clickTimes.adjust).then(
-					function(res){
-					},
-					function(res){	
-					}
-				);
+				http.post({
+					url : $rootScope.restful_api.ABexperiment + "?op=adjust&num=" + $rootScope.clickTimes.adjust,
+					successFn : function(res){},
+					errorFn : 	function(res){}
+				});
 			}
 			
 			if($rootScope.clickTimes.report > 0){
-				$http.post($rootScope.restful_api.ABexperiment + "?op=report&num=" + $rootScope.clickTimes.report).then(
-					function(res){					
-					},
-					function(res){					
-					}
-				);
+				http.post({
+					url : $rootScope.restful_api.ABexperiment + "?op=report&num=" + $rootScope.clickTimes.report,
+					successFn : function(res){},
+					errorFn : 	function(res){}
+				});
 			}		
 		}
 		
@@ -276,12 +271,11 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 			localStorage.setItem("token",thisToken)
 		}
 	}
-	
     $httpProvider.defaults.headers.common = { 'X-Requested-With' : 'XMLHttpRequest','Authorization':localStorage.getItem("token") || ""};
     $httpProvider.interceptors.push(['$rootScope', '$q', function ($rootScope, $q) {
+			
       return {
         request: function (config) {
-
           config.headers = config.headers || {};
           var thisUrl = window.location.origin + window.location.pathname;
           var tokenIndex = thisUrl.indexOf("token=");
@@ -292,13 +286,20 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
         },
 
         response: function (response) {
-
-	        if (response.status == 200 && response.data.error_response && response.data.error_response.code == 1) {
-	            window.location.href = response.data.error_response.sub_msg;
-	    		return response;
+	        if (response.status == 200 && response.data.error_response) {
+	        	//错误码为1，未登录，跳转到登录界面；其他情况则返回错误信息，并增加错误标识
+	        	if(response.data.error_response.code == 1){
+	        	    //跳转前清空旧缓存
+	        		sessionStorage.clear();
+	        		window.location.href = response.data.error_response.sub_msg;
+		    		return response;
+	        	}else{
+	        		response.data.error_response.text = $rootScope.errorCode[response.data.error_response.code];
+	        	}
+		            
 	        }
 			
-			if (response.status == 200 && response.data.success_response!=undefined){
+			if (response.status == 200 && response.data.success_response !== undefined){
 				response.data = response.data.success_response;
 			}
 			
@@ -306,8 +307,7 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
         },
 
         responseError: function (response) {
-        
-          return $q.reject(response);
+        	return $q.reject(response);
         }
       }
     }])

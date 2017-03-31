@@ -1,0 +1,15 @@
+<div>
+    <h1 class="config-content-title"><span>{{"showConfiguration" | translate}}</span> > <span>{{"WorkArea" | translate}}</span> > <span>{{firstPage.title}}</span></h1>
+    <!--<h1 class="config-content-title">{{"Multi-columnSortConfiguration"| translate}}</h1>-->
+    <nav class="fl check-rule-nav">
+        <ul>
+            <!--<li class="ruleLi tc">显示页目录</li>-->
+            <li class="ruleLi active" ui-sref="config.workArea.displayDays"><span>显示天数</span></li>
+            <li class="ruleLi" ui-sref="config.workArea.displayCombine"><span>翻转显示项</span></li>
+            <li class="ruleLi" ui-sref="config.workArea.displayFlip"><span>显示翻转</span></li>
+        </ul>
+    </nav>
+    <div ui-view="" style="width: 932px;" class="fl config-main columnContent"></div>
+    <!--<div ui-view="displayDays" style="width: 952px;" class="fl ConfigMain columnContent"></div>-->
+    <!--<div ui-view="displayCombine" style="width: 952px;" class="fl ConfigMain columnContent"></div>-->
+</div>

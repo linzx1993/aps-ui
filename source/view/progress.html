@@ -2,8 +2,8 @@
 <div class="top-right-button">
 	<span class="user-info">
 		<ul class="user-info-box">
-			<li><a href="#/config">参数配置</a></li>
-			<li><a href="#/help">帮助</a></li>
+			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
+			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
 			<li class="out-login">退出</li>
 		</ul>
 		{{userName||"用户"}}</span>
@@ -17,37 +17,57 @@
 			<div class="progress-label"></div>
 		</div>-->
 		<div id="progressbar" class="pro_bars">
-		    <span></span>
-		    <div id="progress-label" class="pro_labels"></div>
+			<div class="process-label"></div>
+		    <span class="progressbar-gif"></span>
+		    <!--<div id="progress-label" class="pro_labels"></div>-->
+		    <i class="success-icon" ng-show="successAlert"></i>
+		    <i class="fail-icon" ng-show="failAlert" title="排程过程有误，可在下方查看错误信息"></i>
 		</div>
 		<!-- .wrap-content END -->
 
 		<div class="wrap-info">
 			<!--提示信息-->
-			<div style="height: 40px;line-height: 40px;text-shadow: 1px 1px 0 #ddd;font-size: 16px;position: relative;">当前提示信息：
-				<p class="wrap-btn">
-					<span class="btn-same btn-back" ng-click="wrap_back()">返回</span>
-					<span class="btn-same btn-forward" ng-click="wrap_forward()">跳转</span>
-				</p>
+			<div class="current-info">当前提示信息：
+				<i title="返回" ng-click="wrap_back()" ng-show="btnShow"></i>
 			</div>
 
 			<ul>
-				<li ng-repeat="x in states | orderBy:'equipment'">
-					<span class="in-mapState">{{x.equipment}}</span>
-					<span class="in-state">{{"当前状态："+x.state}}</span>
+				<li ng-repeat="info in states | orderBy:'equipment'">
+					<span class="in-mapState">{{$index+1}}、{{info.equipment}}</span>
+					<i class="in-state-icon-success" ></i>
+					<i class="in-state-icon-fail" ></i>
+					<span class="in-state">{{info.state}}</span>
 					<!--<span class="in-info">{{"当前信息："+x.info}}</span>-->
-					<b class="in-icon" ng-click="alertMsg(x,$event)"></b>
+					<b class="in-icon" ng-click="alertMsg(info,$event)">详情</b>
 					<!--<p class="in-alert">{{"提示信息："+x.briefInfo}}</p>-->
 					<!--<i class="in-tri"></i>-->
 				
 				</li>
 			</ul>
-
+			<p class="wrap-btn">
+				<!--<span class="btn-same btn-back" ng-click="wrap_back()" ng-show="btnShow">返回</span>-->
+				<span class="btn-same btn-forward" ng-click="wrap_forward()" ng-show="btnShow">跳转</span>
+			</p>
 		</div>
-		<!--提示     结束-->
+		<!--提示 
+
+		结束-->
+
 	</div>
 </div>
-					<div class="prompt_msg" id="prompt_msg">
-							<p class="in-alert">{{briefInfo}}</p>
-					</div>	
+<!--
+<div class="prompt_msg" id="prompt_msg">
+	<i class="in-close"></i>
+	<p class="in-alert">{{doTaskNum}}</p>
+	<p class="in-alert">{{undoTaskNum}}</p>
+	<p class="in-alert">{{totalTaskNum}}</p>
+	<p class="in-alert">{{useTime}}</p>
+	<p class="in-alert">{{detail}}</p>
+</div>	
+-->
+<div class="prompt_msg" id="prompt_msg">
+	<i class="in-close"></i>
+	<p class="in-alert" ng-repeat="text in in_alert_data">{{text}}</p>
+</div>	
+
 <!-- .pbody-wrap END -->

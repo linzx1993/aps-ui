@@ -1,11 +1,11 @@
 <!--右上角按钮区-->
-<div class="top-right-button">
+<div ng-show="initLoadingShow" class="top-right-button">
 	<span ng-click="aps_start()">开始排程</span>
 	<span ng-click="edit_again()">再编辑</span>
 	<span class="user-info">
 		<ul class="user-info-box">
-			<li><a href="#/config">参数配置</a></li>
-			<li><a href="#/help">帮助</a></li>
+			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
+			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
 			<li class="out-login">退出</li>
 		</ul>
 		{{userName||"用户"}}</span>
@@ -13,28 +13,34 @@
 <!--右上角按钮区 END-->
 
 <!--右边栏-->
-<div class="right-menu">
+<div ng-show="initLoadingShow" class="right-menu">
 	<!--一级页面查询-->
 	<div class="search-btn search-btn-normal right-menu-button">
 		<i class="search-btn-icon"></i>
 		<div class="search-box">
 			<div class="sale-order">
 				<span>订单号：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
 			<div class="material-name">
 				<span>物料名：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
 			<div class="material-code">
 				<span>物料编码：</span>
-				<input type="text" />
+				<input type="text" class="search-input"/>
 			</div>
+			<label for="hide_search_empty">是否开启查询过滤</label>
+			<input type="checkbox" name="hide_search_empty" id="hide_search_empty" ng-model="hide_search_empty" />	
 			<div class="start-search" ng-click="search()">查询</div>
 		</div>
 		<div class="tip">搜索</div>
 	</div>
 	<!--一级页面查询END-->
+	<div class="change-model right-menu-button" ng-click="change_model()">
+		<i class="change-model-icon"></i>
+		<div class="tip">{{change_model_text}}</div>
+	</div>
 	<!--翻转-->
 	<div class="turn-to-back right-menu-button" ng-click="turn_to_back()">
 		<i class="turn-to-back-icon"></i>
@@ -44,7 +50,7 @@
 	<!--隐藏空白行-->
 	<div class="hide-tr right-menu-button " ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
 		<i class="hide-tr-icon"></i>
-		<div class="tip">隐藏空白行</div>
+		<div class="tip">{{hide_empty_text}}</div>
 	</div>
 	<!--隐藏空白行END-->
 	<!--预排转实际-->
@@ -69,40 +75,41 @@
 			</div>
 			<div class="start-to-fact" ng-click="to_fact()">确定</div>
 		</div>
-		<div class="tip">预转排实际</div>
+		<div class="tip">预排转实际</div>
 	</div>	
 	<!--预排转实际END-->
-	<!--外部差异-->
+	<!--任务池-->
 	<div class="edit-again right-menu-button" ng-click="exter_differ()">
 		<i class="external-differ-icon"></i>
 		<span class="external-diff-num">{{differAllNum}}</span>		
-		<div class="tip">外部差异</div>
+		<div class="tip">任务池</div>
 	</div>
 	<!--外部差异END-->
 </div>
-<div class="right-menu-switch"></div>
+<div ng-show="initLoadingShow" class="right-menu-switch"></div>
 <!--右边栏END-->
 
 <div class="pbody-wrap"><!-- 页面表格相关部分 -->
     <div class="wrap-content"><!-- 页面主体内容 --> 	
     	<!--一级页面表格-->
-        <div class="table">
+        <div id="table" class="table j-table" ng-hide="isSmall">
         	<!-- 表头部分 -->
             <div class="table-head">
             	<div style="display: flex;">
-            		<div></div>
-	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">
+            		<div class="current-show-location-name">{{currentShowLocationName}}</div>
+	            	<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">-->
+	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')">
 	            		<span>{{date.thisDate.substring(5,7)}}</span>月
 	            		<span>{{date.thisDate.substring(8,10)}}</span>日
 	            	</div>
-            	</div>	            	
+            	</div>
             </div>
 			<!-- 表头部分END -->
 			<!-- 表格主体部分 -->
             <div class="table-body">
             	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty">
-            			<div ng-repeat="cell in row track by $index" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
+            			<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
             				<!--反面-->
             				<div class="td-back">
             					<!--翻转页显示的信息-->
@@ -111,15 +118,51 @@
 	            			</div>
 	            			<!--反面END-->
 	            			<!--正面-->
-            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="unit_click(cell.front)" ng-style="{cursor: cell['useData'].cursor}">
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-style="{cursor: cell['useData'].cursor}" ng-right-click="showRightClickSmallNav(cell.front,$event,'preview')">
             					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
 	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
 	            				</div>
             				</div>
 	      					<!--正面END-->
 	            			<!--图标放在这一层，加浮动到指定位置-->
-	            			<div class="freeze_info" ng-show={{cell['useData'].isLock}}></div>
-	            			<div class="over-Capability" ng-show={{cell['useData'].isOver}}></div>
+	            			<div class="freeze_info lock_info" ng-show="cell['useData'].isLock"></div>
+	            			<div class="over-Capability" ng-show="cell['useData'].isOver"></div>
+            			</div>
+            		</div>
+            	</div>
+            </div>
+            <!-- 表格主体部分END -->
+			<!--上一页和下一页-->
+			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
+            <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
+            <!--上一页和下一页END-->
+        </div>
+        <div class="small-table j-table" ng-show="isSmall">
+        	<!-- 表头部分 -->
+            <div class="table-head">
+            	<div style="display: flex;">
+            		<div>{{currentShowLocationName}}</div>
+	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')">
+	            		{{date.thisDate.substring(5,10)}}
+	            	</div>
+            	</div>	            	
+            </div>
+			<!-- 表头部分END -->
+			<!-- 表格主体部分 -->
+            <div class="table-body">
+            	<div class="table-content">
+            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
+            			<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity,cursor: cell['useData'].cursor}">
+	            			<!--正面-->
+            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-right-click="showRightClickSmallNav(cell.front,$event,'preview')">
+            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
+	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+	            				</div>
+	            				<!--临时显示物料名称-->
+      							<div class="show_materialName" ng-style="{color:cell['useData'].textColor,fontSize:'12px'}" title={{cell['useData'].materialName}} ng-hide="show_materialName">{{cell['useData'].materialName}}</div>
+            				</div>
+							
+	      					<!--正面END-->
             			</div>
             		</div>
             	</div>
@@ -132,9 +175,10 @@
         </div>
         <!--一级页面表格END-->
     </div><!-- .wrap-content END -->
-
 </div><!-- .pbody-wrap END -->
-
+<!--右键点击小目录-->
+<right-click-nav></right-click-nav>
+<!--右键点击小目录-->
 
 <!--三级页面模版-->
 <div id="do_detail_dialog" title="派工单详细信息">
@@ -315,13 +359,13 @@
 	<span  class="in-but"></span>
 	<h3 ><span></span>请选择要排程的方案</h3>
 	<span class="case-name">选择方案：</span>
-	<span class="case-tri" ></span>
+	<!--<span class="case-tri" ></span>-->
 	<p class="case-header"></p>
 	<ul class="case-content">
 		<li ng-repeat="x in schemeName track by $index" ng-click="case_btn(x.schemeId)" data-schmeid={{x.schemeId}}>{{x.schemeName}}</li>
 	</ul>
 	<div class="wrap-box">
-		<table class="wrap-content">
+		<table class="wrap-contents">
 			<tr ng-repeat="y in locationRule track by $index">
 				<td class="box-aps">{{y.locationName}}</td>
 				<td class="rule-aps">{{y.ruleName}}</td>
@@ -334,14 +378,23 @@
 
 <!--外部差异开始-->
 <div class="exDiffer-window" >
-	<div class="dialog-window-head">外部差异
+	<div class="dialog-window-head">任务池
 		<i class="close-window"></i>
+		<span class="help-span">
+			<div class="help-box">
+				<p>未派数 = 总计划数 - 已派数</p>
+				<p>未排数 = 未派数 - 未转实际数</p>
+			</div>
+		</span>
 	</div>
-	<div class="null-data">暂无差异</div>
+	<div class="null-data">暂无任务</div>
 	<div class="dialog-window-body">
 		<ul class="external-diff-tab">
+			
 			<li ng-repeat = "tabInfo in tabList" ng-click="exteriffer_tab(tabInfo,$event)" type="{{tabInfo.changeType}}">{{tabInfo.changeTypeName}}
 			<span class="each-diff-num">{{tabInfo.each_differ_num}}</span>	
+			<i class="warning-task" ng-show='tabInfo.changeType=="numDes"||tabInfo.changeType=="tim"||tabInfo.changeType=="des"'></i>
+				
 			</li>
 		</ul>		
 		<div class="show-table">
@@ -355,9 +408,9 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="tableRow in changedBodyData" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
+						<tr ng-repeat="tableRow in changedBodyData">
 							<!--<td class="check-box"><label for="Storage{{$index}}"><input id="Storage{{$index}}" name="StorageSingle" type="checkbox" /><span class="check"></span></label></td>-->
-							<td ng-repeat="tableCell in tableRow "  ng-class="tableCell.now==tableCell.old?'':'brightColor'" data-old = "{{tableCell.old}}">{{tableCell.now}}
+							<td ng-repeat="tableCell in tableRow track by $index"  ng-class="tableCell.now==tableCell.old?'':'brightColor'" data-old = "{{tableCell.old}}">{{tableCell}}
 								<!--<span ng-style="{color:tableCell.now==tableCell.old?'#333333':'red'}">{{tableCell.old}}</span>ng-style="{color:tableCell.now==tableCell.old?'#333333':'red'}"-->
 							</td> 
 						</tr>

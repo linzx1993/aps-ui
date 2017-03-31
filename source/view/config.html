@@ -1,6 +1,12 @@
 <!--右上角按钮区-->
 <div class="top-right-button">
-    <span class="out-login">退出</span>
+   <span ng-click="historyUrlBack()">返回</span>
+    <span class="user-info">
+		<ul class="user-info-box">
+			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
+			<li class="out-login">退出</li>
+		</ul>
+		{{userName||"用户"}}</span>
 </div>
 <div class="relative m-0-auto mt-50 config-box">
     <nav class="config-nav fl">

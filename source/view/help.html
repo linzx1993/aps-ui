@@ -1,9 +1,9 @@
 <!--右上角按钮区-->
 <div class="top-right-button">
-	<span class="page-back">返回</span>
+	<span ng-click="historyUrlBack()">返回</span>
 	<span class="user-info">
 		<ul class="user-info-box">
-			<li><a href="#/config">参数配置</a></li>
+			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
 			<li class="out-login">退出</li>
 		</ul>
 		{{userName||"用户"}}</span>
@@ -46,7 +46,7 @@
 				</li>
 			</ul>
 		</div>
-		<div class="help-body">
+		<!--<div class="help-body">
 			<ul class="help-content">
 				<li><span class="li_span">Q :</span>记录问题解决日志</li>
 				<li><span class="li_span">A :</span></li>
@@ -63,8 +63,8 @@
 				<li><span class="li_span">Q :</span></li>
 				<li><span class="li_span">A :</span></li>
 			</ul>
-		</div>
-		<div class="help-body">
+		</div>-->
+		<!--<div class="help-body">
 			<ul class="help-content">
 				<li><span class="li_span">Q :</span></li>
 				<li><span class="li_span">A :</span></li>
@@ -77,14 +77,14 @@
 				<li><span class="li_span">Q :</span>及时通报问题</li>
 				<li><span class="li_span">A :</span></li>
 			</ul>
-		</div>
-		<div class="help-body">
+		</div>-->
+		<!--<div class="help-body">
 			<ul class="help-content">
 				<li><span class="li_span">Q :</span></li>
 				<li><span class="li_span">A :</span></li>
 			</ul>
-		</div>
-		<div class="help-body">
+		</div>-->
+		<!--<div class="help-body">
 			<ul class="help-content">
 				<li><span class="li_span">Q :</span>高效程序开发的习惯？</li>
 				<li><span class="li_span">A :</span>为什么要持续开发呢？因为软件开发时意向非常复杂的智力活动，你遗留下来的任何问题，要么侥幸不会发生意外，要么情况就会变得糟糕，慢慢恶化直到变得不可控制</li>
@@ -97,9 +97,9 @@
 				<li><span class="li_span">Q :</span></li>
 				<li><span class="li_span">A :</span></li>
 			</ul>
-		</div>
-		<div class="help-body">
+		</div>-->
+		<!--<div class="help-body">
 			
-		</div>
+		</div>-->
 	</div>
 </div>

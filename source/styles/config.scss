@@ -1,28 +1,6 @@
-@mixin scale($n) {
-    -webkit-transform: scale($n);
-    -ms-transform: scale($n);
-    transform: scale($n);
-}
+@charset "utf-8";
 
-@mixin transform-origin($x,$y) {
-    -webkit-transform-origin: $x $y;
-    -ms-transform-origin: $x $y;
-    transform-origin: $x $y;
-}
-
-@mixin transition($prop,$time) {
-    -webkit-transition: $prop $time;
-    -ms-transition: $prop $time;
-    transition: $prop $time;
-}
-
-@mixin rotate($deg) {
-    -webkit-transform: rotate($deg);
-    -ms-transform: rotate($deg);
-    transform: rotate($deg);
-}
-
-$themeColor : #1E7CD9;
+@import 'reset.scss';
 $config-box-height : 814px;
 $title-height : 68px;
 $config-content-height : $config-box-height -  $title-height;
@@ -62,7 +40,7 @@ $config-content-height : $config-box-height -  $title-height;
 
 .configLi a:hover, .configLi.active > a {
     color: #fff;
-    border-left: 4px solid #1E7CD9;
+    border-left: 4px solid $themeColor;
     background-color: #375373;
 }
 .config-nav li li a{
@@ -72,35 +50,32 @@ $config-content-height : $config-box-height -  $title-height;
     margin-left: -20px;
     padding-left: 40px;
     color: #fff;
-    border-left: 4px solid #1E7CD9;
+    border-left: 4px solid $themeColor;
     background-color: #375373;
-}
-
-.configLi .nav-angle {
-    position: absolute;
-    right: 20px;
-    top: 16px;
-    width: 9px;
-    height: 9px;
-    border-right: 1px solid #e6e6e6;
-    border-bottom: 1px solid #e6e6e6;
-    @include rotate(45deg);
-    @include transition(all, .5s);
-}
-
-.configLi .nav-angle:hover {
-    border-right: 1px solid #fff;
-    border-bottom: 1px solid #fff;
-}
-
-.configLi.drag .nav-angle {
-    top: 22px;
-    @include rotate(-135deg);
-    @include transition(all, 1s);
 }
 
 /*二级目录样式*/
 .configLi{
+    .nav-angle {
+        position: absolute;
+        right: 20px;
+        top: 16px;
+        width: 9px;
+        height: 9px;
+        border-right: 1px solid #e6e6e6;
+        border-bottom: 1px solid #e6e6e6;
+        @include rotate(45deg);
+        @include transition(all, .5s);
+        &:hover {
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+        }
+    }
+    &.drag .nav-angle {
+        top: 22px;
+        @include rotate(-135deg);
+        @include transition(all, 1s);
+    }
     ul{
         max-height: 0;
         background-color: #2c3642;
@@ -112,10 +87,13 @@ $config-content-height : $config-box-height -  $title-height;
     }
     li {
         padding-left: 20px;
-    }
-    li a:hover {
-        margin-left: -20px;
-        padding-left: 40px;
+        a:hover {
+            margin-left: -20px;
+            padding-left: 40px;
+        }
+        &.disabled,&.active{
+            pointer-events: none;
+        }
     }
     //.second-nav.active{
     //    pointer-events: none;
@@ -145,9 +123,10 @@ $config-content-height : $config-box-height -  $title-height;
     background-color: #f0f3fa;
 }
 
-.config-box .ConfigMain {
+.config-box .config-main {
     position: relative;
     height: 100%;
+
 }
 
 /*/多列配置页面/*/
@@ -212,7 +191,7 @@ input:checked + .input-radio{
 }
 /*/校验规则可配/*/
 .check-rule-nav{
-    width: 180px;
+    width: 200px;
     height: $config-content-height;
     background-color: #dde5f0;
     .schedulePlanLi.active, .schedulePlanLi:hover,.ruleLi.active,.ruleLi:hover {
@@ -231,58 +210,58 @@ input:checked + .input-radio{
             display: block;
         }
     }
-    .addRule,.nav-manage {
+    .addRule{
         position: absolute;
         top: 14px;
         left: 20px;
-        width: 16px;
+        padding-left: 20px;
         height: 16px;
+        line-height: 16px;
+        background: url("../images/add-rule-blue.png") no-repeat;
         cursor: pointer;
-    }
-    .addRule:after,.addRule:before{
-        content: "";
-        position: absolute;
-        top: 5px;
-        left: 2px;
-        width: 16px;
-        height: 2px;
-        background-color: #8e9092;
-    }
-    .addRule:hover:after,.addRule:hover:before {
-        background-color: #1E7CD9;
-    }
-    input {
-        width: 120px;
-        background-color: transparent;
+        &:hover{
+            color: $themeColor;
+        }
     }
     .nav-manage {
+        @extend .addRule;
         left: auto;
         right: 20px;
-        background: url("../images/set-gray.png") no-repeat;
-    }
-    .addRule:before {
-        top: -2px;
-        left: 9px;
-        width: 2px;
-        height: 16px;
-    }
-    .nav-manage:hover {
         background-image: url("../images/set-blue.png");
+    }
+
+    input {
+        //padding-left: 8px;
+        width: 126px;
+        height: 30px;
+        line-height: 30px;
+        background-color: transparent;
+        box-sizing: border-box;
+        &:focus{
+            border: 1px solid $themeColor;
+            background-color: #fff;
+        }
     }
 }
 .config-form{
-    width: 902px;
-    height: $config-content-height;
+    //width: 902px;
+    //height: $config-content-height;
     overflow: auto;
     box-sizing: border-box;
 }
 .check-rule-nav li, .check-scheme-nav li {
     position: relative;
-    padding-left: 30px;
+    padding-left: 20px;
     height: 46px;
     line-height: 46px;
     color: #292929;
     cursor: pointer;
+    .left-nav-name{
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
 }
 
 .config-box .checkContent dt {
@@ -298,10 +277,9 @@ input:checked + .input-radio{
     border: 1px solid #ccc;
     background-color: #fff;
     cursor: pointer;
-}
-
-.config-box dd.relative:hover {
-    border: 1px solid #1e7cd9;
+    &:hover {
+        border: 1px solid $themeColor;
+    }
 }
 
 .config-box .checkItem input[type=text] {
@@ -311,19 +289,16 @@ input:checked + .input-radio{
     height: 28px;
     line-height: 24px;
     border: 1px solid #d9d9d9;
-}
-
-.config-box .checkItem input[type=text].error {
-    border: 1px solid red;
-}
-
-.config-box .checkItem input[type=text]:focus {
-    border: 1px solid #1e7cd9;
-}
-
-.checkItem label {
-    display: inline-block;
-    min-width: 100px;
+    &.error {
+        border: 1px solid red;
+    }
+    &:focus {
+        border: 1px solid $themeColor;
+    }
+    label {
+        display: inline-block;
+        min-width: 100px;
+    }
 }
 
 .config-box .info {
@@ -334,14 +309,12 @@ input:checked + .input-radio{
 
 .config-box .scheduleCheck {
     width: 100%;
-}
-
-.config-box .scheduleCheck label {
-    min-width: 200px;
-}
-
-.config-box .scheduleCheck label:nth-child(4n+1) {
-    text-align: left;
+    label {
+        min-width: 200px;
+        &:nth-child(4n+1) {
+            text-align: left;
+        }
+    }
 }
 
 .config-content dd.relative:after {
@@ -364,42 +337,37 @@ input:checked + .input-radio{
     top: 28px;
     left: -1px;
     background-color: #fff;
-    border: 1px solid #1e7cd9;
+    border: 1px solid $themeColor;
     z-index: 10;
-}
-
-.config-box .scheduleDrag.draw {
-    display: block;
+    li {
+        padding: 0 5px;
+        width: 128px;
+        min-width: 88px;
+        height: 30px;
+        line-height: 30px;
+        cursor: pointer;
+        &:hover,&.active{
+            color: $themeColor;
+        }
+    }
+    &.draw {
+        display: block;
+    }
 }
 
 .config-box dd.disabled {
     color: #808080;
     background-color: #ecf0f1;
+    .scheduleDrag {
+        display: none;
+    }
+    &:hover {
+        border: 1px solid #d9d9d9;
+    }
 }
 
 .config-box dd.not-edit {
     cursor: not-allowed;
-}
-
-.config-box dd.disabled .scheduleDrag {
-    display: none;
-}
-
-.config-box dd.disabled:hover {
-    border: 1px solid #d9d9d9;
-}
-
-.config-box .scheduleDrag li {
-    padding: 0 5px;
-    width: 128px;
-    min-width: 88px;
-    height: 30px;
-    line-height: 30px;
-    cursor: pointer;
-}
-
-.scheduleDrag li:hover, .scheduleDrag li.active {
-    color: #1e7cd9;
 }
 
 .config-box .checkConfig {
@@ -412,7 +380,7 @@ input:checked + .input-radio{
     flex-wrap: wrap;
     width: 400px;;
 }
-
+/*排程规则-排程因子权重*/
 .schedule-weight-map {
     h6 {
         min-width: 170px;
@@ -430,7 +398,6 @@ input:checked + .input-radio{
         line-height: 14px;
     }
 }
-
 .weight-map-box {
     width: 600px;
     dl:nth-child(even) {
@@ -462,10 +429,15 @@ input.disabled{
     }
     &.reverse{
         &:after,&:before{
+            top: 10px;
             @include rotate(-135deg);
+        }
+        &:before{
+            top: 5px;
         }
     }
 }
+/*高级设置分割线*/
 .checkR-rule-line{
     border-top: 1px solid #ccc;
 }
@@ -477,93 +449,69 @@ input.disabled{
 }
 
 .config-box .leftPlan {
-    width: 180px;
+    width: 200px;
     height: 700px;
 }
 
 .config-box .leftPlan .addPlan {
     padding-left: 10px;
-    color: #1e7cd9;
+    color: $themeColor;
     cursor: pointer;
 }
 
-.config-box .addCircle {
-    position: relative;
-    top: 3px;
-    left: -10px;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #1e7cd9;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.config-box .addCircle:after, .config-box .addCircle:before {
-    content: "";
-    position: absolute;
-    top: 5px;
-    left: 2px;
-    width: 8px;
-    height: 2px;
-    background-color: #1e7cd9;
-}
-
-.config-box .addCircle:before {
-    top: 2px;
-    left: 5px;
-    width: 2px;
-    height: 8px;
-}
-
-.config-box .middleWorkshop {
+.config-box .middle-workshop {
     width: 340px;
-}
-
-.middleWorkshop h6 span {
-    color: #808080;
-    font-size: 12px;
-}
-
-.middleWorkshop nav a {
-    position: relative;
-    padding-left: 5px;
-    width: 108px;
-    height: 30px;
-    line-height: 28px;
-    color: #333;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    border: 2px solid #d9d9d9;
-    background-color: #d9d9d9;
-    vertical-align: middle;
-    box-sizing: border-box;
-}
-
-.middleWorkshop nav .select-rule {
-    width: 140px;
-}
-
-.middleWorkshop nav .select-rule:after {
-    content: "";
-    position: absolute;
-    right: 5px;
-    top: 6px;
-    width: 7px;
-    height: 7px;
-    border-right: 1px solid #999;
-    border-bottom: 1px solid #999;
-    @include rotate(45deg);
-}
-
-.middleWorkshop li > a .delete {
-    position: absolute;
-    top: -10px;
-    right: -7px;
-    width: 14px;
-    height: 14px;
-    background: url("../images/garbage.png") no-repeat;
-    z-index: 10;
+    h6 span {
+        color: #808080;
+        font-size: 12px;
+    }
+    nav a {
+        position: relative;
+        padding-left: 5px;
+        width: 108px;
+        height: 30px;
+        line-height: 28px;
+        color: #333;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        border: 2px solid #d9d9d9;
+        background-color: #d9d9d9;
+        vertical-align: middle;
+        box-sizing: border-box;
+    }
+    nav {
+        .select-rule {
+            width: 140px;
+            padding-right: 10px;
+        }
+        .select-rule:after {
+            content: "";
+            position: absolute;
+            right: 5px;
+            top: 6px;
+            width: 7px;
+            height: 7px;
+            border-right: 1px solid #999;
+            border-bottom: 1px solid #999;
+            @include rotate(45deg);
+        }
+    }
+    li > a .delete {
+        position: absolute;
+        top: -10px;
+        right: -7px;
+        width: 14px;
+        height: 14px;
+        background: url("../images/garbage.png") no-repeat;
+        z-index: 10;
+    }
+    .drag-rule-name{
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
 }
 
 .workshop-manage {
@@ -571,93 +519,78 @@ input.disabled{
     height: 16px;
     background: url("../images/set-gray.png") no-repeat;
     cursor: pointer;
-}
-
-.workshop-manage:hover {
-    background-image: url("../images/set-blue.png");
+    &:hover {
+        background-image: url("../images/set-blue.png");
+    }
 }
 
 .workshop-ruleNav {
     position: relative;
     display: inline-block;
-}
-
-.workshop-ruleNav ul {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    width: 140px;
-    max-height: 0;
-    line-height: 30px;
-    text-align: center;
-    overflow: hidden;
-    overflow-y: auto;
-    transition: max-height .5s;
-    z-index: 10;
-}
-
-.workshop-ruleNav.active ul {
-    max-height: 140px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    @include transition(max-height, .5s);
-    //-webkit-transition: max-height .5s;
-    //-ms-transition: max-height .5s;
-    //transition: max-height .5s;
-}
-
-.workshop-ruleNav li {
-    position: relative;
-    padding-left: 5px;
-    height: 30px;
-    line-height: 30px;
-    text-align: left;
-    color: #333;
-    background-color: #fff;
-    cursor: pointer;
-}
-
-.workshop-ruleNav li:hover {
-    background-color: #1e7cd9;
-    color: #fff;
-}
-
-.workshop-ruleNav li:hover .viewRule {
-    display: block;
-}
-
-.workshop-ruleNav .viewRule {
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 30px;
-    height: 30px;
-    color: #1e7cd9;
-    background-color: #1b6fc3;
-}
-
-.workshop-ruleNav .viewRule:before {
-    content: "";
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 14px;
-    height: 14px;
-    border: 1px solid #fff;
-    border-radius: 50%;
-}
-
-.workshop-ruleNav .viewRule:after {
-    content: "...";
-    color: #fff;
-    position: absolute;
-    top: -5px;
-    right: 9px;
-}
-
-.workshop-ruleNav ul li:hover .viewRule {
-    color: #fff;
+    ul {
+        position: absolute;
+        top: 30px;
+        right: 0;
+        width: 140px;
+        max-height: 0;
+        line-height: 30px;
+        text-align: center;
+        overflow: hidden;
+        overflow-y: auto;
+        transition: max-height .5s;
+        z-index: 10;
+    }
+    &.active ul {
+        max-height: 140px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        @include transition(max-height, .5s);
+    }
+    li {
+        position: relative;
+        padding-left: 5px;
+        height: 30px;
+        line-height: 30px;
+        text-align: left;
+        color: #333;
+        background-color: #fff;
+        cursor: pointer;
+        &:hover {
+            background-color: $themeColor;
+            color: #fff;
+            .viewRule {
+                display: block;
+                color: #fff;
+            }
+        }
+    }
+    .viewRule {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        color: $themeColor;
+        background-color: #1b6fc3;
+        &:before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 14px;
+            height: 14px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+        }
+        &:after {
+            content: "...";
+            color: #fff;
+            position: absolute;
+            top: -5px;
+            right: 9px;
+        }
+    }
 }
 
 .config-box .location-show {
@@ -670,17 +603,14 @@ input.disabled{
 }
 .planContent .rightLocation{
     position: static;
-    //min-height: 680px;
-    //border-left: 1px solid #ccc;
-}
-
-.rightLocation h6 {
-    height: 54px;
-    line-height: 54px;
-}
-.planContent .rightLocation i.disabled{
-    background-color: #fff;
-    pointer-events: none;
+    h6 {
+        height: 54px;
+        line-height: 54px;
+    }
+    i.disabled{
+        background-color: #fff;
+        pointer-events: none;
+    }
 }
 /*pap*/
 .papRuleContent label {

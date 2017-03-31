@@ -7,16 +7,19 @@
     <link rel="stylesheet" href="../styles/index.css" />
     <link rel="stylesheet" href="../styles/secondPage.css" />
     <link href="../favicon.ico" rel="icon" type="image/x-icon"/>
-    <title>二级页面查看页</title>
+    <title>设备详情</title>
 </head>
-<body ng-controller="previewController">
-<div class="page-wrapper secondPage">
+<body ng-controller="mainCtrl">
+<div class="page-wrapper secondPage" ng-controller="previewController">
     <!--head START-->
     <div class="header">
     </div>
     <!--二级页面-->
 
     <div class="table-dialog-window table-window" style="opacity:0">
+        <div class="dialog-window-head">
+            设备详情
+        </div>
         <div class="dialog-window-body">
             <div class="info-show">
                 <div class="window-search-box">
@@ -114,7 +117,7 @@
                     <table>
                         <thead>
                         <tr>
-                            <th>序 号</th>
+                            <th style="min-width: 44px;">序 号</th>
                             <th ng-repeat="title in headDataView track by $index">{{title}}
                             </th>
                         </tr>
@@ -135,83 +138,84 @@
             </div>
         </div>
     </div>
-</div>
-<div style="display: none;" id="do_detail_dialog" title="派工单详细信息">
-    <div class="do_detail_dialog">
-        <table>
-            <tr>
-                <td>销售订单</td>
-                <td>:</td>
-                <td>{{do_detail.saleOrderCode}}</td>
-            </tr>
-            <!--生产主计划号（缺）-->
-            <tr>
-                <td>自制件计划号</td>
-                <td>:</td>
-                <td>{{do_detail.moCode}}</td>
-            </tr>
-            <!--车间计划号（缺）-->
-            <tr class="do-code">
-                <td>派工单号</td>
-                <td>:</td>
-                <td>{{do_detail.doCode}}</td>
-            </tr>
-            <tr>
-                <td>物料编码</td>
-                <td>:</td>
-                <td>{{do_detail.materialCode}}</td>
-            </tr>
-            <tr>
-                <td>物料助记码</td>
-                <td>:</td>
-                <td>{{do_detail.materialMnem}}</td>
-            </tr>
-            <tr>
-                <td>物料名称</td>
-                <td>:</td>
-                <td>{{do_detail.materialName}}</td>
-            </tr>
-            <tr>
-                <td>物料规格</td>
-                <td>:</td>
-                <td>{{do_detail.materialSpec}}</td>
-            </tr>
-            <tr>
-                <td>物料单位</td>
-                <td>:</td>
-                <td>{{do_detail.materialUnit}}</td>
-            </tr>
+    <div style="display: none;" id="do_detail_dialog" title="派工单详细信息">
+        <div class="do_detail_dialog">
+            <table>
+                <tr>
+                    <td>销售订单</td>
+                    <td>:</td>
+                    <td>{{do_detail.saleOrderCode}}</td>
+                </tr>
+                <!--生产主计划号（缺）-->
+                <tr>
+                    <td>自制件计划号</td>
+                    <td>:</td>
+                    <td>{{do_detail.moCode}}</td>
+                </tr>
+                <!--车间计划号（缺）-->
+                <tr class="do-code">
+                    <td>派工单号</td>
+                    <td>:</td>
+                    <td>{{do_detail.doCode}}</td>
+                </tr>
+                <tr>
+                    <td>物料编码</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialCode}}</td>
+                </tr>
+                <tr>
+                    <td>物料助记码</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialMnem}}</td>
+                </tr>
+                <tr>
+                    <td>物料名称</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialName}}</td>
+                </tr>
+                <tr>
+                    <td>物料规格</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialSpec}}</td>
+                </tr>
+                <tr>
+                    <td>物料单位</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialUnit}}</td>
+                </tr>
 
-            <tr>
-                <td>工序编码</td>
-                <td>:</td>
-                <td>{{do_detail.processCode}}</td>
-            </tr>
-            <tr>
-                <td>工序名称</td>
-                <td>:</td>
-                <td>{{do_detail.processName}}</td>
-            </tr>
+                <tr>
+                    <td>工序编码</td>
+                    <td>:</td>
+                    <td>{{do_detail.processCode}}</td>
+                </tr>
+                <tr>
+                    <td>工序名称</td>
+                    <td>:</td>
+                    <td>{{do_detail.processName}}</td>
+                </tr>
 
-            <tr>
-                <td>开始时间</td>
-                <td>:</td>
-                <td>{{do_detail.startTime}}</td>
-            </tr>
-            <tr>
-                <td>结束时间</td>
-                <td>:</td>
-                <td>{{do_detail.endTime}}</td>
-            </tr>
-            <tr>
-                <td>计划数</td>
-                <td>:</td>
-                <td>{{do_detail.taskNum}}</td>
-            </tr>
-        </table>
-        <a style="" class="sure" href="javascript:;">确定</a>
+                <tr>
+                    <td>开始时间</td>
+                    <td>:</td>
+                    <td>{{do_detail.startTime}}</td>
+                </tr>
+                <tr>
+                    <td>结束时间</td>
+                    <td>:</td>
+                    <td>{{do_detail.endTime}}</td>
+                </tr>
+                <tr>
+                    <td>计划数</td>
+                    <td>:</td>
+                    <td>{{do_detail.taskNum}}</td>
+                </tr>
+            </table>
+            <a style="" class="sure" href="javascript:;">确定</a>
+        </div>
     </div>
 </div>
+
 <!--二级页面结束-->
 <!-- 加载依赖包,线上可以使用压缩版 -->
 <script src="../scripts/lib/angular.js"></script>
@@ -224,11 +228,15 @@
 <script src="../scripts/lib/layer/layer.js"></script>
 <!-- 加载入口 -->
 <script src="../scripts/app.js"></script>
+<!--加载控制器-->
+<script src="../scripts/controllers/mainController.js"></script>
 <!-- 加载service -->
-<script src="../scripts/services/service.js"></script>
+<script src="../scripts/services/scheduleTableViewModel.js"></script>
+<script src="../scripts/services/tool.js"></script>
+<script src="../scripts/services/http.js"></script>
 
 <script>
-    app.controller("previewController",function($rootScope,$scope, $http,$timeout,$q,scheduleTableViewModelService,tool){
+    app.controller("previewController",function($rootScope,$scope, $http,$timeout,$q,scheduleTableViewModelService,tool,http){
         //设备
         var goEquipment = {};
         var goInfo = {};
@@ -241,8 +249,6 @@
                 materialName = body_data.materialName,
                 materialCode = body_data.materialCode,
                 saleOrder = body_data.saleOrderCode,
-                isStr = body_data.order,
-                isArr = body_data.equipments,
                 thisEquipmentId = body_data.equipments,
                 htmlSource = body_data.from,
                 thisEquipmentName = [];
@@ -259,12 +265,14 @@
             //导出excel接口
             excelAPI=$rootScope.restful_api.excel_pre;
             get_url=$rootScope.restful_api.preview_show_table+"?locationFilterList="+sessionStorage.locationFilterList_pre+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
+			
+			
         }else{
             locationId = sessionStorage.locationId_res;
             sourceUrl=$rootScope.restful_api.res_sourceUrl;
             //导出excel接口
             excelAPI=$rootScope.restful_api.excel_res;
-            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
+            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;	
         }
         /**
          * 显示正式派工单表的排程计划
@@ -274,118 +282,133 @@
         promise
         //直接加载页面数据
                 .then(function(){
-                    $http.post(sourceUrl,body_data)
-                            .then(function(response) {
-                                $(".table-dialog-window").show();
-                                $(".equipment-list").remove();
-                                var resData = response.data;
-                                var headList = resData.columnAlias;//表头列表
-                                //数据转换
+					http.post({
+						url: sourceUrl,
+						data: body_data,
+						successFn: function(response) {
+							$(".table-dialog-window").show();
+							$(".equipment-list").remove();
+							var resData = response.data;
+							var headList = resData.columnAlias;//表头列表
+							//数据转换
 //                              console.log(resData);
-                                var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(resData);
-                                //表头
-                                $scope.headDataView = windowTableData.headData;
-                                //表格数据
-                                $scope.tableDataView = windowTableData.bodyData;
-                            })
+							var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(resData);
+							//表头
+							$scope.headDataView = windowTableData.headData;
+							//表格数据
+							$scope.tableDataView = windowTableData.bodyData;
+						}
+					})
                             //执行合并项和汇总项的配置
                             .then(function(){
                                 //合并项
-                                $http.get($rootScope.restful_api.sort_combine_config + locationId)
-                                        .then(function(res){
+								http.get({
+									url: $rootScope.restful_api.sort_combine_config + locationId,
+									successFn: function(res){
                                             $scope.combineItem = $.extend({},res.data);
                                             $scope.combineObj = {
                                                 combine : scheduleTableViewModelService.combinecountItem($scope.combineItem),
                                                 combineDrag : true,
                                                 combineActive : false
-                                            }
+                                            };
                                             //如果有默认配置合并项就执行
                                             if($scope.combineItem.selectList){
                                                 var combineItem = [];
                                                 var combineCondition = [];
                                                 $scope.combineItem.selectList.forEach(function(item){
                                                     combineItem.push(item.valueAlias);
-                                                })
+                                                });
                                                 $scope.columnSelectList.forEach(function(item){
                                                     combineCondition.push(item.valueAlias);
-                                                })
-                                                $scope.combine(combineItem,combineCondition)//合并条件，合并项
+                                                });
+                                                $scope.combine(combineItem,combineCondition);//合并条件，合并项
                                             }
                                             tool.setTableHeadWidth($(".table-dialog-window"));
                                             $timeout(function(){
                                             },0)
-                                        })
+                                        }
+								});
                                 //汇总项
-                                $http.get($rootScope.restful_api.sort_summary_config + locationId)
-                                        .then(function(res){
-                                            $scope.summaryItem = $.extend({},res.data);
-                                            $scope.summaryObj = {
-                                                summary : scheduleTableViewModelService.combinecountItem($scope.summaryItem),
-                                                summaryDrag : true,
-                                                summaryActive : true
-                                            }
-                                            //如果有默认配置合并项就执行
-                                            if($scope.summaryItem.selectList){
-                                                var countItem = [];
-                                                $scope.summaryItem.selectList.forEach(function(item){
-                                                    countItem.push(item.valueAlias);
-                                                })
-                                                $timeout(function(){
-                                                    tool.setTableHeadWidth($(".table-dialog-window"));
-                                                    $scope.countAll(countItem);
-                                                },0)
-                                            }
-                                        })
+								http.get({
+									url: $rootScope.restful_api.sort_summary_config + locationId,
+									successFn: function(res){
+										$scope.summaryItem = $.extend({},res.data);
+										$scope.summaryObj = {
+											summary : scheduleTableViewModelService.combinecountItem($scope.summaryItem),
+											summaryDrag : true,
+											summaryActive : true
+										};
+										//如果有默认配置合并项就执行
+										if($scope.summaryItem.selectList){
+											var countItem = [];
+											$scope.summaryItem.selectList.forEach(function(item){
+												countItem.push(item.valueAlias);
+											});
+											$timeout(function(){
+												tool.setTableHeadWidth($(".table-dialog-window"));
+												$scope.countAll(countItem);
+											},0)
+										}
+									}
+								});
                             })
                 })
                 //更新查询条件
                 .then(function(){
-                    $http.get(get_url).success(function(res){
-                        goEquipment = $.extend({},res.punit);
-                        goInfo = $.extend({},res);
-                        thisEquipmentId.forEach(function(item){
-                            for(var i in goEquipment){
-                                var newI=i.split("_");
-                                if(item.equipmentId == newI[0]){
-                                    thisEquipmentName.push(goEquipment[i].punitName);
-                                }
-                            }
-                        });
-                        var windowSearchBox = $(".info-show").find(".window-search-box");
-                        windowSearchBox.eq(0).find("input").val(thisStartTime);
-                        windowSearchBox.eq(1).find("input").val(thisEndTime);
-                        windowSearchBox.eq(2).find("input").val(thisEquipmentName.join());
-                        windowSearchBox.eq(3).find("input").val(saleOrder);
-                        windowSearchBox.eq(4).find("input").val(materialName);
-                        windowSearchBox.eq(5).find("input").val(materialCode);
-                    })
+					http.get({
+						url: get_url,
+						successFn: function(res){
+							res = res.data;
+							goEquipment = $.extend({},res.punit);
+							goInfo = $.extend({},res);
+							thisEquipmentId.forEach(function(item){
+								for(var i in goEquipment){
+									var newI=i.split("_");
+									if(item.equipmentId == newI[0]){
+										thisEquipmentName.push(goEquipment[i].punitName);
+									}
+								}
+							});
+							var windowSearchBox = $(".info-show").find(".window-search-box");
+							windowSearchBox.eq(0).find("input").val(thisStartTime);
+							windowSearchBox.eq(1).find("input").val(thisEndTime);
+							windowSearchBox.eq(2).find("input").val(thisEquipmentName.join());
+							windowSearchBox.eq(3).find("input").val(saleOrder);
+							windowSearchBox.eq(4).find("input").val(materialName);
+							windowSearchBox.eq(5).find("input").val(materialCode);
+						},
+						errorFn: function(res){}
+					});
                 })
                 //点击获取li的内容
                 .then(function(){
-                    $scope.columnResData = $http.get($rootScope.restful_api.sort_content_config + locationId)
-                            .success(function(res){
-                                $scope.temporaryList = $scope.resColumnData = res;
-                                $scope.columnOptionList = scheduleTableViewModelService.sortItem($scope.resColumnData);
-                                $scope.columnSelectList = scheduleTableViewModelService.sortSelectItem($scope.resColumnData);//获得右边需要显示的数据
-                                //为降序的li添加上相应的class
-                                var sortItem = document.getElementById("sort-item").childNodes;
-                                for(var i =0 ;i<sortItem.length;i++){
-                                    var thisSortItem = sortItem[i];
-                                    if(thisSortItem.nodeName == "LI"){
-                                        if(thisSortItem.getAttribute("data-order") == "down"){
-                                            thisSortItem.getElementsByTagName("span")[0].className = "itemOrder desc";
-                                        }
-                                    }
-                                }
-                                new DragNewItem('all-item','provide-item','sort-item',{});
-                            });
+					http.get({
+						url: $rootScope.restful_api.sort_content_config + locationId,
+						successFn: function(res){
+							res = res.data;
+							$scope.temporaryList = $scope.resColumnData = res;
+							$scope.columnOptionList = scheduleTableViewModelService.sortItem($scope.resColumnData);
+							$scope.columnSelectList = scheduleTableViewModelService.sortSelectItem($scope.resColumnData);//获得右边需要显示的数据
+							//为降序的li添加上相应的class
+							var sortItem = document.getElementById("sort-item").childNodes;
+							for(var i =0 ;i<sortItem.length;i++){
+								var thisSortItem = sortItem[i];
+								if(thisSortItem.nodeName == "LI"){
+									if(thisSortItem.getAttribute("data-order") == "down"){
+										thisSortItem.getElementsByTagName("span")[0].className = "itemOrder desc";
+									}
+								}
+							}
+							new DragNewItem('all-item','provide-item','sort-item',{});
+						}
+					})
                 })
                 //执行完毕，显示界面
                 .then(function(){
                     $timeout(function(){
                         $(".table-dialog-window").css("opacity" ,1);
                     },200)
-                })
+                });
         deferred.resolve();
 
         //输入检测
@@ -414,17 +437,17 @@
             }
             return true;
         }
-        //点击选中合并和汇总项
+        //点击选中合并和汇总项 cc = count combine
         $scope.addccItem = function(data,$event){
             data.show = true;
             $event.stopPropagation();
-        }
-        //删除选中的合并和汇总项
+        };
+        //删除选中的合并和汇总项 cc = count combine
         $scope.deleteccItem = function(data,$event){
             data.show = false;
             //$event.target.parentNode.parentNode;
             //console.log($event.target.parentNode.parentNode.nextElementSibling);
-        }
+        };
         //二级页面内查询,刷新二级页面
         var windowSearch = false;
         $scope.change_window_table = function(){
@@ -459,16 +482,16 @@
             }
             //刷新二级页面
             $scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode);
-        }
+        };
 
         //导出excel
-        $scope.output_excel = function(){
+        $scope.output_excel1 = function(){
             //获取查询条件
             var inputList = tool.getFromInput_nocode(".table-dialog-window .info-show");
             var thisStartTime = inputList[0],
                     thisEndTime = inputList[1],
-                    thisEquipmentName = inputList[2];
-            saleOrder = inputList[3],
+                    thisEquipmentName = inputList[2]
+                    saleOrder = inputList[3],
                     materialName = inputList[4],
                     materialCode = inputList[5],
                     aEquipmentId = [];
@@ -516,6 +539,52 @@
                 }
                 layer.msg('导出成功', {time: 3500,icon: 1});
             })
+        };
+        
+        //前端导出excel
+        $scope.output_excel = function(){
+        	var exportTable = $(".table-space").clone().attr("id","exportExcel");
+        	var exportTableTr = exportTable.find("tr");  
+        	var todayDate = new Date();
+            var year = todayDate.getFullYear()+"";
+            var month = todayDate.getMonth() + 1;
+            if(month < 10) {
+                month = "0" + month;
+            }
+            var day = todayDate.getDate();
+            if(day < 10) {
+                day = "0" + day;
+            }
+            var fileName = year + month + day + ".xls";
+        	
+        	exportTableTr.each(function(){
+                $(this).find("td").last().remove();
+                $(this).find("th").last().remove();
+            });
+            
+            if($(".countall").length > 0){
+            	var printBottom = $(".countall").clone();
+            	printBottom.children("div").last().remove();
+            	var printBottomDiv = printBottom.children("div");
+	            var colNum = printBottomDiv.length;
+	            var newRow = $("<tr></tr>");	            
+	            for(var i = 0 ; i < colNum ; i++){          	
+	            	newRow.append("<td>"+printBottomDiv.eq(i).text()+"</td>");
+	            }
+	            exportTable.find("tbody").append(newRow);
+            }
+            
+        	exportTable.appendTo($("body")).hide();
+        	var elem = document.getElementById("exportExcel"),
+				content = '<html><head><meta charset="UTF-8"></head><body>' + elem.outerHTML + '</body></html>',
+				EXCEL_URI = 'data:application/vnd.ms-excel;base64,',
+				objectUrl = EXCEL_URI + window.btoa(unescape(encodeURIComponent(content)));
+			
+			var aForExcel = $("<a download='"+fileName+"'><span class='forExcel'>下载excel</span></a>").attr("href",objectUrl);
+            $("body").append(aForExcel);
+            $(".forExcel").click();
+            aForExcel.remove();
+        	$("#exportExcel").remove();
         }
 
         //打印
@@ -556,13 +625,13 @@
             newWindow.document.write('<button class="transverse noprint">横向</button><button class="vertical noprint">纵向</button><button class="noprint">打印</button>');
             newWindow.document.write(b.html());
             newWindow.document.write('<style rel="stylesheet" href="../styles/print.css"></style>');
-            newWindow.document.write('<script src="../scripts/lib/jquery-min.js"></'+'script>');
+            newWindow.document.write('<script src="../scripts/lib/jquery.js"></'+'script>');
             newWindow.document.write('<script src="../scripts/view/print.js?t=14" charset="UTF-8"></'+'script>')
 //          newWindow.focus();
 //          newWindow.document.close();
 //          newWindow.print();
 //          newWindow.close();
-        }
+        };
 
         ///设置多列排序的相关代码
         $scope.set_order = function(){
@@ -684,9 +753,10 @@
                 "equipments":isArr,
                 "schemeId":sessionStorage.schemeId
             };
-            $http.post(sourceUrl,body_data).then(
-                    //成功
-                    function(response){
+			http.post({
+				url: sourceUrl,
+				data: body_data,
+				successFn: function(response){
                         var jTableDialogWindow = $(".table-dialog-window")
                         jTableDialogWindow.show();
                         $(".equipment-list").remove();
@@ -778,37 +848,33 @@
                             $("#all-item").find(".js-move").remove();
                         });
                     },
-                    //失败
-                    function(response){
+				errorFn: function(response){
                         layer.alert('获取数据失败，请联系技术人员处理', {
                             skin: 'layer-alert-themecolor' //样式类名
                         });
                     }
-            )
+			})
         };
         //二级页面地点下拉框
         $scope.equipment_list = function($event){
             if($(".equipment-list").length > 0){
                 $(".equipment-list").remove();
-                $(".table-dialog-window .equipment-input").css("border","");
+                $(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
             }else{
                 tool.dialogWindowEquipment(goEquipment,$event,false);
                 $(".table-dialog-window .equipment-input").css("border","1px solid #1E7CD9");
             }
 	    	$timeout(function(){
-	    		$(document).click(function(){
-					$(".equipment-list").remove();
-				});
-				$(".equipment-list,.equipment-input").click(function(event){
-	   				 event.stopPropagation();
-				});	
+	    		
+	    		
 				
 	    	},0)            
-        }
+        };
         //合并项
         $scope.combine = function(combineItem,combineCondition){
             let count;//第一个为0
-            let conbineItem = combineItem//合并项
+            let conbineItem = combineItem;//合并项
+            let tableTr = $(".table-space tbody tr");//表格每行tr
             if(conbineItem.length<=0){
                 return;
             }
@@ -824,22 +890,24 @@
                                 count = index;
                             }
                         });
+                        //如果列表没有此项，则不对此项进行合并
+                        if(!count){
+                            return;
+                        }
                         $scope.headDataView.splice(count+1,0,"合计数");
                         //内容信息栏
                         $scope.tableDataView.forEach(function(item){
                             let obj = {"showText" : item[count].showText};
                             item.splice(count+1,0,obj);
                         });
-                        $(".table-space tbody tr").each(function(indexCount){
+                        tableTr.each(function(indexCount){
                             $(this).find("td[data-id]").attr("data-id","")
-                        })
-                    })
-                    //1.给每个合计项附上专属ID;2.需注意人工添加了序号这一列,某些情况count+1+combineItemIndex
-                    //一个+combineItemIndex;因为合计数增加在合计项后面一列，每增加一列合计数，后面计算出的count要加对应数量的combineItemIndex
-                    //一个+1因为头部增加了序号这一列
-                    .then(function(){
+                        });
+
+                        //1.给每个合计项附上专属ID;2.需注意人工添加了序号这一列,某些情况count+1+combineItemIndex
+                        //一个+combineItemIndex;因为合计数增加在合计项后面一列，每增加一列合计数，后面计算出的count要加对应数量的combineItemIndex
+                        //一个+1因为头部增加了序号这一列
                         combineItemIndex += 1;//决定于增加几列合计数
-                        console.log(combineItemIndex);
                         //异步等待dom渲染
                         $timeout(function(){
                             //根据合并条件一一赋予属性值
@@ -860,7 +928,7 @@
                             });
                             var dataIdObject = {};
                             //获取相关属性的一个个对象,得出哪些项需要合并
-                            $(".table-space tbody tr").each(function(indexCount){
+                            tableTr.each(function(indexCount){
                                 //忘记当时为什么这么做了
                                 if(indexCount === $(".table-space tbody tr").length-1){
                                     return;
@@ -877,19 +945,17 @@
                                 }
                                 dataIdObject[dataId].value += $scope.tableDataView[indexCount][count+1].showText;
                             });
-                            for(var name in dataIdObject){
-                                var dataIdobj = dataIdObject[name];
-                                $(".table-space tbody tr").eq(dataIdobj.index).children().eq(count + combineItemIndex + 1)
-                                    .text(dataIdobj.value)
-                                    .attr("rowSpan",dataIdobj.num)
-                                    .css("background-color","#fff");
-                                for(var i = 1;i < dataIdobj.num;i++){
-                                    $(".table-space tbody tr").eq(dataIdobj.index + i).children().eq(count + combineItemIndex + 1).remove();
+                            for(let name in dataIdObject){
+                                let dataIdObj = dataIdObject[name];
+                                tableTr.eq(dataIdObj.index).children().eq(count + combineItemIndex + 1)
+                                        .text(dataIdObj.value)
+                                        .attr("rowSpan",dataIdObj.num)
+                                        .css("background-color","#fff");
+                                for(let i = 1;i < dataIdObj.num;i++){
+                                    $(".table-space tbody tr").eq(dataIdObj.index + i).children().eq(count + combineItemIndex + 1).remove();
                                 }
                             }
                         },100)
-                    })
-                    .then(function(){
                     })
             })
         };
@@ -911,6 +977,10 @@
                         count = index;
                     }
                 });
+                //如果列表没有此项，则不对此项进行汇总
+                if(!count){
+                    return;
+                }
                 //对应列计算出汇总数
                 $scope.tableDataView.forEach(function(item){
                     sum += item[count].showText
@@ -920,10 +990,9 @@
 //                    return sum += parseInt($(this).children().eq(count+1).text());
 //                })
 				
-				console.log($scope.tableDataView);
+//				console.log($scope.tableDataView);
                 //修改合计数过长显示不完全的bug
                 let newCountAll = $scope.tableDataView.length ? new Array($scope.tableDataView[0].length) : [];
-                console.log()
                 newCountAll[count] = {};
                 newCountAll[count].showText = sum;
                 $scope.tableDataView.push(newCountAll);
@@ -960,7 +1029,7 @@
                 $(".pk-id").hide();
                 $(".version-id").hide();
             }else{
-				sUrl = $rootScope.restful_api.result_third + pkId + "?versionId="+versionId;
+				sUrl = $rootScope.restful_api.result_third + pkId + "?versionId="+versionId +"&schemeId=" +sessionStorage.schemeId;
                 $(".do-code").hide();
                 $(".pk-id").show();
                 $(".version-id").show();
@@ -978,32 +1047,31 @@
                     $(".layui-layer").css({
                         "left" : $event.pageX - 272,
                         "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
-                    })
+                    });
                     
                     $($event.target).css("color","#1E7CD9");
                     
                     $("body").on("click","#do_detail_dialog .sure,.layui-layer-shade,.layui-layer-close",function(){
                     	 $(".show-table .sale-order-look").css("color","");
-                    })
+                    });
                     
                     $("#do_detail_dialog").on("click",".sure",function(){
                         layer.close(indexLayer);
                     })
                 }
-            })
-            $http.get(sUrl).then(
-                function(res){
-//                      $rootScope.do_detail = res.data;
+            });
+			http.get({
+				url: sUrl,
+				successFn: function(res){
+//                  $rootScope.do_detail = res.data;
                     //绑定view层
                     $scope.do_detail = res.data;
                     //json转viewModel对象
                     console.log($scope.do_detail);
                 },
-                function(res){
-
-                }
-            );
-        }
+				errorFn: function(res){}
+			})
+        };
     	$timeout(function(){
             //预排过得单子字体颜色特殊处理
 	        $("body").find(".show-table table tbody tr").each(function(){

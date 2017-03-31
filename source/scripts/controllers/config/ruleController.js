@@ -1,30 +1,37 @@
 /**
  * Created by yiend on 2017/1/16.
  */
-app.controller("ruleController",["$rootScope","$scope","$http","$timeout","scheduleTableViewModelService","tool", function($rootScope,$scope,$http,$timeout,scheduleTableViewModelService,tool){
-    //显示正确的目录class-active
-    $scope.configNav.activeNav = ".rule";
+app.controller("ruleController",["$rootScope","$scope","$http","$timeout","scheduleTableViewModelService","dataService","tool","http", function($rootScope,$scope,$http,$timeout,scheduleTableViewModelService,dataService,tool,http){
+    //-----本页面相关初始化操作-----
+    $scope.configNav.activeNav = ".rule";//显示正确的目录class-active
+    $scope.$parent.showManage = false;//管理目录的垃圾桶删除按钮消失
+    $scope.columnWorkshop = false;//车间树隐藏
 
-    $scope.columnWorkshop = false;
-        $scope.disable = {
-            schedulePointSelected : false,//pap排程规则下拉列表==>
-            scheduleInterval : false//排程周期 ==>
-        };
-        $scope.notEdit = {
-            schedulePointSelected : false,
-            scheduleInterval:false
-        };
-    $http.get($rootScope.restful_api.all_schedule_rule)
-        .success((res) => {
+    $scope.disable = {
+        schedulePointSelected : false,//pap排程规则下拉列表==>
+        scheduleInterval : false//排程周期 ==>
+    };
+    $scope.notEdit = {
+        schedulePointSelected : false,
+        scheduleInterval:false
+    };
+    //-----本页面相关初始化操作-----
+    // $scope.ruleList = dataService.ruleList;
+    http.get({
+        url: $rootScope.restful_api.all_schedule_rule,
+        successFn: (res) => {
+            res = res.data;
             $scope.ruleList = $.extend([],res);
             //如果有规则，显示第一条排程规则
             if($scope.ruleList[0]){
                 $scope.ruleId = $scope.ruleList[0].ruleId;
-                $http.get($rootScope.restful_api.single_schedule_rule+$scope.ruleId)
-                    .success((res) => {
-                        $scope.setCheckData(res);
-                    })
-                    //表单初始化
+                http.get({
+                    url: $rootScope.restful_api.single_schedule_rule+$scope.ruleId,
+                    successFn: (res) => {
+                        $scope.setCheckData(res.data);
+                    }
+                })
+                //表单初始化
                     .then(function () {
                         //设置pap排程规则
                         if($scope.scheduleCheckData.papType == "PAP_DISABLE"){
@@ -41,43 +48,59 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                                 $(item).text(text);
                             })
                         },0);
-                        document.getElementById("scheduleInterval").onkeyup = function () {
-                            if (this.value.length == 1) {
-                                this.value = this.value.replace(/[^0-9]/g, '')
-                            } else {
-                                this.value = this.value.replace(/\D/g, '')
-                            }
-                            if (this.value > 90) {
-                                this.value = 90;
-                            }
-                        };
-                        document.getElementById("freezePeriod").onkeyup = function () {
-                            if (this.value.length == 1) {
-                                this.value = this.value.replace(/[^1-9]/g, '')
-                            } else {
-                                this.value = this.value.replace(/\D/g, '')
-                            }
-                            if (this.value > 90) {
-                                this.value = 90;
-                            }
-                        };
-                        //当前日期前的车间计划
-                        if(!$scope.scheduleCheckData.isLoadOverduePoolTask) {
-                            $("input[name=overduePeriod]").attr("disabled", "disabled");
-                        }else{
-                            $("input[name=overduePeriod]").removeAttr("disabled");
-                        }
+                        $("#scheduleInterval")
+                            .keyup(function () {
+                                if (this.value.length == 1) {
+                                    this.value = this.value.replace(/[^0-9]/g, '')
+                                } else {
+                                    this.value = this.value.replace(/\D/g, '')
+                                }
+                                if (this.value > 90) {
+                                    this.value = 90;
+                                }
+                            })
+                            .blur(function(){
+                                if(!this.value){
+                                    this.value = 0;
+                                }
+                            });
+
+                        $("#freezePeriod")
+                            .keyup(function () {
+                                if (this.value.length == 1) {
+                                    this.value = this.value.replace(/[^1-9]/g, '')
+                                } else {
+                                    this.value = this.value.replace(/\D/g, '')
+                                }
+                                if (this.value > 90) {
+                                    this.value = 90;
+                                }
+                            })
+                            .blur(function(){
+                                if(!this.value){
+                                    this.value = 1;
+                                }
+                            });
+
+                        $("#overduePeriod")
+                            .keyup(function () {
+                                if (this.value.length == 1) {
+                                    this.value = this.value.replace(/[^1-9]/g, '')
+                                } else {
+                                    this.value = this.value.replace(/\D/g, '')
+                                }
+                                if (this.value > 90) {
+                                    this.value = 90;
+                                }
+                            })
+                            .blur(function(){
+                                if(!this.value){
+                                    this.value = 1;
+                                }
+                            });
                     })
                     //表单验证及相关逻辑联动
                     .then(function(){
-                        //用于修改点击label会触发input点击导致两次的bug
-                        let a = 0;
-                        $("label[for=isLoadOverduePoolTask]").on("click",function(){
-                            a += 2;
-                            if(a%4 === 0){
-                                $("input[name=overduePeriod]").attr("disabled",!$("input[name=overduePeriod]").prop("disabled"))
-                            }
-                        });
                         let regex = /^(\d{1,2}(\.\d{1})?|100)$/;//只能输入大于0小于100的数字
                         $(".jScheduleWeightMap input").each(function(){
                             $(this).keyup(function(){
@@ -92,11 +115,12 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                         })
                     })
             }
-        })
-        .error(() => {
-            info.fail("请求规则失败，请检查服务器");
+        },
+        errorFn: () => {
+            $scope.info.fail("请求规则失败，请检查服务器");
             $scope.ruleList = [];
-        });
+        }
+    });
 
 
     //判断需要发送的数据要保存的属性
@@ -127,8 +151,8 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 
     //表单序列化
     $.fn.serializeObject = function () {
-        var o = {};
-        var a = this.serializeArray();
+        let o = {};
+        let a = this.serializeArray();
         $.each(a, function () {
             if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
@@ -139,7 +163,7 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                 o[this.name] = this.value || '';
             }
         });
-        var $radio = $('input[type=radio],input[type=checkbox]',this);
+        let $radio = $('input[type=radio],input[type=checkbox]',this);
         $.each($radio,function(){
             if(!o.hasOwnProperty(this.name)){
                 o[this.name] = false;
@@ -182,17 +206,23 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
         let post = getFromValue($scope.scheduleCheckData,$("form").serializeObject());
         //获取不到日历插件的值，手工获取
         post.minScheduleDay = $("#minScheduleDay").val();
+        //获取规则名字
+        post.ruleName = $(".ruleLi.active input").val();
         //发送数据
-        $http.put($rootScope.restful_api.single_schedule_rule + $scope.ruleId,post)
-            .then(function(response){
+        http.put({
+            url: $rootScope.restful_api.single_schedule_rule + $scope.ruleId,
+            data: post,
+            successFn: function(response){
                 if(response.data.error_response){
-                    info.fail("数据保存失败");
+                    $scope.info.fail("数据保存失败");
                 }else{
-                    info.success("数据保存成功");
+                    $scope.info.success("数据保存成功");
                 }
-            },function(){
-                info.fail("数据保存失败,请检查服务器");
-            });
+            },
+            errorFn: function(){
+                $scope.info.fail("数据保存失败,请检查服务器");
+            }
+        });
     };
 
     //弹出新建排程规则窗口
@@ -225,18 +255,24 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
         }
         //判断用户是否选了规则,没选设置为默认规则
         $scope.ruleId = $("#ruleSelect").val() === "0" ? "default" : $("#ruleSelect").val();
-        $http.get($rootScope.restful_api.single_schedule_rule + $scope.ruleId)
-            .success((res) => {
-                $scope.scheduleCheckData = res;
-            })
-            .error(() => {layer.msg("创建新规则失败，请检查网络")})
-            //再获得对应的数据,then create Rule
+        http.get({
+            url: $rootScope.restful_api.single_schedule_rule + $scope.ruleId,
+            successFn: (res) => {
+                $scope.scheduleCheckData = res.data;
+                $scope.info.success("创建排程规则成功")
+            },
+            errorFn: () => {$scope.info.fail("创建排程规则失败，请检查网络")}
+        })
+        //再获得对应的数据,then create Rule
             .then(() => {
                 //删除获取到的Id,post创建规则
                 delete $scope.scheduleCheckData.ruleId;
                 $scope.scheduleCheckData.ruleName = $scope.newRuleName;
-                $http.post($rootScope.restful_api.single_schedule_rule,$scope.scheduleCheckData)
-                    .success((res) => {
+                http.post({
+                    url: $rootScope.restful_api.single_schedule_rule,
+                    data: $scope.scheduleCheckData,
+                    successFn: (res) => {
+                        res = res.data;
                         $scope.ruleId = res;
                         $scope.ruleList.push({
                             "ruleId" : res,
@@ -245,79 +281,109 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                         $scope.setCheckData($scope.scheduleCheckData);
                         $scope.newRuleName = "";
                         layer.closeAll();
-                    })
-                    .error(() => {info.fail("创建规则失败-post");})
+                        //最后一个li获得actice的状态
+                        $timeout(function () {
+                            $(".check-rule-nav .ruleLi").last().addClass("active").siblings().removeClass("active");
+                        },0);
+                    },
+                    errorFn: () => {$scope.info.fail("创建规则失败-post");}
+                });
             })
     };
 
     //查看规则
     $scope.lookRule = (id) =>{
-        $http.get($rootScope.restful_api.single_schedule_rule+id)
-            .then((res) => {
+        http.get({
+            url: $rootScope.restful_api.single_schedule_rule+id,
+            successFn: (res) => {
                 $scope.ruleId = id;
                 $scope.setCheckData(res.data);
-            })
+            }
+        });
     };
 
     //删除排程规则
     $scope.deleteRule = (event) =>{
-        // event.stopPropagation();
+        event.stopPropagation();
         let deleteRule = layer.confirm('确定删除此排程规则？', {
             btn: ['确定','取消'] //按钮
         }, function(){
             let target = event.target || event.srcElement;
-            let parentElement = target.parentNode
+            let parentElement = target.parentNode;
             let ruleId = parentElement.getAttribute("data-rule-id");
             layer.close(deleteRule);
-            $http.delete($rootScope.restful_api.single_schedule_rule + ruleId)
-                .then((res) => {
+            http.delete({
+                url: $rootScope.restful_api.single_schedule_rule + ruleId,
+                successFn: (res) => {
                     //成功返回
-                    console.log(res.data);
                     if(res.data == "1"){
                         $scope.ruleList.forEach(function(item,index){
                             if(item.ruleId == ruleId){
                                 $scope.ruleList.splice(index,1);
                             }
                         });
+                        $scope.info.success("删除排程规则成功");
                         //没有规则时，不需要执行
                         if($scope.ruleList.length != 0){
                             $scope.lookRule($scope.ruleList[0].ruleId);
                         }
                     } else if(res.data.error_response.code == "102"){
-                        info.fail("你没有权限删除此规则");
+                        $scope.info.fail("你没有权限删除此规则");
                         // return
                     } else if(res.data.error_response.code == "103"){
-                        info.fail("此规则正在使用，无法删除");
+                        $scope.info.fail("此规则正在使用，无法删除");
                         // return
                     }
-                },function(){
-                    info.fail("删除规则失败，请检查服务器")
-                })
+                },
+                errorFn: function(){
+                    $scope.info.fail("删除规则失败，请检查服务器")
+                }
+            });
         }, function(){
             layer.close(deleteRule);
         });
 
     };
 
+    //显示规则时，js设置目录栏高度,使左边目录栏的高度可以撑满整个div
+    //展开规则时，实时获取规则高度设置，收起时，保证不小于规则最小区域
+    $scope.setCheckRuleHeight = function () {
+        $timeout(function () {
+            let checkContentHeight = $(".checkContent").height();
+            let configFormHeight = $(".config-form").height();
+            $(".check-rule-nav").height(configFormHeight <= checkContentHeight ? checkContentHeight - $(".config-content-title").height() : configFormHeight);
+        })
+    };
+
+    //显示隐藏高级规则---start
     $rootScope.jExpertConfiguration = false;
     $scope.toggleAdvancedShow = function(){
         $scope.jAdvancedConfiguration = !$scope.jAdvancedConfiguration;
+        return $scope.setCheckRuleHeight()
     };
+
     $scope.toggleExpertShow = function(){
         $scope.jExpertConfiguration = !$scope.jExpertConfiguration;
+        return $scope.setCheckRuleHeight()
     };
     $scope.hideAdvancedConfig = function () {
         $scope.jExpertConfiguration = $scope.jAdvancedConfiguration = false;
+        return $scope.setCheckRuleHeight()
     };
+    //显示隐藏高级规则---end
     $("body")
     //pap决定起排工序
         .on("click",".pap-type li",function(){
             if($(this).attr("data-value")=="PAP_DISABLE"){
+                //不启用
                 $timeout(function(){
                     $scope.disable.schedulePointSelected = true;
                     $scope.notEdit.schedulePointSelected = true;
+                    console.log($scope.scheduleFrontData[9].select);
+                    $scope.scheduleFrontData[9].select = false;
                     $(".schedule-point li").eq(0).trigger("click");
                 })
+
             }else if($(this).attr("data-value")=="PAP_SCHEDULE_RULE"){
                 $timeout(function(){
                     $scope.disable.schedulePointSelected = false;

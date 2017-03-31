@@ -12,8 +12,10 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 					var stateText = $(this).find("span").eq(1).text();
 					if(stateText == "自动排程完成"){
 						$(this).find(".in-state-icon-success").show();
+						$(this).find(".in-icon").show();
 					}else if(stateText == "自动排程失败"){
 						$(this).find(".in-state-icon-fail").show();
+						$(this).find(".in-icon").show();
 					}
 				})
 		        // 遍历
@@ -90,15 +92,17 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 								var stateText = $(this).find("span").eq(1).text();
 								if(stateText == "自动排程完成"){
 									$(this).find(".in-state-icon-success").show();
+									$(this).find(".in-icon").show();
 								}else if(stateText == "自动排程失败"){
 									$(this).find(".in-state-icon-fail").show();
+									$(this).find(".in-icon").show();
 								}
 							})
 	                	}
 					},0)
 	             }
 	            $scope.states=listState;
-	            console.log(listState);
+//	            console.log(listState);
 		},$location.$$absUrl)
     //提示信息操作
 	var ele = $(".wrap-content");
@@ -122,15 +126,25 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 	$scope.alertMsg = function(info,$event) {
 		$event.stopPropagation();
 		var state = info.state;
+		//详情数据
+		$scope.in_alert_data = [];
 		if(state == "自动排程完成"){
 			var briefInfoMap = info.briefInfoMap;
-			$scope.doTaskNum = "已排任务：" + briefInfoMap.doTaskNum + "个";
-			$scope.undoTaskNum ="剩余任务：" + briefInfoMap.undoTaskNum + "个";
-			$scope.totalTaskNum = "总任务数：" + briefInfoMap.totalTaskNum + "个";
-			$scope.useTime = "排程所花时间：" + briefInfoMap.useTime + "秒";			
+			
+			$scope.in_alert_data.push(
+				"已排任务：" + briefInfoMap.doTaskNum + "个",
+				"剩余任务：" + briefInfoMap.undoTaskNum + "个",
+				"总任务数：" + briefInfoMap.totalTaskNum + "个",
+				"排程所花时间：" + briefInfoMap.useTime + "秒"
+			)
+//			$scope.doTaskNum = "已排任务：" + briefInfoMap.doTaskNum + "个";
+//			$scope.undoTaskNum ="剩余任务：" + briefInfoMap.undoTaskNum + "个";
+//			$scope.totalTaskNum = "总任务数：" + briefInfoMap.totalTaskNum + "个";
+//			$scope.useTime = "排程所花时间：" + briefInfoMap.useTime + "秒";			
 		}else if(state == "自动排程失败"){
 			var briefInfo = info.briefInfo;
-			$scope.detail = briefInfo;
+//			$scope.detail = briefInfo;
+			$scope.in_alert_data.push(briefInfo);
 		}
 
 		
@@ -141,8 +155,9 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 //			var d_left = $($event.target).offset().left + 56;
 //			var d_top = $($event.target).offset().top - 71;
 			var body = $("body");
-			var scrollTop=$(document).scrollTop(),
-        		scrollLeft=$(document).scrollLeft();
+			var scrollTop=$(".page-wrapper").scrollTop(),
+        		scrollLeft=$(".page-wrapper").scrollLeft();
+			console.log($(".page-wrapper").scrollLeft());
 			var d_left = $($event.target).offset().left + 56 + scrollLeft + 5;
 			var d_top = $($event.target).offset().top - 71 + scrollTop;
 			var targetHeight = $($event.target).css("top").split("px");

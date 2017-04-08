@@ -1,6 +1,6 @@
 - git clone项目到本地
 
-
+gulp＋ng项目
 ---
 
 - 安装本地Node环境，全局安装cnpm并将下载源指向到淘宝

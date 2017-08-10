@@ -1,0 +1,17 @@
+@import "../resetStyle.scss";
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 68px;
+  background-color: #333;
+  .logo{
+    margin: 16px 0 0 40px;
+    height: 36px;
+  }
+  .sign-out{
+    a{
+      color: #fff;
+    }
+  }
+}

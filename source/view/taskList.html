@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles/reset.css"/>
+    <link rel="stylesheet" href="../styles/common.css" />
+    <link rel="stylesheet" href="../styles/index.css" />
+    <link rel="stylesheet" href="../styles/secondPage.css" />    
+    <link rel="stylesheet" href="../styles/changeAToB.css" />
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon"/>
+    <title>任务清单</title>
+</head>
+<body ng-controller="mainCtrl">
+<div class="page-wrapper secondPage change-a-to-b" ng-controller="previewController">
+    <!--head START-->
+    <div class="header">
+    </div>
+    <!--二级页面-->
+    <div class="table-dialog-window table-window base-show" style="opacity:0">
+        <div class="dialog-window-body">
+            <div class="info-show">
+                <div class="window-search-box">
+                    <span>开始时间：</span>
+                    <input id="windowStartTime" class="Wdate jStartTime" type="text" onClick="WdatePicker({isShowClear:false,maxDate:'#F{$dp.$D(\'windowEndTime\')}'})" readonly>
+                </div>
+                <div class="window-search-box">
+                    <span>结束时间：</span>
+                    <input id="windowEndTime" class="Wdate jEndTime" type="text" onClick="WdatePicker({isShowClear:false,minDate:'#F{$dp.$D(\'windowStartTime\')}'})" readonly>
+                </div>
+             	<cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="getEquipment()"></cascader>
+                <search-drop-down-list-with-id search-data="equipment_type_list_type_zero" class="equipment_type_list"></search-drop-down-list-with-id>
+                <search-drop-down-list-with-id search-data="equipment_type_list_type_one" class="equipment_type_list"></search-drop-down-list-with-id>
+                <div class="window-search-box">
+                    <span>&#12288;&#12288;设备：</span>
+                    <!--<input type="text">-->
+                    <input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
+                </div>
+                <search-drop-down-list-with-id search-data="change_type"></search-drop-down-list-with-id>
+                <div class="window-search-button" ng-click="change_window_table()">查询</div>
+            </div>
+            <div class="show-table">
+                <div class="table-space">
+                    <table ng-style="{width : (headDataView.length * 100) + 'px'}">
+                        <thead>
+                        <tr>
+                            <th style="min-width: 44px;">序 号</th>
+                            <th>详细</th>
+                            <th ng-repeat="title in headDataView track by $index" on-finish-render>{{title}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="tableRow in tableDataView" source={{tableRow[0].source}} on-finish-render>
+                            <td>{{$index+1}}</td>
+                            <td><span class="sale-order-look" ng-click="look_task(tableRow.infoData,$event)" title="详细信息"></span></td>
+                            <!--<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>-->
+                            <!--<td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span></td>-->
+                            <td ng-repeat="tableCell in tableRow.repeatData track by $index" >{{tableCell}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="cover-head">
+                    <div>序 号</div>
+                    <div>详细</div>
+                    <div ng-repeat="title in headDataView track by $index">{{title}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="display: none;" id="do_detail_dialog" title="派工单详细信息">
+        <div class="do_detail_dialog">
+            <table>
+                <tr>
+                    <td>销售订单</td>
+                    <td>:</td>
+                    <td>{{do_detail.saleOrderCode}}</td>
+                </tr>
+                <!--生产主计划号（缺）-->
+                <tr>
+                    <td>自制件计划号</td>
+                    <td>:</td>
+                    <td>{{do_detail.moCode}}</td>
+                </tr>
+                <!--车间计划号（缺）-->
+                <tr class="do-code">
+                    <td>派工单号</td>
+                    <td>:</td>
+                    <td>{{do_detail.doCode}}</td>
+                </tr>
+                <tr>
+                    <td>物料编码</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialCode}}</td>
+                </tr>
+                <tr>
+                    <td>物料助记码</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialMnem}}</td>
+                </tr>
+                <tr>
+                    <td>物料名称</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialName}}</td>
+                </tr>
+                <tr>
+                    <td>物料规格</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialSpec}}</td>
+                </tr>
+                <tr>
+                    <td>物料单位</td>
+                    <td>:</td>
+                    <td>{{do_detail.materialUnit}}</td>
+                </tr>
+
+                <tr>
+                    <td>工序编码</td>
+                    <td>:</td>
+                    <td>{{do_detail.processCode}}</td>
+                </tr>
+                <tr>
+                    <td>工序名称</td>
+                    <td>:</td>
+                    <td>{{do_detail.processName}}</td>
+                </tr>
+
+                <tr>
+                    <td>开始时间</td>
+                    <td>:</td>
+                    <td>{{do_detail.startTime}}</td>
+                </tr>
+                <tr>
+                    <td>结束时间</td>
+                    <td>:</td>
+                    <td>{{do_detail.endTime}}</td>
+                </tr>
+                <tr>
+                    <td>计划数</td>
+                    <td>:</td>
+                    <td>{{do_detail.taskNum}}</td>
+                </tr>
+            </table>
+            <a style="" class="sure" href="javascript:;">确定</a>
+        </div>
+    </div>
+    <div class="table-dialog-window table-window change-third" style="display:none">
+        <div class="dialog-window-body">
+            <div class="show-table">
+                <div class="table-space">
+                    <table ng-style="{width : (thirdHeadDataView.length * 100) + 'px'}">
+                        <thead>
+                        <tr>
+                            <!--<th style="min-width: 44px;">序 号</th>-->
+                            <th ng-repeat="title in thirdHeadDataView track by $index" on-finish-render>{{title}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="tableRow in thirdTableDataView" source={{tableRow[0].source}} on-finish-render>
+                            <!--<td>{{$index+1}}</td>-->
+                            <!--<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>-->
+                            <!--<td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span></td>-->
+                            <td ng-repeat="tableCell in tableRow track by $index" rowspan={{tableCell.rowspan}}>{{tableCell.showText}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="cover-head">
+                    <!--<div>序 号</div>-->
+                    <div ng-repeat="title in thirdHeadDataView track by $index">{{title}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--二级页面结束-->
+<!-- 加载依赖包,线上可以使用压缩版 -->
+<script src="../scripts/lib/angular.js"></script>
+<script src="../scripts/lib/ui-router.js"></script>
+<script src="../scripts/lib/jquery.js"></script>
+<script src="../scripts/lib/My97DatePicker/WdatePicker.js"></script>
+<script src="../scripts/lib/angular-translate.js"></script>
+<script src="../scripts/lib/angular-translate-loader-static-files.min.js"></script>
+<script src="../scripts/lib/layer/layer.js"></script>
+<!-- 加载入口 -->
+<script src="../scripts/app.js"></script>
+<script src="../scripts/config/app.js"></script>
+<!--加载directive-->
+<script src="../scripts/directives/directive.js"></script>
+<!--加载控制器-->
+<script src="../scripts/controllers/mainController.js"></script>
+<!-- 加载service -->
+<script src="../scripts/services/scheduleTableViewModel.js"></script>
+<script src="../scripts/services/tool.js"></script>
+<script src="../scripts/services/http.js"></script>
+<script>
+    app.controller("previewController",function($rootScope,$scope, $http,$timeout,$q,scheduleTableViewModelService,tool,http){
+        
+        let //设备
+			goEquipment = {},
+			
+			//初始化查询日期
+			body_data = JSON.parse(sessionStorage.getItem("hrefPrameter")),
+			thisStartTime = body_data.startTime,
+            thisEndTime = body_data.endTime,
+            materialName = body_data.materialName,
+            materialCode = body_data.materialCode,
+            saleOrder = body_data.saleOrderCode,
+            thisEquipmentId = body_data.equipments,
+            htmlSource = body_data.from,
+            thisEquipmentName = [],
+			
+			//接口	
+			sourceUrl,
+			excelAPI,
+			get_url,
+			thirdChangeUrl,
+			taskListUrl,
+			
+			//获取排程前后所选的车间Id
+			locationId;
+		
+		$scope.change_type = {
+			repeatData:[
+				{
+					showName: "派工单",
+					id: 0
+				},
+				{
+					showName: "换装",
+					id: 1
+				},
+				{
+					showName: "保养换装",
+					id: 2
+				}
+			],
+			showText: "换装类型",
+			className: "jChangeType"
+		}
+		
+		//根据不同来源，定义不同的接口
+        if(htmlSource == "preview"){
+			//更新接口
+			$rootScope.getsessionStorage(sessionStorage.locationId_pre, sessionStorage.locationId_res, true);
+            locationId = sessionStorage.locationId_pre;
+            sourceUrl=$rootScope.restful_api.a_to_b_preview;
+            //导出excel接口
+            excelAPI=$rootScope.restful_api.excel_pre;
+			//任务清单接口
+			taskListUrl = $rootScope.restful_api.task_list_preview;
+			//换模三级接口
+			thirdChangeUrl = $rootScope.restful_api.tasklist_change_preview;
+			//左键正常信息接口，右键换装接口
+            get_url=$rootScope.restful_api.preview_show_table+"?locationFilterList="+sessionStorage.locationFilterList_pre+ + "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
+        }else{
+			//更新接口
+			$rootScope.getsessionStorage(sessionStorage.locationId_pre, sessionStorage.locationId_res, false);
+            locationId = sessionStorage.locationId_res;
+            sourceUrl=$rootScope.restful_api.a_to_b_result;
+            //导出excel接口
+            excelAPI=$rootScope.restful_api.excel_res;
+			//任务清单接口
+			taskListUrl = $rootScope.restful_api.task_list_result;
+			//换模三级接口
+			thirdChangeUrl = $rootScope.restful_api.tasklist_change_result;
+            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;
+        }
+		
+        /**
+		 *desc:向后台查询换装数据
+		 *time:2017-05-23
+		 *author:dww
+		 *@param: {Object} postData 查询参数
+		 *@return:
+		 **/
+		$scope.getChangeData = function(postData){
+			//查询换模类型、是否隐藏相同
+			let changeType = $(".jChangeType .search-input").attr("check_id");
+			postData.retoolType = changeType ? changeType.split(",") : [0,1,2];;
+			http.post({
+				url: taskListUrl,
+				data: postData,
+				successFn: function(response) {
+					
+					$(".equipment-list").remove();
+					var resData = response.data;
+					//数据转换
+					var windowTableData = scheduleTableViewModelService.jsonToChangeTaskList(resData);
+					//表头
+					$scope.headDataView = windowTableData.headInfo;
+					//表格数据
+					$scope.tableDataView = windowTableData.rowInfo;
+					
+					//提示查询成功
+					if(windowSearch && resData.row.length){
+                        layer.msg('已查询，请在下方表格中查看查询结果', {time: 1500,icon: 1});
+                        windowSearch = false;
+                    }else if(windowSearch && (!resData.row.length)){
+                        layer.msg('未查询出结果', {time: 3500,icon: 2});
+                        windowSearch = false;
+                    }
+					//渲染完成，显示页面,重置表头宽度
+//					if(windowTableData.rowInfo.length === 0){
+//						tool.setTableHeadWidth($(".table-dialog-window"));
+//						$(".table-dialog-window").css("opacity",1);
+//						return;
+//					}
+					$scope.$on("ngRepeatFinished",function(){
+						tool.setTableHeadWidth($(".base-show"));
+						$(".base-show").css("opacity",1);
+						
+						$(".base-show .table-space").on("scroll", function () {
+							let coverHead = $(".base-show .cover-head");
+							let scrollLeft = $(this).scrollLeft();
+							let scrollTop = $(this).scrollTop();
+							coverHead.css("left", -scrollLeft);
+							//根据滚动条绝对定位固定列的位置
+							coverHead.children().eq(0).css("left",scrollLeft);
+							coverHead.children().eq(1).css("left",scrollLeft + coverHead.children().eq(0).width());
+						});
+					})
+				},
+				errorFn: function(response){
+                    layer.alert('获取数据失败，请联系技术人员处理', {
+                        skin: 'layer-alert-themecolor' //样式类名
+                    });
+                }
+			})
+		}
+		
+		/**
+		 *desc:构造设备类型下拉框，两种
+		 *time:2017-06-01
+		 *author:dww
+		 *@param:从后台查询的所有设备类型
+		 *@return:
+		 **/
+		$scope.creatEquipmentTypeList = function(equipmentTypeList){
+			let equipment_type_list_type_zero = [],//0是离散型，1是产线性
+				equipment_type_list_type_one = [];
+			//对设备类型进行分类
+			for(let i = 0, l = equipmentTypeList.length ; i < l ; i++){
+				let thisEquipmentType = equipmentTypeList[i],
+					thisData = {
+						showName: thisEquipmentType.modelName,
+						id: thisEquipmentType.modelId
+					};
+				
+				if(thisEquipmentType.modelType === 1){
+					equipment_type_list_type_one.push(thisData);
+				}else if(thisEquipmentType.modelType === 0){
+					equipment_type_list_type_zero.push(thisData);
+				}
+			}
+			//渲染到页面
+			$scope.equipment_type_list_type_one = {
+				repeatData: equipment_type_list_type_one,
+				showText: "生产单元",
+				className: "equipment_type_list_one"
+			}
+			$scope.equipment_type_list_type_zero = {
+				repeatData: equipment_type_list_type_zero,
+				showText: "离散设备",
+				className: "equipment_type_list_zero"
+			}
+		}
+		
+		/**
+		 *desc:查询设备信息
+		 *time:2017-06-01
+		 *author:dww
+		 *@param:从后台查询的所有设备类型
+		 *@return:
+		 **/
+		$scope.getEquipment = function(thisEquipmentId){
+			//获取选中的设备类型
+			let typeListOne = $(".equipment_type_list_one .search-input").attr("check_id") || "",
+				typeListZero = $(".equipment_type_list_zero .search-input").attr("check_id") || "",
+				modelIdList;
+			
+			//设备类型
+			if(typeListOne && typeListZero){
+				modelIdList = typeListOne + "," + typeListZero;
+			}else{
+				modelIdList = typeListOne + typeListZero;
+			}
+			
+			//地点
+			let selectedLocationId = $scope.get_selected_location ? $scope.get_selected_location().join(",") : "";
+			
+			//查询设备
+			http.get({
+				url: $rootScope.restful_api.get_location + "?startTime=" + thisStartTime 
+														 + "&endTime=" + thisEndTime 
+														 + "&searchType=" + (htmlSource === "preview" ? 0 : 1) 
+														 + "&modelIdList=" + modelIdList
+														 + "&locationFilterList=" + selectedLocationId,
+				successFn: function(res){
+					let equipmentData = res.data;
+					let thisIdTyList = [];
+					//设备下拉框
+					goEquipment = $.extend({},equipmentData);
+					//遍历除当前选中的设备名
+					thisEquipmentName = [];
+					//传入默认选项则使用默认选项，否则即为全选
+					if(thisEquipmentId){
+						thisEquipmentId.forEach(function(item){
+							let thisIdType = item.equipmentId + "_" + item.equipmentType;
+							goEquipment[thisIdType] ? thisEquipmentName.push(goEquipment[thisIdType].productUnitName) : "";
+							thisIdTyList.push(thisIdType);
+						})
+					}else{
+						for(let i in goEquipment){
+							thisEquipmentName.push(goEquipment[i].productUnitName);
+							thisIdTyList.push(i);
+						}
+					}
+					
+					
+					//已选设备添加到页面
+					$(".equipment-input").attr("idtype",thisIdTyList.join(","));
+					
+					//刷新查询参数
+					var windowSearchBox = $(".info-show").find(".window-search-box");
+					windowSearchBox.eq(0).find("input").val(thisStartTime);
+					windowSearchBox.eq(1).find("input").val(thisEndTime);
+					windowSearchBox.eq(2).find("input")
+						.val(thisEquipmentName.join())
+						.attr("title",thisEquipmentName.join());
+				}
+			});
+		}
+		
+		/**
+		 *desc:初次加载执行的方法
+		 *time:2017-05-24
+		 *author:dww
+		 *@param:
+		 *@return:
+		 **/
+		$scope.render = (function(){
+			let location_data = {}
+			
+			//构造地点级联下拉框
+			http.get({
+				url: $rootScope.restful_api.aps_location_readable,
+				successFn: function(res){
+					location_data.repeatData = res.data;
+					location_data.showText = "筛选地点";
+					location_data.className = "location";
+					
+					//如果是手动微调页过来的，再查询方案下的地点
+					if(htmlSource === "result"){
+						http.get({
+							url: $rootScope.restful_api.aps_location_writable,
+							successFn: function(res){
+								let thisData = res.data,
+									thisSchemeId = sessionStorage.schemeId;
+								//遍历除当前方案
+								for(let i = 0,l = thisData.length ; i < l ; i++){
+									if(thisData[i].schemeId == thisSchemeId){
+										let thisLocation = thisData[i].locationDtoList,
+											writableLocation = [];
+										//遍历除地点ID
+										for(let i = 0,l = thisLocation.length ; i < l ; i++){
+											writableLocation.push(thisLocation[i].locationId);
+										}
+										//传入组件
+										location_data.writable = writableLocation;
+										break;
+									}
+								}
+								$scope.location_data = location_data;
+							}
+						});	
+					}else{
+						$scope.location_data = location_data;
+					}
+					
+				}
+			});
+			
+			//构造设备类型下拉框
+			http.get({
+				url: $rootScope.restful_api.get_equipment_type,
+				successFn: function(res){
+					$scope.creatEquipmentTypeList(res.data);
+				}
+			});
+			
+			//构造设备下拉框
+			$timeout(function(){
+				$scope.getEquipment(thisEquipmentId);
+			},500)
+			
+			//根据传入数据查询一次数据
+			$scope.getChangeData(body_data);
+		})();
+		
+        //输入检测
+        function checkSearchData(thisStartTime,thisEndTime,thisEquipment){
+            if(!thisStartTime){
+                layer.alert('请选择开始时间', {
+                    skin: 'layer-alert-themecolor' //样式类名
+                });
+                return false;
+            }else if(!thisEndTime){
+                layer.alert('请选择结束时间', {
+                    skin: 'layer-alert-themecolor' //样式类名
+                });
+                return false;
+            }else if(!thisEquipment.length){
+                layer.alert('请选择设备', {
+                    skin: 'layer-alert-themecolor' //样式类名
+                });
+                return false;
+            }
+            return true;
+        }
+
+        //二级页面内查询,刷新二级页面
+        var windowSearch = false;
+        $scope.change_window_table = function(){
+            //获取查询条件
+            var thisStartTime = tool.getFromInput_nocode(".jStartTime"),
+                thisEndTime = tool.getFromInput_nocode(".jEndTime"),
+                aEquipment = [];
+            //已选设备,没有就取全下拉框设备
+			let checkEqupment = $(".equipment-input").attr("idtype") ? $(".equipment-input").attr("idtype").split(",") : $(".equipment-input").attr("allIdType").split(",");
+			
+			for(let i = 0 , l = checkEqupment.length ; i < l ; i++){
+				if(checkEqupment[i]){
+					let thisIdType = checkEqupment[i].split("_");
+					aEquipment.push({
+						equipmentId: thisIdType[0],
+						equipmentType: thisIdType[1]
+					})
+				}
+			}
+			
+            //输入检测
+            if(!checkSearchData(thisStartTime,thisEndTime,aEquipment)){
+                return;
+            }else{
+                windowSearch = true;
+            }
+			
+			//构造查询对象
+			let searchData = {
+				startTime: thisStartTime,
+				endTime: thisEndTime,
+				equipments: aEquipment
+			}
+			//如果是微调页
+			if(htmlSource === "result"){
+				searchData.schemeId = sessionStorage.schemeId;
+			}
+			//查询数据，渲染页面
+			$scope.getChangeData(searchData);
+        };
+		
+		//查看详细信息
+		$scope.look_task = function(taskInfo,$event){
+			const id = taskInfo.id;
+			//派工单或者换模
+			if(taskInfo.isChange){//换模
+				
+				//弹窗
+				const indexLayer = layer.open({
+					type: 1,
+					title: "换模详细信息",
+	//              closeBtn: 0,
+					shadeClose: true,
+					area: ["80%","80%"],
+					content : $(".change-third"),
+					success : function(){
+						//272是显示框正常宽度，450是高度
+//						$(".layui-layer").css({
+//							"left" : $event.pageX,
+//							"top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
+//						});
+//
+//						$("#do_detail_dialog").on("click",".sure",function(){
+//							layer.close(indexLayer);
+//						})
+					}
+				});
+				
+				http.get({
+					url: thirdChangeUrl + id,
+					successFn: function(res){
+						//处理数据
+						var resData = res.data;
+						
+						//数据转换
+						var windowTableData = scheduleTableViewModelService.jsonToChangeAToB(resData);
+						//绑定页面
+						//表头
+						$scope.thirdHeadDataView = windowTableData.headInfo;
+						//表格数据
+						$scope.thirdTableDataView = windowTableData.rowInfo;
+						$timeout(function(){
+							//重置表头
+							tool.setTableHeadWidth($(".change-third"));
+							$(".change-third .cover-head").css("left",0);
+							$(".change-third .table-space").on("scroll", function () {
+								let coverHead = $(".change-third .cover-head");
+								let scrollLeft = $(this).scrollLeft();
+								let scrollTop = $(this).scrollTop();
+								coverHead.css("left", -scrollLeft);
+								//根据滚动条绝对定位固定列的位置
+								coverHead.children().eq(0).css("left",scrollLeft);
+								coverHead.children().eq(1).css("left",scrollLeft + coverHead.children().eq(0).width());
+							});
+						},0)
+					}
+				})
+			}else{//派工单
+				let sUrl = "";
+				if(htmlSource === "preview"){
+					sUrl = $rootScope.restful_api.preview_third + id;
+					$(".do-code").show();
+					$(".pk-id").hide();
+					$(".version-id").hide();
+				}else{
+					const id_version = id.split("_"),
+						  pkId = id_version[0],
+						  versionId = id_version[1];
+					sUrl = $rootScope.restful_api.result_third + pkId + "?versionId="+versionId +"&schemeId=" +sessionStorage.schemeId;
+					$(".do-code").hide();
+					$(".pk-id").show();
+					$(".version-id").show();
+				}
+				//弹窗
+				const indexLayer = layer.open({
+					type: 1,
+					title: "派工单详细信息",
+	//              closeBtn: 0,
+					shadeClose: true,
+					content : $("#do_detail_dialog"),
+					success : function(){
+						//272是显示框正常宽度，450是高度
+						$(".layui-layer").css({
+							"left" : $event.pageX,
+							"top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
+						});
+
+						$("#do_detail_dialog").on("click",".sure",function(){
+							layer.close(indexLayer);
+						})
+					}
+				});
+				http.get({
+					url: sUrl,
+					successFn: function(res){
+	//                  $rootScope.do_detail = res.data;
+						//绑定view层
+						$scope.do_detail = res.data;
+						//json转viewModel对象
+					},
+					errorFn: function(res){}
+				})
+			}
+		}
+		
+		$(window).on("resize",function(){
+			tool.setTableHeadWidth($(".base-show"));
+			tool.setTableHeadWidth($(".change-third"));
+		})
+       
+        //二级页面设备下拉框
+        $scope.equipment_list = function($event){
+            if($(".equipment-list").length > 0){
+                $(".equipment-list").remove();
+                $(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
+            }else{
+				$timeout(function(){
+					tool.dialogWindowEquipmentInterim(goEquipment,$event,false);
+                	$(".table-dialog-window .equipment-input").css("border","1px solid #1E7CD9");
+				},200);
+                
+            }
+        };
+		
+		//设备类型与班次联动
+		$("body").on("click",".equipment_type_list li",function(){
+			$scope.getEquipment();
+		});
+		
+		//检查my97时间变化
+		$("body").on("focus","#windowStartTime",function(){
+			let newStartTime = $("#windowStartTime").val();
+			if(thisStartTime !== newStartTime){
+				thisStartTime = newStartTime;
+				$scope.getEquipment();
+			}
+		});
+		$("body").on("focus","#windowEndTime",function(){
+			let newEndTime = $("#windowEndTime").val();
+			if(thisEndTime !== newEndTime){
+				thisEndTime = newEndTime;
+				$scope.getEquipment();
+			}
+		})
+    })
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+@charset "utf-8";
+@import "resetStyle.scss";
 /*二级页面 */
 .table-window{
     display: flex;
@@ -7,14 +9,19 @@
     background-color: #FFF;
     border: 1px solid #CCC;
     box-shadow: 0 0 10px 5px #888;
-    z-index: 12;
+    z-index: 20;
 }
 .table-dialog-window{
-    margin-left: -550px;
-    width: 1100px;
-    height: 620px;
-    top: 110px;
-    left: 50%;
+//    margin-left: -550px;
+//    width: 1100px;
+//    height: 620px;
+//    top: 110px;
+//    left: 50%;
+	width: 60%;
+	height: 620px;
+	min-width: 600px;
+	top: 30px;
+	left: 20px;
 }
 .dialog-window-head{
     flex: 0 0 40px;
@@ -39,12 +46,13 @@
     background-color: #e8e8e8;
 }
 .table-window .dialog-window-body{
+    position: relative;
     flex: 1 1;
-    padding: 20px 30px;
+    padding: 20px 20px;
     display: flex;
     flex-direction: column;
 }
-.table-window .dialog-window-body.countAll{
+.table-window .dialog-window-body.count-all{
     padding-bottom: 59px;
 }
 .table-dialog-window .info-show {
@@ -56,7 +64,7 @@
 }
 .table-window .info-show .window-search-box{
     display: inline-block;
-    width: 240px;
+    //width: 240px;
     height: 50px;
     line-height: 30px;
 }
@@ -66,7 +74,7 @@
     height: 28px;
     color:#fff;
     line-height: 28px;
-    margin-left: 75px;
+    margin-left: 40px;
     text-align: center;
     background-color: #1E7CD9;
     border: 1px solid #1E7CD9;
@@ -76,34 +84,34 @@
 .table-window .info-show .window-search-button:hover,.sure:hover {
     border: 1px solid #ddd;
 }
-.table-dialog-window .table-sort-show{
+.table-window .table-sort-show{
     display: inline-block;
     position: relative;
 }
-.table-dialog-window .set-order,
-.table-dialog-window .output-excel,
-.table-dialog-window .print-table {
+.table-window .set-order,
+.table-window .output-excel,
+.table-window .print-table {
     display: inline-block;
     width: 20px;
     height: 20px;
     background: url(../images/set-order.png) center center no-repeat;
     cursor: pointer;
 }
-.table-dialog-window .output-excel {
+.table-window .output-excel {
     background-image: url(../images/excel.png);
 }
-.table-dialog-window .print-table {
+.table-window .print-table {
     background-image: url(../images/print.png);
 }
 /*小图标之间的分割线*/
-.table-dialog-window .dialog-window-body .split{
+.table-window .dialog-window-body .split{
     display: inline-block;
     width: 10px;
     height: 20px;
     text-align: center;
     background: url(../images/splitline.png) center center no-repeat;
 }
-.table-window .info-show .window-search-box input{
+.table-window .info-show .window-search-box>input{
     width: 118px;
     height: 22px;
     padding: 3px 10px;
@@ -120,17 +128,17 @@
 .WdateActive{
     background:url(../images/calendar-on.png) no-repeat 115px #fff ;
 }
-.table-dialog-window .info-show  .window-search-box .equipment-input{
+.table-window .info-show  .window-search-box .equipment-input{
     width: 103px;
     padding-right: 25px;
     background: #fff url(../images/down.png) no-repeat 118px !important;
     cursor: pointer;
 }
-.table-window .window-search-box span{
-    width: 70px;
+.table-window .window-search-box>span{
+    padding: 0 10px;
     text-align: right;
 }
-.table-dialog-window .info-show  .equipment-list{
+.table-window .info-show  .equipment-list{
     position: absolute;
     width: 138px;
     max-height: 150px;
@@ -140,38 +148,40 @@
     z-index: 40;
     overflow-y: auto;
 }
-.table-dialog-window .info-show .equipment-list li{
+.table-window .info-show .equipment-list li{
     height: 14px;
     padding: 8px 10px;
     line-height: 14px;
     cursor: pointer;
 }
-.table-dialog-window .info-show .equipment-list li:hover{
+.table-window .info-show .equipment-list li:hover{
     color: #1E7CD9;
 }
-.table-dialog-window .info-show .equipment-list li:last-child{
+.table-window .info-show .equipment-list li:last-child{
     border-bottom: none;
 }
-.table-dialog-window .info-show .equipment-list .li-selected{
+.table-window .info-show .equipment-list .li-selected{
     color: #1e7cd9;
 }
 .table-window .show-table{
+    margin-top: 3px;
     flex: 1 1;
     position: relative;
     width: 100%;
-    margin-top: 3px;
+    overflow: hidden;
 }
 .table-window .show-table .table-space{
     position: absolute;
     max-height: 100%;
+    //min-width: 100%;
     width: 100%;
     overflow: auto;
 }
 .table-window .show-table .cover-head{
     position: absolute;
+    z-index: 10;
     height: 36px;
     line-height: 36px;
-    border: 1px solid #CCC;
 }
 .table-window .show-table .cover-head div{
     float: left;
@@ -181,27 +191,39 @@
     color: #FFF;
 }
 .table-window .show-table .countall{
+    height: 30px!important;
     border: none;
     border-left: 1px solid #ccc;
 }
-.table-window .show-table .countall div{
-    background-color: #fff;
-    color: #ff9927;
+.table-window .show-table .countall{
+    div{
+        float: left;
+        height: 30px;
+        line-height: 30px;
+        color: #ff9927;
+        border: 1px solid #CCC;
+        background-color: #fff;
+    }
+    //.fixed-column{
+    //    height: 35px;
+    //}
 }
 .table-window .dialog-window-body .show-table table{
     border-collapse:collapse;
     width: 100%;
+    min-width: 100%;
 }
-.table-window .dialog-window-body .show-table table thead{
-    width: 100%;
-    height: 36px;
-}
-.table-window .dialog-window-body .show-table table tbody{
-    width: 100%;
-}
-.source-light{
-    color: #d88200;
-}
+//.table-window .dialog-window-body .show-table table thead{
+//    width: 100%;
+//    height: 36px;
+//}
+//.table-window .dialog-window-body .show-table table tbody{
+//    width: 100%;
+//}
+//.source-light{
+//    color: #d88200;
+//}
+
 .table-window .dialog-window-body .window-tr-onlook{
     background-color: #FCEFA1;
 }
@@ -214,19 +236,32 @@
     cursor: pointer;
 }
 .dialog-window-body .show-table .sale-order-look,
+.dialog-window-body .show-table .sale-order-edit,
 .dialog-window-body .show-table .sale-order-change{
-    margin: 0 5px;
-    /*color: #333333;*/
+    margin: 0 10px;
+    width: 14px;
+    height: 14px;
+    background:url("./../images/look-weitiao-list.png") no-repeat 0 -14px;
     cursor: pointer;
 }
+.dialog-window-body .show-table .sale-order-change{
+    background-position: -14px -14px;
+}
+.dialog-window-body .show-table .sale-order-edit{
+	background-position: -28px -14px;
+}
 .dialog-window-body .show-table .sale-order-look:hover{
-    color: #1E7CD9;
+    background-position: 0 0;
+}
+.dialog-window-body .show-table .sale-order-edit:hover{
+    background-position: -28px 0;
 }
 .dialog-window-body .show-table .sale-order-change:hover{
-    color: #1E7CD9;
+    background-position: -14px 0;
 }
 .dialog-window-body .show-table th{
-    height: 36px;
+    min-width: 40px;
+    min-height: 36px;
     line-height: 36px;
     table-layout: fixed;
 }
@@ -237,20 +272,46 @@
 .dialog-window-body .show-table tr:nth-child(even){
     background-color: #EDEEED;
 }
-.dialog-window-body .show-table input{
-    display: none;
-}
-.dialog-window-body .show-table .check{
-    display: inline-block;
+.dialog-window-body .show-table label{
+	display: inline-block;
     width: 14px;
     height: 14px;
     background: url(../images/unchecked.png);
     cursor: pointer;
 }
-.dialog-window-body .show-table input:checked + span,
-.dialog-window-body .cover-head input:checked + span{
+.dialog-window-body .show-table input{
+    display: none;
+}
+.dialog-window-body .show-table input:checked + label,
+.dialog-window-body .cover-head input:checked + label{
     background:url(../images/selected.png) center #FFF;
     border:1px solid #1E7CD9;
+}
+.fix-table-column{
+    position: absolute;
+    top:0;
+    left: 0;
+    overflow: hidden;
+    height: 100%;
+    //z-index: 10;
+    background-color: #fff;
+    table{
+        position: absolute;
+    }
+    .fix-table thead tr{
+        background-color: #3E7EC3;
+        th{
+            color: #fff;
+            font-weight: normal;
+        }
+    }
+}
+.fixed-column{
+    position: absolute;
+}
+.check-error{
+	width: 100%;
+    z-index: 100;
 }
 /***多列排序弹窗***/
 .countSortTitle {
@@ -264,12 +325,27 @@
     width: 16px;
     height: 16px;
     background: url("../images/alert-close.png") no-repeat;
+    cursor: pointer;
 }
 /*-------新页面==二级页面--------*/
-.secondPage .table-dialog-window{
+.secondPage .table-window{
     position: static;
     margin: 50px auto;
     width: 1200px;
-    height: 800px;
     box-shadow: none;
+    flex: 1 0 620px;
+}
+
+.secondPage .layui-layer .change-third{
+	box-sizing: border-box;
+	height: calc(100% - 40px);
+	border: none;
+	
+	.dialog-window-body{
+		padding: 0;
+		
+		.show-table{
+			margin-top: 0;
+		}
+	}
 }

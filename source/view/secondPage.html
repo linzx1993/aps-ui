@@ -6,45 +6,45 @@
     <link rel="stylesheet" href="../styles/common.css" />
     <link rel="stylesheet" href="../styles/index.css" />
     <link rel="stylesheet" href="../styles/secondPage.css" />
-    <link href="../favicon.ico" rel="icon" type="image/x-icon"/>
-    <title>设备详情</title>
+    <link rel="stylesheet" href="../styles/changeAToB.css" />
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon"/>
+    <title>工作单元</title>
 </head>
 <body ng-controller="mainCtrl">
-<div class="page-wrapper secondPage" ng-controller="previewController">
+<div class="page-wrapper secondPage change-a-to-b" ng-controller="previewController">
     <!--head START-->
     <div class="header">
     </div>
     <!--二级页面-->
 
-    <div class="table-dialog-window table-window" style="opacity:0">
-        <div class="dialog-window-head">
-            设备详情
-        </div>
+    <div class="table-dialog-window table-window" style="opacity: 0">
         <div class="dialog-window-body">
             <div class="info-show">
-                <div class="window-search-box">
-                    <span>开始时间</span>
-                    <input id="windowStartTime" class="Wdate" type="text" onClick="WdatePicker({maxDate:'#F{$dp.$D(\'windowEndTime\')}'})">
+                <div class="window-search-box jStartTime">
+                    <span>开始时间：</span>
+                    <input id="windowStartTime" class="Wdate" type="text" onClick="WdatePicker({isShowClear:false,maxDate:'#F{$dp.$D(\'windowEndTime\')}'})" readonly>
                 </div>
-                <div class="window-search-box">
-                    <span>结束时间</span>
-                    <input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">
+                <div class="window-search-box jEndTime">
+                    <span>结束时间：</span>
+                    <input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({isShowClear:false,minDate:'#F{$dp.$D(\'windowStartTime\')}'})" readonly>
                 </div>
-                <div class="window-search-box">
-                    <span>设备</span>
-                    <!--<input type="text">-->
-                    <input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
-                </div>
-                <div class="window-search-box">
-                    <span>订单号</span>
+                <!--<div class="window-search-box">-->
+                    <!--<span>设备</span>-->
+                    <!--&lt;!&ndash;<input type="text">&ndash;&gt;-->
+                    <!--<input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)" title="">-->
+                <!--</div>-->
+                <search-drop-down-list search-data="searchData" style="{'width' : '104px'}" class="window-search-box jPunitName"></search-drop-down-list>
+                <search-drop-down-list search-data="shiftData" style="{'width' : '104px'}" class="window-search-box jShiftName"></search-drop-down-list>
+                <div class="window-search-box jSaleOrder">
+                    <span>订单编号：</span>
                     <input type="text">
                 </div>
-                <div class="window-search-box">
-                    <span>物料名</span>
+                <div class="window-search-box jMaterialName">
+                    <span>物料名称：</span>
                     <input type="text">
                 </div>
-                <div class="window-search-box">
-                    <span>物料编码</span>
+                <div class="window-search-box jMaterialCode">
+                    <span>物料编码：</span>
                     <input type="text">
                 </div>
                 <div class="window-search-button" ng-click="change_window_table()">查询</div>
@@ -108,31 +108,48 @@
                     </div>
                 </div>
                 <span class="split"></span>
-                <span class="output-excel" ng-click="output_excel()" title="下载excel表"></span>
+                <a download="{{file_name}}" class="output-excel" title="下载excel表"></a>
                 <span class="split"></span>
                 <span class="print-table" ng-click="print()" title="打印"></span>
             </div>
             <div class="show-table">
                 <div class="table-space">
-                    <table>
+                    <table ng-style="{width : (headDataView.length * 100) + 'px'}">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 44px;">序 号</th>
+                                <th>操 作</th>
+                                <th ng-repeat="title in headDataView track by $index">{{title}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="tableRow in tableDataView"  ng-class="tableRow[0].source ? 'orange' : ''" source={{tableRow[0].source}}>
+                                <td>{{$index+1}}</td>
+                                <td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span></td>
+                                <td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="fix-table-column">
+                    <table class="fix-table">
                         <thead>
                         <tr>
                             <th style="min-width: 44px;">序 号</th>
-                            <th ng-repeat="title in headDataView track by $index">{{title}}
-                            </th>
+                            <th>操 作</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="tableRow in tableDataView" source={{tableRow[0].source}}>
+                        <tr ng-repeat="tableRow in tableDataView track by $index"  ng-class="tableRow[0].source ? 'orange' : ''" source={{tableRow[0].source}}>
                             <td>{{$index+1}}</td>
-                            <td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>
-                            <td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span></td>
+                            <td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)"  title="查看"></span></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="cover-head">
-                    <div>序 号</div>
+                    <div class="fixed-column">序 号</div>
+                    <div class="fixed-column">操 作</div>
                     <div ng-repeat="title in headDataView track by $index">{{title}}</div>
                 </div>
             </div>
@@ -219,7 +236,6 @@
 <!--二级页面结束-->
 <!-- 加载依赖包,线上可以使用压缩版 -->
 <script src="../scripts/lib/angular.js"></script>
-<!--<script src="../scripts/lib/angular-route.js"></script>-->
 <script src="../scripts/lib/ui-router.js"></script>
 <script src="../scripts/lib/jquery.js"></script>
 <script src="../scripts/lib/My97DatePicker/WdatePicker.js"></script>
@@ -228,12 +244,14 @@
 <script src="../scripts/lib/layer/layer.js"></script>
 <!-- 加载入口 -->
 <script src="../scripts/app.js"></script>
+<script src="../scripts/config/app.js"></script>
 <!--加载控制器-->
 <script src="../scripts/controllers/mainController.js"></script>
 <!-- 加载service -->
 <script src="../scripts/services/scheduleTableViewModel.js"></script>
 <script src="../scripts/services/tool.js"></script>
 <script src="../scripts/services/http.js"></script>
+<script src="../scripts/directives/directive.js"></script>
 
 <script>
     app.controller("previewController",function($rootScope,$scope, $http,$timeout,$q,scheduleTableViewModelService,tool,http){
@@ -242,7 +260,7 @@
         var goInfo = {};
         //初始化查询日期
         var today = new Date();
-        
+
         var body_data = JSON.parse(sessionStorage.getItem("hrefPrameter"));
         var thisStartTime = body_data.startTime,
                 thisEndTime = body_data.endTime,
@@ -252,33 +270,62 @@
                 thisEquipmentId = body_data.equipments,
                 htmlSource = body_data.from,
                 thisEquipmentName = [];
-                
+
         var sourceUrl;
         var excelAPI;
         var get_url;
-        let locationId;//获取排程前后所选的车间Id
+        let locationId,//获取排程前后所选的车间Id
+			shitfSearchData;//班次查询信息
         $rootScope.getsessionStorage(sessionStorage.locationId_pre,sessionStorage.locationId_res);
-        
-        if(htmlSource == "preview"){
+		$scope.excel_url = "http://www.baidu.com";
+		$scope.file_name = "百度";
+        if(htmlSource === "preview"){
             locationId = sessionStorage.locationId_pre;
             sourceUrl=$rootScope.restful_api.pre_sourceUrl;
             //导出excel接口
             excelAPI=$rootScope.restful_api.excel_pre;
             get_url=$rootScope.restful_api.preview_show_table+"?locationFilterList="+sessionStorage.locationFilterList_pre+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
-			
-			
+
+
         }else{
             locationId = sessionStorage.locationId_res;
             sourceUrl=$rootScope.restful_api.res_sourceUrl;
             //导出excel接口
             excelAPI=$rootScope.restful_api.excel_res;
-            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;	
+            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;
         }
         /**
          * 显示正式派工单表的排程计划
          **/
         var deferred = $q.defer();
         var promise = deferred.promise;
+		
+		//拉取班次信息
+		$scope.refreshShift = function(){
+			http.post({
+				url: $rootScope.restful_api.get_shift,
+				data: shitfSearchData,
+				successFn: function(res){
+					let shiftData = res.data,
+						repeatData = [];
+
+					//循环构造下拉框数据
+					for(let i = 0, l = shiftData.length ; i < l ; i++){
+						let thisData = shiftData[i];
+						repeatData.push({
+							dragItemText: thisData
+						})
+					}
+					//传入组件
+					$scope.shiftData.repeatData = repeatData;
+					
+					//清空已选信息
+					$(".jShiftName .search-input").val("");
+					$(".jShiftName .active").removeClass("active");
+				}
+			});
+		}
+		
         promise
         //直接加载页面数据
                 .then(function(){
@@ -293,10 +340,42 @@
 							//数据转换
 //                              console.log(resData);
 							var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(resData);
+							$scope.pageData = $.extend([],windowTableData);
 							//表头
 							$scope.headDataView = windowTableData.headData;
+                            //去除‘操作’这一列
+							if($scope.headDataView[0] === "操作"){
+                                $scope.headDataView.shift();
+                            }
 							//表格数据
-							$scope.tableDataView = windowTableData.bodyData;
+                            $scope.tableDataView = windowTableData.bodyData;
+
+//							测试数据
+//							for(let i = 0;i < 20;i ++){
+//                                $scope.tableDataView.push($.extend([],$scope.tableDataView[0]));
+//                            }
+							//等待dom出现开始执行
+							$timeout(function(){
+								tool.setTableHeadWidth($(".table-dialog-window"),2);
+								$(".table-dialog-window").css("opacity" ,1);
+								$timeout(function(){
+									$scope.refresh_excel();
+								})
+								//滚动条监听
+								$(".table-space").on("scroll",function () {
+									let coverHead = $(".cover-head");
+									let scrollLeft = $(".table-space").scrollLeft();
+									$(".fix-table-column table").css({
+										"top" : -$(".table-space").scrollTop()
+									});
+									coverHead.css("left",-scrollLeft);
+									coverHead.children().eq(0).css("left",scrollLeft);
+									coverHead.children().eq(1).css("left",scrollLeft + coverHead.children().eq(0).width());
+									//2017-05-11-start-临时代码-固定汇总数表头
+									$(".countall .fixed-column").eq(0).css({"left":scrollLeft}).height("37x");
+									$(".countall .fixed-column").eq(1).css({"left":scrollLeft + coverHead.children().eq(0).width()}).height("37x");
+								});
+							})
 						}
 					})
                             //执行合并项和汇总项的配置
@@ -323,9 +402,6 @@
                                                 });
                                                 $scope.combine(combineItem,combineCondition);//合并条件，合并项
                                             }
-                                            tool.setTableHeadWidth($(".table-dialog-window"));
-                                            $timeout(function(){
-                                            },0)
                                         }
 								});
                                 //汇总项
@@ -340,14 +416,14 @@
 										};
 										//如果有默认配置合并项就执行
 										if($scope.summaryItem.selectList){
-											var countItem = [];
+											const countItem = [];
 											$scope.summaryItem.selectList.forEach(function(item){
 												countItem.push(item.valueAlias);
 											});
-											$timeout(function(){
-												tool.setTableHeadWidth($(".table-dialog-window"));
+//                                            debugger;
+//											$timeout(function(){
 												$scope.countAll(countItem);
-											},0)
+//											},0)
 										}
 									}
 								});
@@ -364,52 +440,106 @@
 							thisEquipmentId.forEach(function(item){
 								for(var i in goEquipment){
 									var newI=i.split("_");
-									if(item.equipmentId == newI[0]){
+									if(item.equipmentId == newI[0] && item.equipmentType == newI[1]){
 										thisEquipmentName.push(goEquipment[i].punitName);
 									}
 								}
 							});
-							var windowSearchBox = $(".info-show").find(".window-search-box");
-							windowSearchBox.eq(0).find("input").val(thisStartTime);
-							windowSearchBox.eq(1).find("input").val(thisEndTime);
-							windowSearchBox.eq(2).find("input").val(thisEquipmentName.join());
-							windowSearchBox.eq(3).find("input").val(saleOrder);
-							windowSearchBox.eq(4).find("input").val(materialName);
-							windowSearchBox.eq(5).find("input").val(materialCode);
+							const windowSearchBox = $(".info-show");
+							windowSearchBox.find(".jStartTime").find("input").val(thisStartTime);
+							windowSearchBox.find(".jEndTime").find("input").val(thisEndTime);
+							windowSearchBox.find(".jPunitName").find("input").eq(0).val(thisEquipmentName.join());
+							windowSearchBox.find(".jSaleOrder").find("input").val(saleOrder);
+							windowSearchBox.find(".jMaterialName").find("input").val(materialName);
+							windowSearchBox.find(".jMaterialCode").find("input").val(materialCode);
+
+							//设备下拉列表数据
+                            $scope.searchData = {
+                                showText : "设备名称",
+                                value : "",
+                                repeatData : [],
+                            };
+                            for(let idType in goEquipment){
+                                let object = {
+                                    dragItemText : goEquipment[idType].punitName,
+                                    attr : idType
+                                };
+                                //筛选出初始选中的值
+                                thisEquipmentId.some((item) => {
+                                    if(item.equipmentId + "_" + item.equipmentType === idType){
+										return object.isActive = true;
+                                    }else{
+                                        object.isActive = false;
+                                    }
+                                });
+                                $scope.searchData.repeatData.push(object);
+                            }
 						},
-						errorFn: function(res){}
 					});
                 })
+				//班次下拉框
+				.then(function(){
+					//构造班次查询数据
+					shitfSearchData = {
+						startTime: thisStartTime,
+						endTime: thisEndTime,
+						equipments: thisEquipmentId
+					}
+					//查询数据
+					http.post({
+						url: $rootScope.restful_api.get_shift,
+						data: shitfSearchData,
+						successFn: function(res){
+							let shiftData = res.data,
+								repeatData = [];
+							
+							$scope.shiftData = {
+								showText: "查询班次",
+								className: "jShiftName",
+								value: ""
+							};
+							//循环构造下拉框数据
+							for(let i = 0, l = shiftData.length ; i < l ; i++){
+								let thisData = shiftData[i];
+								repeatData.push({
+									dragItemText: thisData
+								})
+							}
+							//传入组件
+							$scope.shiftData.repeatData = repeatData;
+						}
+					})
+				})
                 //点击获取li的内容
                 .then(function(){
 					http.get({
 						url: $rootScope.restful_api.sort_content_config + locationId,
 						successFn: function(res){
-							res = res.data;
-							$scope.temporaryList = $scope.resColumnData = res;
+							$scope.temporaryList = $scope.resColumnData = res.data;
 							$scope.columnOptionList = scheduleTableViewModelService.sortItem($scope.resColumnData);
 							$scope.columnSelectList = scheduleTableViewModelService.sortSelectItem($scope.resColumnData);//获得右边需要显示的数据
-							//为降序的li添加上相应的class
-							var sortItem = document.getElementById("sort-item").childNodes;
-							for(var i =0 ;i<sortItem.length;i++){
-								var thisSortItem = sortItem[i];
-								if(thisSortItem.nodeName == "LI"){
-									if(thisSortItem.getAttribute("data-order") == "down"){
-										thisSortItem.getElementsByTagName("span")[0].className = "itemOrder desc";
-									}
-								}
-							}
-							new DragNewItem('all-item','provide-item','sort-item',{});
+                            //等待页面渲染出元素
+                            $timeout(function () {
+                                //为降序的li添加上相应的class
+                                var sortItem = document.getElementById("sort-item").childNodes;
+                                for(var i =0 ;i<sortItem.length;i++){
+                                    var thisSortItem = sortItem[i];
+                                    if(thisSortItem.nodeName == "LI"){
+                                        if(thisSortItem.getAttribute("data-order") === "down"){
+                                            thisSortItem.getElementsByTagName("span")[0].className = "itemOrder desc";
+                                        }
+                                    }
+                                }
+                                new DragNewItem('all-item','provide-item','sort-item',{});
+                            })
 						}
 					})
-                })
-                //执行完毕，显示界面
-                .then(function(){
-                    $timeout(function(){
-                        $(".table-dialog-window").css("opacity" ,1);
-                    },200)
                 });
         deferred.resolve();
+		
+		$(window).on("resize",function(){
+			tool.setTableHeadWidth($(".table-dialog-window"),2);
+		})
 
         //输入检测
         function checkSearchData(thisStartTime,thisEndTime,thisEquipmentName,aEquipmentId){
@@ -445,21 +575,19 @@
         //删除选中的合并和汇总项 cc = count combine
         $scope.deleteccItem = function(data,$event){
             data.show = false;
-            //$event.target.parentNode.parentNode;
-            //console.log($event.target.parentNode.parentNode.nextElementSibling);
         };
         //二级页面内查询,刷新二级页面
         var windowSearch = false;
         $scope.change_window_table = function(){
             //获取查询条件
-            var inputList = tool.getFromInput_nocode(".info-show");
-            var thisStartTime = inputList[0],
-                    thisEndTime = inputList[1],
-                    thisEquipmentName = inputList[2],
-                    saleOrder = inputList[3],
-                    materialName = inputList[4],
-                    materialCode = inputList[5],
-                    aEquipmentId = [];
+            let thisStartTime = tool.getFromInput_nocode(".jStartTime"),
+                thisEndTime = tool.getFromInput_nocode(".jEndTime"),
+                thisEquipmentName = decodeURIComponent(tool.getFromInput_nocode(".jPunitName input")),
+                saleOrder = tool.getFromInput_nocode(".jSaleOrder"),
+                materialName = tool.getFromInput_nocode(".jMaterialName"),
+                materialCode = tool.getFromInput_nocode(".jMaterialCode"),
+//                shiftName = $(".jShiftName input").attr("check_id"),
+                aEquipmentId = [];
 
             //根据设备名获取设备ID
             var aEquipmentName = thisEquipmentName.split(",");
@@ -480,8 +608,8 @@
             }else{
             	windowSearch = true;
             }
-            //刷新二级页面
-            $scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode);
+            //刷新二级页面`
+            $scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode,true);
         };
 
         //导出excel
@@ -540,11 +668,11 @@
                 layer.msg('导出成功', {time: 3500,icon: 1});
             })
         };
-        
-        //前端导出excel
-        $scope.output_excel = function(){
-        	var exportTable = $(".table-space").clone().attr("id","exportExcel");
-        	var exportTableTr = exportTable.find("tr");  
+		
+		//刷新导出excel下载地址
+		$scope.refresh_excel = function(){
+			var exportTable = $(".table-space").clone().attr("id","exportExcel");
+        	var exportTableTr = exportTable.find("tr");
         	var todayDate = new Date();
             var year = todayDate.getFullYear()+"";
             var month = todayDate.getMonth() + 1;
@@ -556,60 +684,118 @@
                 day = "0" + day;
             }
             var fileName = year + month + day + ".xls";
-        	
+
         	exportTableTr.each(function(){
-                $(this).find("td").last().remove();
-                $(this).find("th").last().remove();
+                $(this).find("td").eq(1).remove();
+                $(this).find("th").eq(1).remove();
             });
-            
+
             if($(".countall").length > 0){
+				//删除表内汇总行
+				exportTable.find("tr").last().remove();
+				
             	var printBottom = $(".countall").clone();
-            	printBottom.children("div").last().remove();
+            	printBottom.children("div").eq(1).remove();
             	var printBottomDiv = printBottom.children("div");
 	            var colNum = printBottomDiv.length;
-	            var newRow = $("<tr></tr>");	            
-	            for(var i = 0 ; i < colNum ; i++){          	
+	            var newRow = $("<tr></tr>");
+	            for(var i = 0 ; i < colNum ; i++){
 	            	newRow.append("<td>"+printBottomDiv.eq(i).text()+"</td>");
 	            }
 	            exportTable.find("tbody").append(newRow);
             }
-            
+			exportTable.find("th").css("border","1px solid #000");
+			exportTable.find("td").css("border","1px solid #000");
+
         	exportTable.appendTo($("body")).hide();
         	var elem = document.getElementById("exportExcel"),
 				content = '<html><head><meta charset="UTF-8"></head><body>' + elem.outerHTML + '</body></html>',
 				EXCEL_URI = 'data:application/vnd.ms-excel;base64,',
 				objectUrl = EXCEL_URI + window.btoa(unescape(encodeURIComponent(content)));
 			
-			var aForExcel = $("<a download='"+fileName+"'><span class='forExcel'>下载excel</span></a>").attr("href",objectUrl);
-            $("body").append(aForExcel);
-            $(".forExcel").click();
-            aForExcel.remove();
-        	$("#exportExcel").remove();
-        }
+			//同步导出地址
+			$(".output-excel").attr("href",objectUrl)
+			$scope.file_name = fileName;
+			$("#exportExcel").remove();
+		}
+		
+        //前端导出excel
+//        $scope.output_excel = function($event){
+//        	var exportTable = $(".table-space").clone().attr("id","exportExcel");
+//        	var exportTableTr = exportTable.find("tr");
+//        	var todayDate = new Date();
+//            var year = todayDate.getFullYear()+"";
+//            var month = todayDate.getMonth() + 1;
+//            if(month < 10) {
+//                month = "0" + month;
+//            }
+//            var day = todayDate.getDate();
+//            if(day < 10) {
+//                day = "0" + day;
+//            }
+//            var fileName = year + month + day + ".xls";
+//
+//        	exportTableTr.each(function(){
+//                $(this).find("td").eq(1).remove();
+//                $(this).find("th").eq(1).remove();
+//            });
+//
+//            if($(".countall").length > 0){
+//				//删除表内汇总行
+//				exportTable.find("tr").last().remove();
+//				
+//            	var printBottom = $(".countall").clone();
+//            	printBottom.children("div").eq(1).remove();
+//            	var printBottomDiv = printBottom.children("div");
+//	            var colNum = printBottomDiv.length;
+//	            var newRow = $("<tr></tr>");
+//	            for(var i = 0 ; i < colNum ; i++){
+//	            	newRow.append("<td>"+printBottomDiv.eq(i).text()+"</td>");
+//	            }
+//	            exportTable.find("tbody").append(newRow);
+//            }
+//
+//        	exportTable.appendTo($("body")).hide();
+//        	var elem = document.getElementById("exportExcel"),
+//				content = '<html><head><meta charset="UTF-8"></head><body>' + elem.outerHTML + '</body></html>',
+//				EXCEL_URI = 'data:application/vnd.ms-excel;base64,',
+//				objectUrl = EXCEL_URI + window.btoa(unescape(encodeURIComponent(content)));
+//
+//			var aForExcel = $("<a download='"+fileName+"'><span class='forExcel'>下载excel</span></a>").attr("href",objectUrl);
+//            $("body").append(aForExcel);
+//            $(".forExcel").click();
+////            aForExcel.remove();
+//        	$("#exportExcel").remove();
+//			$event.preventDefault()
+//        };
 
         //打印
         $scope.print = function(){
             var printTable = $(".table-space").clone();
-            var printTableTr = printTable.find("tr");    
-  
+            var printTableTr = printTable.find("tr");
+
             printTableTr.each(function(){
-                $(this).find("td").last().remove();
-                $(this).find("th").last().remove();
+                $(this).find("td").eq(1).remove();
+                $(this).find("th").eq(1).remove();
             });
-            
+
             //如果存在汇总项
             if($(".countall").length > 0){
+				
+				//删除表内汇总行
+				printTable.find("tr").last().remove();
+				
             	var printBottom = $(".countall").clone();
-            	printBottom.children("div").last().remove();
+            	printBottom.children("div").eq(1).remove();
             	var printBottomDiv = printBottom.children("div");
 	            var colNum = printBottomDiv.length;
-	            var newRow = $("<tr></tr>");	            
-	            for(var i = 0 ; i < colNum ; i++){          	
+	            var newRow = $("<tr></tr>");
+	            for(var i = 0 ; i < colNum ; i++){
 	            	newRow.append("<td>"+printBottomDiv.eq(i).text()+"</td>");
 	            }
 	            printTable.find("tbody").append(newRow);
             }
-                
+
             printTable.css({"width":"100%","text-align":"center","margin":"0","padding":"0"});
             printTable.find("table").css({"width":"100%","text-align":"center","border-collapse":"collapse"});
             printTable.find("td").css({"border":"1px solid #ccc","padding":"4px","font-size":"12px","vertical-align":"middle"});
@@ -621,6 +807,7 @@
 			b.append(printBody);
             var newWindow = window.open("","_blank");
             newWindow.document.write('<meta charset="utf-8" />');
+            newWindow.document.write('<title>生产通知单</title>');
             newWindow.document.write('<style type="text/css">@media print {.noprint,.printBody { display: none } .nextpage {page-break-after:always;}}button{margin:4px;}</style>');
             newWindow.document.write('<button class="transverse noprint">横向</button><button class="vertical noprint">纵向</button><button class="noprint">打印</button>');
             newWindow.document.write(b.html());
@@ -646,13 +833,14 @@
         $scope.refresh_order = function(){
             //获取查询条件
             var inputList = tool.getFromInput_nocode(".info-show");
-            var thisStartTime = inputList[0],
-                    thisEndTime = inputList[1],
-                    thisEquipmentName = inputList[2],
-                    saleOrder = inputList[3],
-                    materialName = inputList[4],
-                    materialCode = inputList[5],
-                    aEquipmentId = [];
+			//获取查询条件
+			let thisStartTime = tool.getFromInput_nocode(".jStartTime"),
+				thisEndTime = tool.getFromInput_nocode(".jEndTime"),
+				thisEquipmentName = decodeURIComponent(tool.getFromInput_nocode(".jPunitName input")),
+				saleOrder = tool.getFromInput_nocode(".jSaleOrder"),
+				materialName = tool.getFromInput_nocode(".jMaterialName"),
+				materialCode = tool.getFromInput_nocode(".jMaterialCode"),
+				aEquipmentId = [];
 
             //根据设备名获取设备ID
             var aEquipmentName = thisEquipmentName.split(",");
@@ -675,16 +863,16 @@
             $scope.orderShow = !$scope.orderShow;
             //每次保存后暂时存储用户排序规则,存储临时变量
             (function (){
-                var attrArr = [];
-                var temporaryList = $.extend({},$scope.temporaryList);
+                let attrArr = [];
+				let temporaryList = $.extend({},$scope.temporaryList);
                 Array.prototype.forEach.call($("#sort-item li"),function(item){
-                    var attr = item.getAttribute("data-keyname");
+					let attr = item.getAttribute("data-keyname");
                     attrArr.push(attr);
                 });
-                var selectListArr = [];
-                for(var j = 0,length = attrArr.length;j<length;j++){
-                    for(var i = 0,len = temporaryList.optionList.length;i<len;i++){
-                        if(temporaryList.optionList[i].valueContent.replace(":desc","") == attrArr[j].replace(":desc","")){
+				let selectListArr = [];
+                for(let j = 0,length = attrArr.length;j<length;j++){
+                    for(let i = 0,len = temporaryList.optionList.length;i<len;i++){
+                        if(temporaryList.optionList[i].valueContent.replace(":desc","") === attrArr[j].replace(":desc","")){
                             temporaryList.optionList[i].order = "up";
                             //如果向下，设置class
                             if(attrArr[j].indexOf(":desc") > 0){
@@ -697,26 +885,27 @@
                     }
                 }
                 $scope.temporaryList.selectList = selectListArr;
-                $scope.columnContentData = scheduleTableViewModelService.sortItem($scope.temporaryList);//获得左边需要显示的数据
+                $scope.columnOptionList = scheduleTableViewModelService.sortItem($scope.temporaryList);//获得左边需要显示的数据
                 $scope.columnSelectList = scheduleTableViewModelService.sortSelectItem($scope.temporaryList);//获得右边需要显示的数据
             })();
-            
+
             layer.msg('保存成功', {time: 3500,icon: 1});
-            $scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode);
-        }
-        
+            $scope.click_creat_window(thisStartTime,thisEndTime,aEquipmentId.join(","),saleOrder,materialName,materialCode,true);
+        };
+
         $scope.orderHdie = function () {
             $scope.orderShow = !$scope.orderShow;
-        }
-        
-        $scope.click_creat_window = function(startTime,endTime,equipment,saleOrder,materialName,materialCode){
+        };
+
+        $scope.click_creat_window = function(startTime,endTime,equipment,saleOrder,materialName,materialCode,notFirst){
             var thisStartTime = startTime,
                     thisEndTime = endTime,
                     thisEquipment = equipment+"",
-                    URL="",
+//                    URL="",
                     thisEquipmentName = [],
                     aEquipment = "",
-                    aFreezeDate = "";
+					shiftNames = $(".jShiftName .search-input").val();
+//                    aFreezeDate = "";
             //拼接Url
             if(thisEquipment.indexOf(",")>-1){
                 aEquipment = thisEquipment.split(",");
@@ -742,7 +931,6 @@
                 isStr.push(item.valueContent)
             });
             isStr = isStr.join();
-           
             body_data={
                 "startTime":thisStartTime,
                 "endTime":thisEndTime,
@@ -753,6 +941,10 @@
                 "equipments":isArr,
                 "schemeId":sessionStorage.schemeId
             };
+			//如果有查班次
+			if(shiftNames){
+				body_data.shiftNames = shiftNames.split(",");
+			}
 			http.post({
 				url: sourceUrl,
 				data: body_data,
@@ -772,7 +964,7 @@
                         }
 
                         var windowTableData = scheduleTableViewModelService.jsonToWindowTableView(resData);
-						
+
 						if(windowSearch && resData.row.length){
 							layer.msg('已查询，请在下方表格中查看查询结果', {time: 3500,icon: 1});
 							windowSearch = false;
@@ -780,23 +972,29 @@
 							layer.msg('未查询出结果', {time: 3500,icon: 2});
 							windowSearch = false;
 						}
-						
+
                         //绑定页面
                         $scope.headDataView = windowTableData.headData;
+                        //去除‘操作’这一列
+                        if($scope.headDataView[0] === "操作"){
+                            $scope.headDataView.shift();
+                        }
                         $scope.tableDataView = windowTableData.bodyData;
-                        
+
                         $timeout(function(){
                             //更新表头宽度
-                            tool.setTableHeadWidth($(".table-dialog-window"));
-                            //更新查询条件
-                            var windowSearchBox = $(".table-dialog-window").find(".window-search-box");
-                            windowSearchBox.eq(0).find("input").val(thisStartTime);
-                            windowSearchBox.eq(1).find("input").val(thisEndTime);
-                            windowSearchBox.eq(2).find("input").val(thisEquipmentName.join(","));
-                            windowSearchBox.eq(3).find("input").val(decodeURIComponent(saleOrder));
-                            windowSearchBox.eq(4).find("input").val(decodeURIComponent(materialName));
-                            windowSearchBox.eq(5).find("input").val(decodeURIComponent(materialCode));
-                            
+                            tool.setTableHeadWidth($(".table-dialog-window"),2);
+							if(!notFirst){
+								//更新查询条件
+								var windowSearchBox = $(".table-dialog-window").find(".window-search-box");
+								windowSearchBox.eq(0).find("input").val(thisStartTime);
+								windowSearchBox.eq(1).find("input").val(thisEndTime);
+								windowSearchBox.eq(2).find("input").eq(0).val(thisEquipmentName.join(","));
+								windowSearchBox.eq(4).find("input").val(decodeURIComponent(saleOrder));
+								windowSearchBox.eq(5).find("input").val(decodeURIComponent(materialName));
+								windowSearchBox.eq(6).find("input").val(decodeURIComponent(materialCode));
+							}
+
             				//预排过得单子字体颜色特殊处理
 	            			$(".show-table table tbody tr").each(function(){
 	            				var source = $(this).attr("source");
@@ -805,12 +1003,16 @@
 	            				}else{
 	            					$(this).removeClass("source-light");
 	            				}
-	            			});                            
+	            			});
                         },0);
+						//先放一秒钟，很稳妥
+						$timeout(function(){
+							$scope.refresh_excel();
+						},1000);
                         //初始化复选框
                         $("input[name='single'],input[name='all']").prop("checked",false);
 
-                        $("#sort-item").find(".js-move").remove();
+						$("#all-item").find(".js-move").remove();
                         //是否调用临时排序相关功能↓↓↓↓
                         var combineCondition = [];
                         var combineItem = [];
@@ -825,10 +1027,9 @@
                             countItem.push(item.innerText);
                         });
                         $timeout(function(){
-//                      console.log($scope.tableDataView);
                         $scope.combine(combineItem,combineCondition);
                         $timeout(function(){
-                            tool.setTableHeadWidth($(".table-dialog-window"));//保证复制头部之前正确的宽度
+                            tool.setTableHeadWidth($(".table-dialog-window"),2);//保证复制头部之前正确的宽度
                             $scope.countAll(countItem)
                         },100);
                         },0);
@@ -855,143 +1056,129 @@
                     }
 			})
         };
-        //二级页面地点下拉框
-        $scope.equipment_list = function($event){
-            if($(".equipment-list").length > 0){
-                $(".equipment-list").remove();
-                $(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
-            }else{
-                tool.dialogWindowEquipment(goEquipment,$event,false);
-                $(".table-dialog-window .equipment-input").css("border","1px solid #1E7CD9");
-            }
-	    	$timeout(function(){
-	    		
-	    		
-				
-	    	},0)            
-        };
+//        //二级页面地点下拉框
+//        $scope.equipment_list = function($event){
+//            if($(".equipment-list").length > 0){
+//                $(".equipment-list").remove();
+//                $(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
+//            }else{
+//                tool.dialogWindowEquipment(goEquipment,$event,false);
+//                $(".table-dialog-window .equipment-input").css("border","1px solid #1E7CD9");
+//            }
+//        };
         //合并项
         $scope.combine = function(combineItem,combineCondition){
-            let count;//第一个为0
             let conbineItem = combineItem;//合并项
             let tableTr = $(".table-space tbody tr");//表格每行tr
-            if(conbineItem.length<=0){
+            const addHeadItemNum = 2;//人为增加非渲染内容的列数
+            let combineItemIndex = 0;//计算增加了几列合计数
+            if(conbineItem.length <= 0){
                 return;
             }
-            combineItem.forEach(function(item,combineItemIndex){
-                let combinePromise = $q.defer();
-                combinePromise.resolve();
-                combinePromise.promise
+            //增加序号栏
+            combineItem.forEach(function (currentCombineItem) {
+                let count;
                 //确定合并项下标，增加头部和内容的合计数栏
-                    .then(function(){
-                        //头信息栏
-                        $scope.headDataView.forEach(function(item,index){
-                            if(item == conbineItem[combineItemIndex]){
-                                count = index;
-                            }
-                        });
-                        //如果列表没有此项，则不对此项进行合并
-                        if(!count){
-                            return;
-                        }
-                        $scope.headDataView.splice(count+1,0,"合计数");
-                        //内容信息栏
-                        $scope.tableDataView.forEach(function(item){
-                            let obj = {"showText" : item[count].showText};
-                            item.splice(count+1,0,obj);
-                        });
-                        tableTr.each(function(indexCount){
-                            $(this).find("td[data-id]").attr("data-id","")
-                        });
+                //头信息栏
+                $scope.headDataView.some(function (headitem, index) {
+                    return (count = headitem === currentCombineItem ? index : undefined) >= 0;//大于等于0是为了解决首列为0时判断为false无法跳出some的bug
+                });
+                //如果列表没有此项，则不对此项进行合并
+                if (count === undefined) {
+                    return;
+                }
+                $scope.headDataView.splice(count + 1, 0, "合计数");
+                //内容信息栏
+                $scope.tableDataView.forEach(function (item) {
+                    let obj = {"showText": item[count].showText,"aaa":true};
+                    item.splice(count + 1, 0, obj);
+                });
 
-                        //1.给每个合计项附上专属ID;2.需注意人工添加了序号这一列,某些情况count+1+combineItemIndex
-                        //一个+combineItemIndex;因为合计数增加在合计项后面一列，每增加一列合计数，后面计算出的count要加对应数量的combineItemIndex
-                        //一个+1因为头部增加了序号这一列
-                        combineItemIndex += 1;//决定于增加几列合计数
-                        //异步等待dom渲染
-                        $timeout(function(){
-                            //根据合并条件一一赋予属性值
-                            combineCondition.forEach(function(item){
-                                $scope.headDataView.forEach(function(headItem,index){
-                                    if(item == headItem){
-                                        $(".table-space tbody tr").each(function(){
-                                            //给合计数这一列赋属性data-id
-                                            var dataId = $(this).children().eq(count+combineItemIndex+1).attr("data-id");
-                                            if(!dataId){
-                                                dataId = "";
-                                            }
-                                            dataId += $(this).children().eq(index+1).text().trim();//+1原因增加序号这一列
-                                            $(this).children().eq(count+1+1).attr("data-id",dataId);
-                                        })
+                //1.给每个合计项附上专属ID;2.需注意人工添加固定项,某些情况count+addHeadItemNum+combineItemIndex
+                //一个+combineItemIndex;因为合计数增加在合计项后面一列，每增加一列合计数，后面计算出的count要加对应数量的combineItemIndex
+                combineItemIndex += 1;//决定于增加几列合计数
+                //异步等待dom渲染
+                $timeout(function () {
+                    //根据合并条件一一赋予属性值
+                    combineCondition.forEach(function (item) {
+                        $scope.headDataView.forEach(function (headItem, index) {
+                            if (item === headItem) {
+                                $(".table-space tbody tr").each(function () {
+                                    //给合计数这一列赋属性data-id
+                                    let dataId = $(this).children().eq(count + addHeadItemNum + combineItemIndex).attr("data-id");//加上combineItemIndex是因为插入了一列
+                                    if (!dataId) {
+                                        dataId = "";
                                     }
-                                });
-                            });
-                            var dataIdObject = {};
-                            //获取相关属性的一个个对象,得出哪些项需要合并
-                            tableTr.each(function(indexCount){
-                                //忘记当时为什么这么做了
-                                if(indexCount === $(".table-space tbody tr").length-1){
-                                    return;
-                                }
-                                var td =  $(this).children().eq(count + combineItemIndex + 1);//得到合并项那一列的表格
-                                var dataId = td.attr("data-id");
-                                if(!dataIdObject[dataId]){
-                                    dataIdObject[dataId] = {};
-                                    dataIdObject[dataId].index = indexCount;//第一个合并单元格的下标
-                                    dataIdObject[dataId].num = 1;//要合并的单元格数量
-                                    dataIdObject[dataId].value = 0;//相加的值
-                                }else {
-                                    dataIdObject[dataId].num++;
-                                }
-                                dataIdObject[dataId].value += $scope.tableDataView[indexCount][count+1].showText;
-                            });
-                            for(let name in dataIdObject){
-                                let dataIdObj = dataIdObject[name];
-                                tableTr.eq(dataIdObj.index).children().eq(count + combineItemIndex + 1)
-                                        .text(dataIdObj.value)
-                                        .attr("rowSpan",dataIdObj.num)
-                                        .css("background-color","#fff");
-                                for(let i = 1;i < dataIdObj.num;i++){
-                                    $(".table-space tbody tr").eq(dataIdObj.index + i).children().eq(count + combineItemIndex + 1).remove();
-                                }
+                                    dataId += $(this).children().eq(index + addHeadItemNum).text().trim();
+                                    $(this).children().eq(count + addHeadItemNum + combineItemIndex).attr("data-id", dataId);
+                                })
                             }
-                        },100)
-                    })
+                        });
+                    });
+                    let dataIdObject = {};
+                    //获取相关属性的一个个对象,得出哪些项需要合并
+                    let prevValue,currentValue,dataIndex = 0;
+                    tableTr.each(function (indexCount) {
+                        let td = $(this).children().eq(count + addHeadItemNum  + combineItemIndex);//为了得到合并项那一列的表格，所以减一
+                        const dataId = td.attr("data-id");
+                        currentValue = dataId;
+                        //如果当前属性和前一个属性一致，则继续计算总值，不一样则新建一个对象重新开始
+                        if (currentValue !== prevValue) {
+                            dataIndex ++;
+                            dataIdObject[dataIndex] = {};
+                            dataIdObject[dataIndex].index = indexCount;//第一个合并单元格的下标
+                            dataIdObject[dataIndex].num = 1;//要合并的单元格数量
+                            dataIdObject[dataIndex].value = 0;//相加的值
+                        } else {
+                            dataIdObject[dataIndex].num++;
+                        }
+                        dataIdObject[dataIndex].value += $scope.tableDataView[indexCount][count].showText;
+                        prevValue = dataId;
+                    });
+                    for (let name in dataIdObject) {
+                        let dataIdObj = dataIdObject[name];
+                        tableTr.eq(dataIdObj.index).children().eq(count + combineItemIndex + addHeadItemNum)
+                            .text(dataIdObj.value)
+                            .attr("rowSpan", dataIdObj.num)
+                            .css("background-color", "#fff");
+                        for (let i = 1; i < dataIdObj.num; i++) {
+                            $(".table-space tbody tr").eq(dataIdObj.index + i).children().eq(count + combineItemIndex + addHeadItemNum).remove();
+                        }
+                    }
+                }, 100)
             })
         };
         //汇总项
         $scope.countAll = function(countItem){
+            const dialogWindowBody = $(".dialog-window-body");
+            //先移除之前的汇总行
             $(".countall").remove();
-            if(countItem.length == 0){
-                document.getElementsByClassName("dialog-window-body")[0].className = "dialog-window-body";
+            if(countItem.length === 0){
+//                $(".dialog-window-body").attr("class","dialog-window-body");
+                dialogWindowBody.removeClass("count-all");
                 return;
             }
-            document.getElementsByClassName("dialog-window-body")[0].className = "dialog-window-body countAll";
-            var tableHeight = $(".table-dialog-window .show-table table").height();
-            var tableBoxHeight = $(".table-dialog-window .show-table").height();
+            dialogWindowBody.addClass("count-all");
+            const tableHeight = dialogWindowBody.find(".table-space table").height();
+            const tableBoxHeight = dialogWindowBody.find(".show-table").height();
+            const addHeadItemNum = 2;//人为增加非渲染内容的列数
             countItem.forEach(function(conditionItem){
-                var count;
-                var sum = 0;
+                let count;
+                let sum = 0;
                 $scope.headDataView.forEach(function(item,index){
                     if(item == conditionItem){
                         count = index;
                     }
                 });
-                //如果列表没有此项，则不对此项进行汇总
-                if(!count){
+                //如果列表没有此项，则不对此项进行汇总，直接返回
+                if(count === undefined){
                     return;
                 }
                 //对应列计算出汇总数
                 $scope.tableDataView.forEach(function(item){
                     sum += item[count].showText
                 });
-//                //对应列计算出汇总数
-//                $(".table-dialog-window .show-table tbody tr").each(function(){
-//                    return sum += parseInt($(this).children().eq(count+1).text());
-//                })
-				
-//				console.log($scope.tableDataView);
-                //修改合计数过长显示不完全的bug
+                //修改合计数过长，列宽不够显示不完全的bug
                 let newCountAll = $scope.tableDataView.length ? new Array($scope.tableDataView[0].length) : [];
                 newCountAll[count] = {};
                 newCountAll[count].showText = sum;
@@ -999,31 +1186,44 @@
                 //渲染数据，->重新计算表头 ->克隆头部宽度 -> 生成底部宽度
                 //所以目前不得不加了个异步
                 $timeout(function () {
-                    tool.setTableHeadWidth($(".table-dialog-window"));
+                    tool.setTableHeadWidth(dialogWindowBody,2);
                     //生成底部栏,复制汇总数
-                    var cloneElem = $(".table-dialog-window .show-table .cover-head").clone();
-                    $(".table-dialog-window .show-table").append(cloneElem);
+                    let cloneElem = $(".show-table .cover-head").clone(true);
+                    $(".show-table").append(cloneElem);
                     cloneElem.addClass("countall");
                     cloneElem.children().text("").eq(0).text("汇总数");
                     //count+1 ==> 表格headDataView前增加了序号一列，这个为人工添加的
-                    cloneElem.children().eq(count+1).text(sum);
+                    cloneElem.children().eq(count + addHeadItemNum).text(sum);
                     //判断高度是否需要悬浮底部栏
                     cloneElem.css({
                         "position" : "absolute",
-                        "top" : tableHeight>tableBoxHeight ? tableBoxHeight+"px" : tableHeight + "px",
-                        "width" : "100%"
+                        "height" : "30px",
                     });
+                    //-30是是因为表格比高度刚好低了一个表格行高度时，汇总行出现在了表格外
+                    if(tableHeight>tableBoxHeight - 30){
+						console.log($(".table-space").width());
+						console.log($(".table-space table").width());
+						if($(".table-space table").width() > $(".table-space").width()){
+							cloneElem.css("bottom","10px")
+                        }else{
+                            cloneElem.css("bottom","2px")
+                        }
+                    }else{
+                        cloneElem.css("top",tableHeight + "px")
+                    }
+                    $(".fix-table-column").height($(".table-space").height() - 9);//减去滚动条的高度
                     //底部正确的宽度克隆完成，移除最后一行汇总数
-                    $(".show-table table").find("tr").last().remove();
+//                    $(".show-table table").find("tr").last().remove();
                 })
             },0);
         };
+
         //二级页面点击查看
         $scope.look_sale_order = function(thisRow,$event){
-            var pkId = thisRow[0].pkId;
-            var versionId = thisRow[0].versionId;
-            var sUrl = "";
-            if(versionId == undefined){     
+            const pkId = thisRow[0].pkId,
+                versionId = thisRow[0].versionId;
+            let sUrl = "";
+            if(versionId == undefined){
                 sUrl = $rootScope.restful_api.preview_third + pkId;
                 $(".do-code").show();
                 $(".pk-id").hide();
@@ -1035,26 +1235,25 @@
                 $(".version-id").show();
             }
             //弹窗
-            var indexLayer = layer.open({
+            const indexLayer = layer.open({
                 type: 1,
                 title: "派工单详细信息",
 //              closeBtn: 0,
                 shadeClose: true,
-                skin: 'yourclass',
                 content : $("#do_detail_dialog"),
                 success : function(){
                     //272是显示框正常宽度，450是高度
                     $(".layui-layer").css({
-                        "left" : $event.pageX - 272,
+                        "left" : $event.pageX,
                         "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
                     });
-                    
+
                     $($event.target).css("color","#1E7CD9");
-                    
+
                     $("body").on("click","#do_detail_dialog .sure,.layui-layer-shade,.layui-layer-close",function(){
                     	 $(".show-table .sale-order-look").css("color","");
                     });
-                    
+
                     $("#do_detail_dialog").on("click",".sure",function(){
                         layer.close(indexLayer);
                     })
@@ -1067,22 +1266,78 @@
                     //绑定view层
                     $scope.do_detail = res.data;
                     //json转viewModel对象
-                    console.log($scope.do_detail);
                 },
 				errorFn: function(res){}
 			})
         };
-    	$timeout(function(){
-            //预排过得单子字体颜色特殊处理
-	        $("body").find(".show-table table tbody tr").each(function(){
-	            var source = $(this).attr("source");
-	            if(source){
-	            	$(this).addClass("source-light");
-	            }else{
-	            	$(this).removeClass("source-light");
-	            }
-	        });    		
-    	},50)
+		
+		//设备与班次联动
+		$("body").on("click",".jPunitName li",function(){
+			let thisEquipmentName = decodeURIComponent(tool.getFromInput_nocode(".jPunitName input")),
+				aEquipmentId = [];
+			
+			//如果没有选设备，清空班次信息，return
+			if(!thisEquipmentName){
+				$scope.shiftData.repeatData = [];
+				$(".jShiftName .search-input").val("");
+				$(".jShiftName .active").removeClass("active");
+				return;
+			}
+			
+            //根据设备名获取设备ID
+            let aEquipmentName = thisEquipmentName.split(","),
+				allEquipmentInfo = goInfo.punit;
+
+            for(var i in allEquipmentInfo){
+                var thisName = allEquipmentInfo[i].punitName;
+                for(var j in aEquipmentName){
+                    if(aEquipmentName[j] == thisName){
+						let idTypeList = i.split("_");
+                        aEquipmentId.push({
+							equipmentId: idTypeList[0],
+							equipmentType: idTypeList[1]
+						});
+                    }
+                }
+            }
+			console.log(aEquipmentId);
+			//更新班次查询信息
+			shitfSearchData.equipments = aEquipmentId;
+			//重新拉取班次信息
+			$scope.refreshShift();			
+		})
+		.on("click",".jPunitName .clear-value",function(){
+			$scope.shiftData.repeatData = [];
+			$(".jShiftName .search-input").val("");
+			$(".jShiftName .active").removeClass("active");
+			return;
+		});
+		
+		
+		
+		//检查my97时间变化
+		let my97OldStartTime = "",
+			my97OldEndTime = "";
+		$("body").on("focus","#windowStartTime",function(){
+			let newStartTime = $("#windowStartTime").val();
+			if(my97OldStartTime !== newStartTime){
+				my97OldStartTime = newStartTime;
+				//修改班次查询数据
+				shitfSearchData.startTime = newStartTime;
+				//重新获取班次信息
+				$scope.refreshShift();
+			}
+		});
+		$("body").on("focus","#windowEndTime",function(){
+			let newEndTime = $("#windowEndTime").val();
+			if(my97OldEndTime !== newEndTime){
+				my97OldEndTime = newEndTime;
+				//修改班次查询数据
+				shitfSearchData.endTime = newEndTime;
+				//重新获取班次信息
+				$scope.refreshShift();
+			}
+		})
     })
 </script>
 </body>

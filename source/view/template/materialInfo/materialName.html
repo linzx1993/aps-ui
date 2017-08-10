@@ -1,0 +1,30 @@
+<div class="table-space show-table">
+	<table>
+		<thead>
+			<tr>
+				<th>物料名称</th>
+				<th>物料编码</th>
+				<th>日期</th>
+				<th>需求数量</th>
+				<th>合计</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="tr in tableBody" id="{{tr.materialName}}" on-finish-render-filters>
+				<!--<td ng-repeat="td in tr track by $index">{{td}}</td>-->
+				<td class="tr-materialName">{{tr.materialName}}</td>
+				<td class="tr-materialCode">{{tr.materialCode}}</td>
+				<td>{{tr.datetime}}</td>
+				<td>{{tr.quantity}}</td>
+				<td class="tr-count">{{tr.countNum}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div class="cover-head">
+	<div>物料名称</div>
+	<div>物料编码</div>
+	<div>日期</div>
+	<div>需求数量</div>
+	<div>合计</div>
+</div>

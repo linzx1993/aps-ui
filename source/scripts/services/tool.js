@@ -7,8 +7,9 @@ app.service('tool', function($rootScope) {
 
 	/**
 	 * 设置表格头部宽度
+	 * @param num ：首行固定的数量
 	 */
-	this.setTableHeadWidth = function(parentNodes) {
+	this.setTableHeadWidth = function(parentNodes,num = 0) {
 		var lastLeft = 0;
 		var jCoverHead = parentNodes.find(".cover-head"),
 			jShowTable = parentNodes.find(".show-table thead");
@@ -18,7 +19,6 @@ app.service('tool', function($rootScope) {
 		var jHeadTh = jShowTable.find("th");
 		var thNum = jHeadTh.length;
 		for(var i = 0; i < thNum; i++) {
-
 			if(!!window.ActiveXObject || "ActiveXObject" in window) {
 				if(i == thNum - 1) {
 					jCoverTh.eq(i).width(jShowTable.width() - jHeadTh.eq(i).position().left - 2);
@@ -31,6 +31,26 @@ app.service('tool', function($rootScope) {
 				jCoverTh.eq(i).width(jHeadTh.eq(i).width());
 			}
 		}
+		//=====首行固定宽度代码,如果需要固定的话
+		if(num > 0){
+            let width = 0;//获取固定两列的宽度
+            parentNodes.each(function () {
+                let td = $(this).find(".show-table thead").children("tr").eq(0).children("th");
+                for(let index = 0;index < num;index ++){
+                    let currentWidth = td.eq(index).width();
+                    jCoverHead.children().eq(index).css("left",width + parentNodes.find(".table-space").scrollLeft());
+                    jCoverHead.children().eq(index).width(currentWidth + 2);
+                    width += currentWidth;
+                }
+				jCoverHead.width(jCoverHead.width() - width);//针对可以看见滚动条，却无法移动的bug（还有一个bug数据太多，是看不见滚动条）
+                $(this).find(".fix-table-column").width(width + num * 3);
+                $(this).find(".fix-table").width(width + num * 3);
+
+            });
+            jCoverHead.css("padding-left",width + num * 2);
+		}else{
+			jCoverHead.css("padding-left",0);
+		}
 	};
 
 	/**二级页面地点下拉框（有时间可封装成共有的下拉框组件）
@@ -40,22 +60,23 @@ app.service('tool', function($rootScope) {
 	 * @param 是否单选
 	 * 
 	 */
-	this.dialogWindowEquipment = function(equipmentInfo, thisInput, selectOne) {
+	this.dialogWindowEquipment = function(allInfo, thisInput, selectOne) {
 		var jTableDialogWindow = $(".table-dialog-window");
 		var thisTarget = thisInput.target;
 		var x = thisTarget.offsetLeft;
 		var y = thisTarget.offsetTop + thisTarget.offsetHeight;
 		var equipmentList = $("<div class='equipment-list'><ul></ul></div>");
-		var equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(",");
+		var equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(","),
+			equipmentInfo = allInfo.punit,
+			idInfo = allInfo.punitId;
 
-		for(var i in equipmentInfo) {
-			var thisText = equipmentInfo[i].punitName;
+		for(var i in idInfo) {
+			var thisText = equipmentInfo[idInfo[i]].punitName || equipmentInfo[idInfo[i]].productUnitName;
 			if(equipmentInputVal.indexOf(thisText) >= 0) {
 				equipmentList.find("ul").append($("<li class='li-selected'></li>").text(thisText).attr("equipment-id", i));
 			} else {
 				equipmentList.find("ul").append($("<li></li>").text(thisText).attr("equipment-id", i));
 			}
-
 		}
 		jTableDialogWindow.find(".info-show").append(equipmentList);
 		$(".equipment-list").css("left", x);
@@ -77,12 +98,88 @@ app.service('tool', function($rootScope) {
 			} else {
 				$(this).toggleClass("li-selected");
 
-				var jLiSelected = $(".li-selected");
+				let jAllLi = $(".equipment-list li");
 				var newVal = [];
-				for(var i = 0, l = jLiSelected.length; i < l; i++) {
-					newVal.push(jLiSelected.eq(i).text());
+				let newIdType = [];
+				let allIdType = [];
+				for(var i = 0, l = jAllLi.length; i < l; i++) {
+					let thisIdType = jAllLi.eq(i).attr("equipment-id");
+					allIdType.push(thisIdType);
+					if(jAllLi.eq(i).hasClass("li-selected")){
+						newVal.push(jAllLi.eq(i).text());
+						newIdType.push(thisIdType)
+					}
 				}
-				jTableDialogWindow.find(".equipment-input").val(newVal.join(","));
+				jTableDialogWindow.find(".equipment-input")
+					.val(newVal.join(","))
+					.attr("idType",newIdType.join(","))
+					.attr("allIdType",allIdType.join(","))
+					.attr("title",newVal.join(","));
+			}
+
+		});
+	}
+	
+	/**二级页面地点下拉框（有时间可封装成共有的下拉框组件）
+	 * 
+	 * @param 所有地点对象
+	 * @param 当前input对象
+	 * @param 是否单选
+	 * 
+	 */
+	this.dialogWindowEquipmentInterim = function(equipmentInfo, thisInput, selectOne) {
+		var jTableDialogWindow = $(".table-dialog-window");
+		var thisTarget = thisInput.target;
+		var x = thisTarget.offsetLeft;
+		var y = thisTarget.offsetTop + thisTarget.offsetHeight;
+		var equipmentList = $("<div class='equipment-list'><ul></ul></div>");
+		var equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(",");
+
+		for(var i in equipmentInfo) {
+			var thisText = equipmentInfo[i].punitName || equipmentInfo[i].productUnitName;
+			if(equipmentInputVal.indexOf(thisText) >= 0) {
+				equipmentList.find("ul").append($("<li class='li-selected'></li>").text(thisText).attr("equipment-id", i));
+			} else {
+				equipmentList.find("ul").append($("<li></li>").text(thisText).attr("equipment-id", i));
+			}
+		}
+		jTableDialogWindow.find(".info-show").append(equipmentList);
+		$(".equipment-list").css("left", x);
+		$(".equipment-list").css("top", y);
+
+		$(".equipment-list").on("click", "li", function() {
+			var thisText = $(this).text();
+			var inputVal = $(".equipment-input").val();
+
+			if(selectOne) {
+				if($(this).hasClass("li-selected")) {
+					return;
+				} else {
+					$(".li-selected").removeClass("li-selected");
+					$(this).addClass("li-selected");
+					jTableDialogWindow.find(".equipment-input").val($(this).text());
+				}
+				$(".equipment-list").remove();
+			} else {
+				$(this).toggleClass("li-selected");
+
+				let jAllLi = $(".equipment-list li");
+				var newVal = [];
+				let newIdType = [];
+				let allIdType = [];
+				for(var i = 0, l = jAllLi.length; i < l; i++) {
+					let thisIdType = jAllLi.eq(i).attr("equipment-id");
+					allIdType.push(thisIdType);
+					if(jAllLi.eq(i).hasClass("li-selected")){
+						newVal.push(jAllLi.eq(i).text());
+						newIdType.push(thisIdType)
+					}
+				}
+				jTableDialogWindow.find(".equipment-input")
+					.val(newVal.join(","))
+					.attr("idType",newIdType.join(","))
+					.attr("allIdType",allIdType.join(","))
+					.attr("title",newVal.join(","));
 			}
 
 		});
@@ -95,11 +192,11 @@ app.service('tool', function($rootScope) {
 	 */
 	this.stringToDate = function(str) {
 		return str == undefined ? undefined : new Date(str.replace(/-/g, "/"));
-	}
+	};
 
 	/**date转string
 	 * 
-	 * @param 时间对象
+	 * @param date:时间对象
 	 * @returns 时间字符串（2016-01-01）
 	 */
 	this.dateToString = function(date) {
@@ -113,36 +210,36 @@ app.service('tool', function($rootScope) {
 			day = "0" + day;
 		}
 		return year + "-" + month + "-" + day;
-	}
+	};
+
 
 	/**
 	 * 从页面input标签内获取参数,转码后返回
-	 * @param {string} input或者其父元素的class
-	 *
+	 * @param {string} className:input或者其父元素的class
 	 * @return{string} 包含从input中读取的、经过转码的参数的数组
 	 */
 	this.getFromInput = function(className) {
 		if(typeof(className) != "string") {
-			return;
-		} else {
-			var thisEle = $(className);
-
+			// return
+		}  else {
+			const thisEle = $(className);
 			if(thisEle.is("input")) {
 				return encodeURIComponent(thisEle.val().trim());
 			} else if(thisEle.find("input").length == 1) {
 				return encodeURIComponent(thisEle.find("input").val().trim());
 			} else if(thisEle.find("input").length > 1) {
-				var returnList = [];
-				thisEle.find("input").each(function() {
-					returnList.push(encodeURIComponent($(this).val().trim()));
-				});
-				return returnList;
+				// var returnList = [];
+				// thisEle.find("input").each(function() {
+				// 	returnList.push(encodeURIComponent($(this).val().trim()));
+				// });
+				// return returnList;
+				return encodeURIComponent(thisEle.find("input").eq(0).val().trim());
 			}
 		}
-	}
+	};
 
 	/**
-	 * 从页面input标签内获取参数,不  转码后返回！！
+	 * 从页面input标签内获取参数,不转码后返回！！
 	 * @param {string} input或者其父元素的class
 	 *
 	 * @return{string} 包含从input中读取的参数的数组
@@ -158,18 +255,19 @@ app.service('tool', function($rootScope) {
 			} else if(thisEle.find("input").length == 1) {
 				return thisEle.find("input").val().trim();
 			} else if(thisEle.find("input").length > 1) {
-				var returnList = [];
-				thisEle.find("input").each(function() {
-					returnList.push($(this).val().trim());
-				});
-				return returnList;
+				// var returnList = [];
+				// thisEle.find("input").each(function() {
+				// 	returnList.push($(this).val().trim());
+				// });
+				// return returnList;
+                return thisEle.find("input").eq(0).val().trim();
 			}
 		}
 	}
 
 	/**
 	 * 浏览器及其版本号检测方法
-	 * 
+	 *
 	 * @return{Object} 返回浏览器，和版本号组成的对象。
 	 */
 	this.getBrowser = function() {
@@ -256,16 +354,16 @@ app.service('tool', function($rootScope) {
 			};
 		}
 
-	}
+	};
 
 	/**
 	 * 进度条
-	 * @param {elements1} 父元素(必填)
-	 * @param {elements2} 子元素，进度条(必填)
-	 * @param {url} 接口地址
-	 * @param {text} 进度条上显示文本
-	 * @return{fn} 当进度加载完成后执行的参数方法
-	 * 
+	 * @param elements1 父元素(必填)
+	 * @param elements2 子元素，进度条(必填)
+	 * @param url 接口地址
+	 * @param text 进度条上显示文本
+	 * @returnfn 当进度加载完成后执行的参数方法
+	 *
 	 * @param {String} absUrl 当前的url
 	 */
 	this.newprogressBar = function(elements1, elements2, url, text, fn, ff, absUrl) {
@@ -283,7 +381,7 @@ app.service('tool', function($rootScope) {
 					ff(res);
 					progressVal = res.rate || 0; //获取接口数据
 					var progWidth = 40 + progressVal / 100 * 360;
-					//							progressbar.children("span").css("width", progWidth + "px"); 
+					//							progressbar.children("span").css("width", progWidth + "px");
 					progressbar.children("span").animate({
 						"width": progWidth + "px"
 					});
@@ -297,7 +395,7 @@ app.service('tool', function($rootScope) {
 					if(progressVal || progressVal == 0) { //数据正确
 						if(progressVal < 100) {
 							var j = setTimeout(SetProgress, 1000);
-							if(i > 360) {
+							if(i > 3600) {
 								layer.alert("进度失败，请联系技术人员处理");
 								clearTimeout(j);
 								progressLabel.text(text + "失败");
@@ -308,7 +406,7 @@ app.service('tool', function($rootScope) {
 							progressbar.find(".process-label").html(text + "完成" + progressVal + "%");
 							fn(); //参数
 						}
-					} else { //如果数据错误		      					      				
+					} else { //如果数据错误
 						layer.alert("进度失败，请联系技术人员处理");
 						progressbar.hide(50); //进度条加载完成后隐藏
 					}
@@ -350,15 +448,21 @@ app.service('tool', function($rootScope) {
 	 * @return{Object} true：表示空对象，false不为空对象
 	 */
 	this.isEmptyObject = function(obj) {
-		for(var i in obj) {
-			return false
+		if(this.typeObject(obj) === "Object"){
+            for(let i in obj) {
+                return false
+            }
+            return true
+		}else{
+			return false;
 		}
-		return true
-	}
+	};
 
 	/**
 	 * 检查新创建规则和方案时是否重名
-	 * @param newName,nameList,type: 新名字 已有名字列表 方案名还是规则名
+	 * @param newName,nameList,type: 新名字
+	 * @param nameList: 已有名字列表
+	 * @param type: 方案名还是规则名
 	 * @return 新名字 或者 错误
 	 */
 	this.checkRepeatName = function(newName, nameList, type) {
@@ -376,12 +480,11 @@ app.service('tool', function($rootScope) {
 			})
 		}
 		return result ? newName : false
-	}
+	};
 
 	/**
 	*desc:1.获取点击元素位于相对于某个父元素的offset属性2.没有设置父元素直接获取相对页面3.想获取最近父元素直接获取，不需要调用此方法
 	*time:2017-03-20
-	*author:linzx
 	*@param: 点击的dom元素或者dom元素的ID
 	*@param: 需要获取相对距离的父元素,如不需要设置为null
 	*@param: 获得相对元素的滚动条滚动距离
@@ -401,9 +504,7 @@ app.service('tool', function($rootScope) {
             parent = parent.offsetParent;
         }
         //获得相对于页面主体的滚动条滚动距离
-		console.log(document.querySelectorAll(scrollParent));
         let scrollParentLeft = scrollParent ? document.querySelectorAll(scrollParent)[0].scrollLeft : 0;
-        console.log(scrollParentLeft);
         _offset.left = left - scrollParentLeft;
         //!!!!!配置页减去对应的滚动条距离
         _offset.top = top;
@@ -411,21 +512,26 @@ app.service('tool', function($rootScope) {
     };
 
     /**
-     * 但会传入对象的类型
+     * 判断传入对象的类型
 	 * *time:2017-03-24
-     * author:linzx
      * @params object :待验证数据
-     * @return 返回object的type
+     * @return 返回object的type  Boolean Number String Function Array Date RegExp Object Error,null,Undefined
      */
     this.typeObject = function (obj) {
         return Object.prototype.toString.call(obj).slice(8,-1);
     };
+    // this.class2type = {};
+    // $.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
+    //     this.class2type["[object " + name + "]"] = name.toLowerCase()
+    // })
+    // function type(obj) {
+    //     return obj == null ? String(obj) :
+    //         class2type[toString.call(obj)] || "object"
+    // }
 
     /**
      * 一维数组去重
 	 * *time:2017-03-24
-     * author:linzx
-     * @author:linzx
      * @params Array
      * @return 返回Array,返回数组乱序
      */
@@ -433,8 +539,8 @@ app.service('tool', function($rootScope) {
         if(!this.typeObject(array) === "Array"){
             return;
         }
-        array.filter(function (item, index) {
-            return array.indexOf(item) !== index;
+        return array.filter(function (item, index) {
+            return array.indexOf(item) == index;
         })
     };
 
@@ -491,5 +597,114 @@ app.service('tool', function($rootScope) {
             }
             return returnId;
         }
-    }
+    };
+
+    /**
+     * desc:根据车间ID获得车间名字
+     * time:2017-03-29
+     * @param: locationId:需要获取地点名字的地点ID
+     * @param: locationTree:传入的地点树数据
+     * @return: 获得的地点名字
+     **/
+    this.getLocationName = (locationId,locationTree) => {
+        let locationName;
+        //如果地点树数据为空或地点ID不对，直接返回
+        if(this.isEmptyObject(locationTree) || !locationId){
+            return;
+        }
+        for(let id in locationTree){
+            if(locationName) return locationName;
+            if(locationTree[id].locationId === locationId){
+                locationName =locationTree[id].locationName;
+                return locationName;
+            }else{
+                locationName = this.getLocationName(locationId,locationTree[id]["nextLevelLocation"])
+            }
+        }
+        return locationName;
+    };
+	
+	/**
+     * desc:返回一个随机色（有一定特殊性，不是全颜色随机）
+     * time:2017-04-16
+     * author:dww
+     * @return: 随机色
+     **/
+	this.getSpecialColor = () => {
+		//R、G、B只取间隔值，保证颜色不相近
+		let thisR = (Math.floor(Math.random()*8)*2).toString(16) + "",
+			thisG = (Math.floor(Math.random()*8)*2).toString(16) + "",
+			thisB = (Math.floor(Math.random()*8)*2).toString(16) + "",
+			thisC = (Math.floor(Math.random()*16)).toString(16) + "";
+
+			return "#"+thisR+thisC+thisG+thisC+thisB+thisC;
+	}
+	
+	
+	/**
+     * desc:根据传入的背景色，返回对应的字体颜色
+     * time:2017-04-25
+     * author:dww
+     * @return: 字体颜色
+     **/
+	this.getTextColor = (backgroundColor) => {
+		if(backgroundColor.length>10){
+			return "#000000";
+		}
+		var threshold = 128;
+		var r = parseInt(backgroundColor.substring(1,3),16) * 0.3;
+		var g = parseInt(backgroundColor.substring(3,5),16) * 0.59;
+		var b = parseInt(backgroundColor.substring(5,7),16) * 0.11;
+		var rgb = r + g + b;
+		if (rgb > threshold)
+		{
+			return "#000000";
+		}else
+		{
+			return "#FFFFFF";
+		}
+	}
+	
+	 /**
+     * desc:小时转小时分钟
+     * time:2017-05-09
+	 * author:dww
+     * @param: hour:传入的小时
+     * @return: 小时：分钟格式的字符串
+     **/
+	this.hourToHourMinute = (hour) => {
+		//将传入的小时按小数转为数值型
+		let paramHour = +hour,
+			minute = paramHour%1,
+			returnHourMinute;
+		//如果没有小数，直接返回结果
+		if(minute){
+			let hour = paramHour - minute;
+			//小时的小数部分转化为分钟
+			minute = Math.floor(minute*60);
+			//补足位数
+			returnHourMinute = (hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute)
+		}else{
+			//补足位数
+			returnHourMinute = (paramHour < 10 ? "0" + paramHour : paramHour) + ":00";
+		}
+		return returnHourMinute;
+	}
+	
+	/**
+     * desc:根据传入的时间提早或者延后n天返回
+     * time:2017-06-14
+	 * author:dww
+     * @param: moveDay:移动的天数，正是往后，负是往前
+     * @param: oldDate:传入的原始时间，默认为今天,可以是时间对象或者字符串YYYY-MM-DD
+     * @return: 变动后的时间，date对象形式（为了可以保留时分秒）
+     **/
+	this.dateChange = function(moveDay = 0 , oldDate = new Date()){
+		//入参检查
+		if(typeof(oldDate) === "string"){
+			oldDate = this.stringToDate(oldDate);
+		}
+		//返回重置后的时间
+		return new Date(oldDate.setDate(oldDate.getDate() + moveDay));
+	}
 });

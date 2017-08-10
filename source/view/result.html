@@ -1,715 +1,858 @@
-<!--右上角按钮区-->
-<div class="top-right-button">
-    <span ng-click="save_check_aps()">确认保存</span>
-	<span ng-click="cancel_aps()">取消排程</span>
-	<span class="user-info">
-		<ul class="user-info-box">
-			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
-			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
-			<li class="out-login">退出</li>
-		</ul>
-		{{userName||"用户"}}</span>
-</div>
-<!--右上角按钮区 END-->
-
-<!--右边栏-->
-<div class="right-menu">
-	<div class="right-menu-button" ng-click="cache_box()">
-		<span class="cache-num"></span>
-		<i class="cache-button-icon"></i>
-		<div class="tip">暂存间</div>
+<div class="jResultPage">
+	<!--右上角按钮区-->
+	<div class="top-right-button">
+		<span ng-click="returnPreviewPage()">返回</span>
+		<span ng-click="save_check_aps()">确认保存</span>
+		<span ng-click="cancel_aps()">取消排程</span>
+		<span><a href="./mesdist/index.html?schemeId={{schemeId}}" target="_blank">数据分析</a></span>
+		<span ng-click="fixedDisplay()">全屏展示</span>
+		<span class="user-info">
+			<ul class="user-info-box">
+				<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
+				<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
+				<li class="out-login" ng-click="loginOut()">退出</li>
+			</ul>
+			{{userName||"用户"}}</span>
 	</div>
-	<div class="search-btn search-btn-normal right-menu-button change-one">
-		<i class="search-btn-icon"></i>
-		<div class="search-box">
-			<div class="sale-order">
-				<span>订单号：</span>
-				<input type="text" class="search-input"/>
-			</div>
-			<div class="material-name">
-				<span>物料名：</span>
-				<input type="text" class="search-input"/>
-			</div>
-			<div class="material-code">
-				<span>物料编码：</span>
-				<input type="text" class="search-input"/>
-			</div>
-			<label for="hide_search_empty">是否开启查询过滤</label>
-			<input type="checkbox" name="hide_search_empty" id="hide_search_empty" ng-model="hide_search_empty" />	
-			<div class="start-search" ng-click="search()">查询</div>
+	<!--右上角按钮区 END-->
+
+	<!--右边栏-->
+	<div class="right-menu" ng-hide="full_screen">
+		<div class="right-menu-button" ng-click="cache_box()">
+			<span class="cache-num"></span>
+			<i class="cache-button-icon"></i>
+			<div class="tip">暂存区</div>
 		</div>
-		<div class="tip">搜索</div>
-	</div>
-	
-	<div class="change-model right-menu-button" ng-click="change_model()">
-		<i class="change-model-icon"></i>
-		<div class="tip">{{change_model_text}}</div>
-	</div>
-	<div class="turn-to-back right-menu-button turnback" ng-click="turn_to_back()">
-		<i class="turn-to-back-icon"></i>
-		<div class="tip">翻转</div>
-	</div>
-	<div class="right-menu-button differ-btn" ng-click="showDiffer()">
-		<i class="differ-btn-icon"></i>
-		<div class="tip">查询差异化</div> 
-	</div>
-	<!--隐藏空白行-->
-	<div class="hide-tr right-menu-button" ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
-		<i class="hide-tr-icon"></i>
-		<div class="tip">{{hide_empty_text}}</div>
-	</div>
-	<!--隐藏空白行END-->
-	<div class="right-menu-button change-one" ng-click="check_aps($event)">
-		<i class="jiaoyan-icon"></i>
-		<div class="tip">校验</div>
-		<input type="checkbox" class="check-check-box"/>
-	</div>
-	<div class="right-menu-button back-one" ng-click="rollback()">
-		<i class="back-one-icon"></i>
-		<div class="tip">撤销</div>
-	</div>
-	<div class="right-menu-button tab-fo-ba" ng-click="around()">
-		<i class="pap-open-icon"></i>
-		<div class="tip">前拉后推</div>
-	</div>
-	<div class="right-menu-button tab-del-fo-ba" ng-click="around_del()">
-		<i class="pap-close-icon"></i>
-		<div class="tip">取消前拉后推</div>
-	</div>
-</div>
-<div class="right-menu-switch"></div>
-<!--右边栏END-->
-<!--校验详细信息-->
-<div style="display: none;" id="check_detail_dialog" title="异常原因">
-    <div class="check_detail_dialog">
-        <!--详细信息弹出框建议格式-->
-        <table >
-			<tr ng-repeat="x in checkRows">
-				<td>{{($index+1) + "、" + x}}</td>
-			</tr>
-		</table>
-		<!--<a style="" class="sure" href="javascript:;">确定</a>-->
-    </div>
-</div>
-<!--校验详细信息end-->
+		<div class="search-btn search-btn-normal right-menu-button change-one">
+			<i class="search-btn-icon"></i>
+			<div class="search-box tl">
+				<h6 class="search-box-title">查询</h6>
+				<div class="search-content">
+					<search-drop-down-list ng-repeat="searchData in searchDataList" search-data="searchData"></search-drop-down-list>
+					<div class="start-search" ng-click="search()">查询</div>
+				</div>
+			</div>
+			<div class="tip">搜索</div>
+		</div>
 
-<!--pap详细信息-->
-<div style="display: none;" id="check_detail_dialog_pap" title="异常原因">
-    <div class="check_detail_dialog">
-        <!--详细信息弹出框建议格式-->
-        <table >
-			<tr ng-repeat="x in lists">
-				<td>{{($index+1) + "、" + x}}</td>
-			</tr>
-		</table>
-    </div>
-</div>
-<!--pap详细信息end-->
-<div class="pbody-wrap"><!-- 页面表格相关部分 -->
-	
-	<div id="progressbar_one" class="pro_bars">
-	    <span class="progressbar-gif"></span>
-	    <div id="progress-label_one" class="pro_labels"></div>
-	</div>	
-	
-	<!--校验提示信息  开始-->
-	<div class="wrap-alert" >
-		<button ng-click="confirm_close()" class="in-but"></button>
-		<h3 ><span></span>当前提示信息</h3>
-		<ul >
-		    <li  ng-repeat="checkRow in listOne">
-		    	<span class="in-mapStates" >{{$index+1+"."}}</span>
-		    	<span class="in-states" title={{checkRow.code}}>{{checkRow.code}}</span>
-		    	<span class="in-true"></span>
-		    	<span class="in-infos" ></span>
-		    	<b class="in-icons" style="display: none;" ng-click="confirm_dialog(checkRow,$event)" data-info={{checkRow.info}}>详情</b>
-		    </li>
-		 </ul>
-		 <div class="check-btn-div" style="display: none;">
-			 <div class="check-btn check-confirm" >确定</div>
-			 <div class="check-btn check-cancel" >取消</div>		 	
-		 </div>
-
+		<div class="change-model right-menu-button" ng-click="change_model()">
+			<i class="change-model-icon"></i>
+			<div class="tip">{{change_model_text}}</div>
+		</div>
+		<div class="turn-to-back right-menu-button turnback" ng-click="turn_to_back()" ng-if="!isSmall">
+			<i class="turn-to-back-icon"></i>
+			<div class="tip">翻转</div>
+		</div>
+		<div class="right-menu-button differ-btn" ng-click="showDiffer()">
+			<i class="differ-btn-icon"></i>
+			<div class="tip">查询差异化</div>
+		</div>
+		<!--隐藏空白行-->
+		<div class="hide-tr right-menu-button" ng-click="hide_tr()" ng-class="hide_empty?'search-btn-click':''">
+			<i class="hide-tr-icon"></i>
+			<div class="tip">{{hide_empty_text}}</div>
+		</div>
+		<!--隐藏空白行END-->
+		<!--隐藏物料名-->
+		<div class="show-material right-menu-button" ng-click="hide_materialName()" ng-class="materialName_hide?'search-btn-click':''" ng-if="isSmall">
+			<i class="show-material-icon"></i>
+			<div class="tip">{{hide_materialName_text}}</div>
+		</div>
+		<!--隐藏物料名END-->
+		<div class="right-menu-button change-one" ng-click="check_aps($event)">
+			<i class="jiaoyan-icon"></i>
+			<div class="tip">校验</div>
+			<input type="checkbox" class="check-check-box" />
+		</div>
+<!--
+		<div class="right-menu-button back-one" ng-click="rollback()">
+			<i class="back-one-icon"></i>
+			<div class="tip">撤销</div>
+		</div>
+-->
+		<div class="right-menu-button tab-fo-ba" ng-click="around()">
+			<i class="pap-open-icon"></i>
+			<div class="tip">前拉后推</div>
+		</div>
+		<div class="right-menu-button tab-del-fo-ba" ng-click="around_del()">
+			<i class="pap-close-icon"></i>
+			<div class="tip">取消前拉后推</div>
+		</div>
 	</div>
-	<!--校验提示信息  结束-->
-	
-	<!--前拉后推提示  开始-->
-	<div class="pap-alert">
-		<button ng-click="pap_close()"></button>
-		<h3 ><span></span>当前提示信息</h3>
-		<ul >
-		    <li ng-repeat="list in Lists track by $index">
-				<span class="pap-pkid">{{"pkId:"+" "+list.pkId}}</span>
-		    	<span class="pap-state">{{"当前状态："+" "+list.state}}</span>
-		    	<span class="pap-info"></span>
-		    	<b class="in-icons" data-info={{list.info}} ng-click="pap_dialog(list,$event)">详情</b>
-		    	<!--<p class="pap-in-alert">
-		    		<i class="pap-alert-head">&nbsp;&nbsp;&nbsp;&nbsp;异常原因</i>
-		    		<i class="pap-alert-content">&nbsp;&nbsp;&nbsp;&nbsp;{{list.info}}</i>
-		    	</p>
-		    	<u class="pap-alert-tri"></u>-->
-		    </li>
-		 </ul>
+	<div class="right-menu-switch" ng-hide="full_screen"></div>
+	<!--右边栏END-->
+	<!--校验详细信息-->
+	<div style="display: none;" id="check_detail_dialog" title="异常原因">
+		<div class="check_detail_dialog">
+			<!--详细信息弹出框建议格式-->
+			<table>
+				<tr ng-repeat="x in checkRows track by $index">
+					<td>{{($index+1) + "、" + x}}</td>
+				</tr>
+			</table>
+			<!--<a style="" class="sure" href="javascript:;">确定</a>-->
+		</div>
 	</div>
-	<!--前拉后推提示  结束-->
+	<!--校验详细信息end-->
 
-    <!--<div class="wrap-page">
-        <div class="page-content">
-        	<span class="search-btn search-btn-normal">
-        		<div class="search-box">
-        			<i class="triangle"></i>
-        			<div class="sale-order">
-        				<span>订单号:</span>
-        				<input type="text" />
-        			</div>
-        			<div class="material-name">
-        				<span>物料名:</span>
-        				<input type="text" />
-        			</div>
-        			<div class="material-code">
-        				<span>物料编码:</span>
-        				<input type="text" />
-        			</div>
-        			<div class="start-search" ng-click="search()">查询</div>
-        		</div>
-        	</span>
-        	<span class="turn-to-back to-fact" ng-click="turn_to_back()">翻转</span>
-        </div>
-    </div>-->
+	<!--pap详细信息-->
+	<div style="display: none;" id="check_detail_dialog_pap" title="异常原因">
+		<div class="check_detail_dialog">
+			<!--详细信息弹出框建议格式-->
+			<table >
+				<tr>{{lists}}</tr>
+			</table>
+		</div>
+	</div>
+	<!--pap详细信息end-->
+	<div class="pbody-wrap">
+		<!-- 页面表格相关部分 -->
 
-    <div class="wrap-content"><!-- 页面主体内容 -->
-    		
-        <div id="table" class="table j-table" ng-hide="isSmall || ifDiffer"><!-- 表格 -->
-            <div class="table-head"><!-- 表头部分 -->
-            	<div style="display: flex;">
-					<div class="current-show-location-name">{{currentShowLocationName}}</div>
-	            	<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date,$event)" ng-right-click="date_click(date,$event)">-->
-					<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'result')">
-	            		<span>{{date.thisDate.substring(5,7)}}</span>月
-	            		<span>{{date.thisDate.substring(8,10)}}</span>日
-	            	</div>
-	            </div>
-            </div><!-- .table-head END -->
+		<div id="progressbar_one" class="pro_bars">
+			<span class="progressbar-gif"></span>
+			<div id="progress-label_one" class="pro_labels"></div>
+		</div>
 
-            <div class="table-body"><!-- 表格主体部分 -->
-            	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
-            			<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
-            				<!--背面-->
-	            			<div class="td-back">
-	            				<p ng-repeat="back in cell.back">{{back}}</p>
-	            			</div>
-	            			<!--正面-->
-            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-style="{cursor: cell['useData'].cursor}" ng-right-click="showRightClickSmallNav(cell.front,$event,'result')">
-            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
-	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
-	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
-	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
-	            				</div>
-            				</div>	            			
-	            			<!--图标放在这一层，加浮动到指定位置-->
-	            			<div class="freeze_info" ng-show="cell['useData'].isLock"></div>
-	            			<div class="over-Capability" ng-show="cell['useData'].isOver"></div>
-            			</div>
-            		</div>
-            	</div>
-            </div><!-- .table-body END -->
-            <span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
-            <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
-        </div><!-- .table END -->
-		<div class="j-table table diffe-table" ng-hide="isSmall || !ifDiffer"><!-- 表格 -->
-			<div class="table-head"><!-- 表头部分 -->
-				<div style="display: flex;">
-					<div class="current-show-location-name">{{currentShowLocationName}}</div>
-					<div ng-repeat="date in tableHeadViewModel track by $index" style="cursor: default;">
-						<span>{{date.thisDate.substring(5,7)}}</span>月
-						<span>{{date.thisDate.substring(8,10)}}</span>日
+		<!--校验提示信息  开始-->
+		<div class="wrap-alert">
+			<button ng-click="confirm_close()" class="in-but"></button>
+			<h3 ><span></span>当前提示信息</h3>
+			<ul >
+				<li  ng-repeat="checkRow in checkList">
+					<span class="in-mapStates" >{{$index+1+"."}}</span>
+					<span class="in-states">{{checkRow.checkItemChineseName}}</span>
+					<span class="mr-5 in-true class-true" ng-if="checkRow.checkResult"></span><span ng-if="checkRow.checkResult">校验正常</span>
+					<span class="mr-5 in-infos class-false" ng-if="!checkRow.checkResult"></span><span ng-if="!checkRow.checkResult">校验存在异常</span>
+					<b class="in-icons" ng-if="!checkRow.checkResult" ng-click="confirm_dialog(checkRow,$event)">详情</b>
+				</li>
+			 </ul>
+			<p class="all-scheme-validate" ng-show="allSchemeValidate"><span>!</span>注意，设备作业页的排程结果有变动，别的排程方案在你排程期间保存过了。建议你取消此次排程重排一次，否则有可能会覆盖别人的排程结果甚至产生冲突</p>
+			 <div class="check-btn-div" style="display: none;">
+				 <div class="check-btn check-confirm" ng-click="confirm_save()">确定</div>
+				 <div class="check-btn check-cancel" ng-click="confirm_close()">取消</div>
+			 </div>
+		</div>
+		<!--校验错误二级页面-->
+		<div class="table-dialog-window table-window jcheckError check-error" ng-show="checkSchedule">
+			<div class="dialog-window-head">
+				异常情况
+				<i class="close-dialog-window" ng-click="checkSchedule = false;"></i>
+			</div>
+			<div class="dialog-window-body">
+				<div class="show-table">
+					<div class="table-space">
+						<table ng-style="{width : (checkItemTableHeadData.length * 100) + 'px'}">
+							<thead>
+							<tr>
+								<th>序号</th>
+								<th ng-repeat="title in checkItemTableHeadData track by $index" >{{title.showText}}</th>
+							</tr>
+							</thead>
+							<tbody>
+							<tr ng-repeat="checkItemTableRow in checkItemTableBodyData track by $index">
+								<td ng-if="checkErrorType !== 3">{{$index + 1}}</td>
+								<td ng-repeat="tableCell in checkItemTableRow track by $index" ng-class="tableCell.errorClass ? 'red' : ''" rowspan={{tableCell.rowNum}}>{{tableCell.showText}}</td>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="cover-head">
+						<div>序号</div>
+						<div ng-repeat="title in checkItemTableHeadData track by $index">{{title.showText}}</div>
 					</div>
 				</div>
-			</div><!-- .table-head END -->
+			</div>
+		</div>
+		<!--校验错误弹窗-->
+		<!--校验提示信息  结束-->
 
-			<div class="table-body"><!-- 表格主体部分 -->
-				<div class="table-content">
-					<div class="differSameItem mb-10" ng-repeat="differ in differTableBodyViewModel track by $index" ng-hide="differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty || differ[0][0]['useData'].isSearchEmpty && differ[1][0]['useData'].isSearchEmpty && hide_search_empty">
-						<div class="table-tr" ng-repeat="row in differ track by $index">
-							<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell['useData'].dateId}} >
+		<!--前拉后推提示  开始-->
+		<div class="pap-alert">
+			<button ng-click="pap_close()"></button>
+			<h3 ><span></span>当前提示信息</h3>
+			<ul >
+				<li ng-repeat="list in Lists">
+					<span class="pap-pkid">pkId:</span>
+					<span class="pap-state" data-pkid={{list.pkId}}>{{list.pkId}}</span>
+					<span class="in-true"></span>
+					<span class="pap-info"></span>
+					<b class="in-icons" data-info={{list.info}} ng-click="pap_dialog(list,$event)">详情</b>
+				</li>
+			 </ul>
+		</div>
+		<!--前拉后推提示  结束-->
+
+		<!--<div class="wrap-page">
+			<div class="page-content">
+				<span class="search-btn search-btn-normal">
+					<div class="search-box">
+						<i class="triangle"></i>
+						<div class="sale-order">
+							<span>订单号:</span>
+							<input type="text" />
+						</div>
+						<div class="material-name">
+							<span>物料名:</span>
+							<input type="text" />
+						</div>
+						<div class="material-code">
+							<span>物料编码:</span>
+							<input type="text" />
+						</div>
+						<div class="start-search" ng-click="search()">查询</div>
+					</div>
+				</span>
+				<span class="turn-to-back to-fact" ng-click="turn_to_back()">翻转</span>
+			</div>
+		</div>-->
+
+		<div class="wrap-content jResultContent">
+			<!-- 页面主体内容 -->
+
+			<div id="table" class="table j-table j-cache-table" ng-if="!(isSmall || ifDiffer)">
+				<!-- 表格 -->
+				<!-- 表头部分 -->
+				<div class="table-head">
+						<div class="current-show-location-name"></div>
+						<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">-->
+						<div style="display: flex;" class="jDateListDiv">
+							<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft} : {}">
+								<span>{{date.thisDate.substring(5,7)}}</span>月
+								<span>{{date.thisDate.substring(8,10)}}</span>日
+							</div>
+						</div>
+				</div>
+				<!-- .table-head END -->
+
+				<div class="table-body">
+					<div class="table-equipment-head">
+						<div>
+							<div class="table-td" ng-repeat="row in tableBodyData track by $index" ng-if="!(row[0]['useData'].isEmpty && hide_empty)" ng-right-click="showRightClickSmallNav(row[0],$event,'preview')" title={{row[0]['front'][0].text}} equipment-id={{row[0]['front'][0].equipment_id}}>
+								<div class="show-info" ng-style="{color:unit.textColor}">{{row[0]['front'][0].text}}</div>
+							</div>
+						</div>
+					</div>
+					<!-- 表格主体部分 -->
+					<div class="table-content" pagescroll="myPagingFunction()">
+						<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-if="!(row[0]['useData'].isEmpty && hide_empty)" ng-style="{marginLeft:controllerDate.bigTableMarginLeft}">
+							<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}" ng-click="check_this(cell.front,$event)">
 								<!--背面-->
 								<div class="td-back">
 									<p ng-repeat="back in cell.back">{{back}}</p>
 								</div>
 								<!--正面-->
-								<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="differ_unit_click(cell.front,$event)">
-									<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
+								<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-style="{cursor: cell['useData'].cursor,background: cell['useData'].smallBoxColor}" ng-right-click="showRightClickSmallNav(cell,$event,'result')">
+	<!--
+									<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
+										<div class="table-cell-name-font">{{unit.text}}</div>
+										<div class="table-cell-quantity-font">{{unit.text_number}}</div>
 										<div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
 									</div>
+	-->
 								</div>
 								<!--图标放在这一层，加浮动到指定位置-->
-								<div class="freeze_info" ng-show="cell['useData'].isLock"></div>
-	            				<div class="over-Capability" ng-show="cell['useData'].isOver"></div>
+								<div class="freeze_info" ng-if="cell['useData'].isLock"></div>
+								<div class="over-Capability" ng-if="cell['useData'].isOver"></div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div><!-- .table-body END -->
-			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
-			<span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
-		</div><!-- .table END -->
-   		<!--小格子-->
-   		<div class="small-table j-table" ng-show="isSmall && !ifDiffer"><!-- 表格 -->
-            
-            <div class="table-head"><!-- 表头部分 -->
-            	<div style="display: flex;">
-	            	<div>{{currentShowLocationName}}</div>
-	            	<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'result')">
-	            		{{date.thisDate.substring(5,10)}}
-	            	</div>
-	            </div>
-            </div><!-- .table-head END -->
-            <div class="table-body"><!-- 表格主体部分 -->
-            	<div class="table-content">
-            		<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-hide="row[0]['useData'].isEmpty && hide_empty || row[0]['useData'].isSearchEmpty && hide_search_empty">
-            			<div  ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td" ng-style="{opacity:cell['useData'].opacity}">
-	            			<!--正面-->
-            				<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-right-click="showRightClickSmallNav(cell.front,$event,'result')" ng-style="{cursor: cell['useData'].cursor}">
-            					<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
-	            					<!--<div class="table-cell-name-font">{{unit.text}}</div>
-	                                <div class="table-cell-quantity-font">{{unit.text_number}}</div>-->
-	                                <div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
-	            				</div>
-	            				<!--临时显示物料名称-->
-								<div class="show_materialName" ng-style="{color:cell['useData'].textColor,fontSize:'12px'}" title={{cell['useData'].materialName}} ng-hide="show_materialName">{{cell['useData'].materialName}}</div>            
-            				</div>		
-            			</div>
-            		</div>
-            	</div>
-            </div><!-- .table-body END -->
-            <span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
-            <span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
-        </div><!-- .table END -->
-        <!--小格子差异化-->
-        <div class="j-table small-table diffe-table" ng-show="isSmall && ifDiffer"><!-- 表格 -->
-			<div class="table-head"><!-- 表头部分 -->
-				<div style="display: flex;">
-					<div class="current-show-location-name">{{currentShowLocationName}}</div>
-					<div ng-repeat="date in tableHeadViewModel track by $index" style="cursor: default;">
-						{{date.thisDate.substring(5,10)}}
+			</div>
+			<!-- .table END -->
+			<div class="j-table table diffe-table" ng-if="!isSmall && ifDiffer">
+				<!-- 表格 -->
+				<div class="table-head">
+					<div class="current-show-location-name"></div>
+					<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">-->
+					<div style="display: flex;" class="jDateListDiv">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft} : {}">
+							<span>{{date.thisDate.substring(5,7)}}</span>月
+							<span>{{date.thisDate.substring(8,10)}}</span>日
+						</div>
 					</div>
 				</div>
-			</div><!-- .table-head END -->
+				<!-- .table-head END -->
 
-			<div class="table-body"><!-- 表格主体部分 -->
-				<div class="table-content">
-					<div class="differSameItem" ng-repeat="differ in differTableBodyViewModel track by $index" ng-hide="differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty || differ[0][0]['useData'].isSearchEmpty && differ[1][0]['useData'].isSearchEmpty && hide_search_empty">
-						<div class="table-tr" ng-repeat="row in differ track by $index">
-							<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId = {{cell['useData'].dateId}} >
+				<div class="table-body">
+					<!-- 表格主体部分 -->
+					<div class="table-equipment-head">
+						<div>
+							<div class="differSameItemEquipment" ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" ng-click="a(differ)" title={{differ[0][0]['front'][0].text}}>
+								<div class="table-td" ng-repeat="row in differ track by $index">
+									<div class="show-info" ng-style="{color:unit.textColor}">{{row[0]['front'][0].text}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-content" pagescroll="myPagingFunction()">
+						<div class="differSameItem mb-10" ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" ng-style="{marginLeft:controllerDate.bigTableMarginLeft}">
+							<div class="table-tr" ng-repeat="row in differ track by $index">
+								<div ng-repeat="cell in row" ng-style="$index != 0 ? {opacity : 0.2} : {opacity : 1}" class="{{cell['useData'].frontClass}} table-td" ng-class="$index != 0 ? 'second' : 'first'" data-dateId={{cell['useData'].dateId}}  ng-click="differ_unit_click(cell.front,$event)">
+									<!--背面-->
+									<div class="td-back">
+										<p ng-repeat="back in cell.back">{{back}}</p>
+									</div>
+									<!--正面-->
+									<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-style="{background: cell['useData'].smallBoxColor}">
+	<!--
+										<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, height: unit.percent}">
+											<div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+										</div>
+	-->
+									</div>
+									<!--图标放在这一层，加浮动到指定位置-->
+									<div class="freeze_info" ng-if="cell['useData'].isLock"></div>
+									<div class="over-Capability" ng-if="cell['useData'].isOver"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- .table END -->
+			<!--小格子-->
+			<div class="small-table j-table j-cache-table" ng-if="isSmall && !ifDiffer">
+				<!-- 表格 -->
+				<div class="table-head">
+					<div></div>
+					<div style="display: flex;" class="jDateListDiv">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')"  ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft} : {}">
+							{{date.thisDate.substring(5,10)}}
+						</div>
+					</div>
+				</div>
+				<!-- .table-head END -->
+				<div class="table-body">
+					<!-- 表格主体部分 -->
+					<div class="table-equipment-head">
+						<div>
+							<div class="table-td" ng-repeat="row in tableBodyData track by $index" ng-if="!(row[0]['useData'].isEmpty && hide_empty)" ng-right-click="showRightClickSmallNav(row[0],$event,'preview')" equipment-id={{row[0]['front'][0].equipment_id}} title={{row[0]['front'][0].text}}>{{row[0]['front'][0].text}}</div>
+						</div>
+					</div>
+					<div class="table-content" pagescroll="myPagingFunction()">
+						<div class="table-tr" ng-repeat="row in tableBodyData track by $index" ng-if="!(row[0]['useData'].isEmpty && hide_empty)" ng-style="{marginLeft:controllerDate.smallTableMarginLeft}">
+							<div ng-repeat="cell in row" class="{{cell['useData'].frontClass}} table-td td-front-non" ng-style="{opacity:cell['useData'].opacity,cursor: cell['useData'].cursor,background:cell['useData'].smallBoxColor}" ng-click="check_this(cell.front,$event)" ng-right-click="showRightClickSmallNav(cell,$event,'result')">
 								<!--正面-->
-								<div class="td-front" ng-class="cell['useData'].totalWorkTimeIsZero" ng-click="differ_unit_click(cell.front,$event)">
-									<div ng-repeat="unit in cell.front track by $index" class="table-font-wrap" ng-style="{background: unit.color, width: unit.percent}">
-										<div class="show-info" title={{unit.text}} ng-style="{color:unit.textColor}">{{unit.text}}{{unit.text_number}}</div>
+								<div class="show-info-time" ng-if="cell['useData'].materialName && materialName_hide" title={{cell['useData'].materialName}} ng-style="{color: cell['useData'].materialNameTextColor}">
+									{{cell['useData'].materialName}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- .table END -->
+			<!--小格子差异化-->
+			<div class="j-table small-table diffe-table" ng-if="isSmall && ifDiffer">
+				<!-- 表格 -->
+				<!-- 表头部分 -->
+				<div class="table-head">
+					<div></div>
+					<div style="display: flex;" class="jDateListDiv">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft} : {}">
+							{{date.thisDate.substring(5,10)}}
+						</div>
+					</div>
+				</div>
+				<!-- .table-head END -->
+
+				<div class="table-body">
+					<!-- 表格主体部分 -->
+					<div class="table-equipment-head">
+						<div>
+							<div class="differSameItemEquipment"ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" title={{differ[0][0]['front'][0].text}}>
+								<div class="table-td" ng-repeat="row in differ track by $index">{{row[0]['front'][0].text}}</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-content" pagescroll="myPagingFunction()">
+						<div class="differSameItem" ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" ng-style="{marginLeft:controllerDate.smallTableMarginLeft}">
+							<div class="table-tr" ng-repeat="row in differ track by $index">
+								<div ng-repeat="cell in row" ng-style="cell['useData'].opacity == 0.2 ? {background: cell['useData'].smallBoxColor,opacity:0.2} : {background: cell['useData'].smallBoxColor}"  class="{{cell['useData'].frontClass}} table-td table-td-none" ng-class="$index != 0 ? 'second' : 'first'" data-dateId={{cell['useData'].dateId}} ng-click="differ_unit_click(cell.front,$event)">
+									<!--正面-->
+									<div class="show-info-time" ng-if="cell['useData'].materialName && materialName_hide" title={{cell['useData'].materialName}} ng-style="{color: cell['useData'].materialNameTextColor}">
+										{{cell['useData'].materialName}}
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div><!-- .table-body END -->
-			<span class="page-select page-left" ng-style="last_page_button_style" ng-click="last_page()" id="page-left"></span>
-			<span class="page-select page-right" ng-style="next_page_button_style" ng-click="next_page()" id="page-right"></span>
-		</div><!-- .table END -->
-    </div><!-- .wrap-content END -->
-
-</div><!-- .pbody-wrap END -->
-<!--右键点击小目录-->
-<right-click-nav></right-click-nav>
-<!--右键点击小目录-->
-
-<!--透明遮盖层-->
-<div class="cover" ng-style="{display : cover_show?'block':'none'}"></div>
-	
-<!--保存时的loading-->
-<div class="save-loading uil-reload-css" style='-webkit-transform:scale(0.6)' ng-style="{display : cover_show?'block':'none'}">
-	<div class="round"></div>
-</div>
-
-<div style="display: none;" id="do_detail_dialog_1" title="临时派工单详细信息">
-    <div class="do_detail_dialog">
-        <!--详细信息弹出框建议格式-->
-        <table>
-			<tr>
-				<td>销售订单</td>
-				<td>:</td>
-				<td>{{do_detail.saleOrderCode}}</td>
-			</tr>
-			<!--生产主计划号（缺）-->
-			<tr>
-				<td>自制件计划号</td>
-				<td>:</td>
-				<td>{{do_detail.moCode}}</td>
-			</tr>
-			<!--车间计划号（缺）-->
-			<tr class="do-code">
-				<td>派工单号</td>
-				<td>:</td>
-				<td>{{do_detail.doCode}}</td>
-			</tr>
-			<tr>
-				<td>物料编码</td>
-				<td>:</td>
-				<td>{{do_detail.materialCode}}</td>
-			</tr>
-			<tr>
-				<td>物料助记码</td>
-				<td>:</td>
-				<td>{{do_detail.materialMnem}}</td>
-			</tr>
-			<tr>
-				<td>物料名称</td>
-				<td>:</td>
-				<td>{{do_detail.materialName}}</td>
-			</tr>
-			<tr>
-				<td>物料规格</td>
-				<td>:</td>
-				<td>{{do_detail.materialSpec}}</td>
-			</tr>
-			<tr>
-				<td>物料单位</td>
-				<td>:</td>
-				<td>{{do_detail.materialUnit}}</td>
-			</tr>
-			
-			<tr>
-				<td>工序编码</td>
-				<td>:</td>
-				<td>{{do_detail.processCode}}</td>
-			</tr>
-			<tr>
-				<td>工序名称</td>
-				<td>:</td>
-				<td>{{do_detail.processName}}</td>
-			</tr>
-			
-			<tr>
-				<td>开始时间</td>
-				<td>:</td>
-				<td>{{do_detail.startTime}}</td>
-			</tr>
-			<tr>
-				<td>结束时间</td>
-				<td>:</td>
-				<td>{{do_detail.endTime}}</td>
-			</tr>
-			<tr>
-				<td>计划数</td>
-				<td>:</td>
-				<td>{{do_detail.taskNum}}</td>
-			</tr>
-		</table>
-		<a style="" class="sure" href="javascript:;">确定</a>
-    </div>
-</div>
-
-<!--二级页面-->		
-<div class="table-dialog-window table-window">
-	<div class="dialog-window-head">
-		设备详情
-		<i class="close-dialog-window"></i>
-	</div>
-	<div class="dialog-window-body">
-		<div class="info-show">
-			<span class="window-search-box">
-				<span>选择时间：</span>
-					<input id="windowStartTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'%y-%M-%d'})">	
-			</span>
-			<span class="window-search-box" style="display: none;">
-				<span>结束时间：</span>
-					<input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">	
-			</span>
-			<span class="window-search-box">
-				<span>设备名称：</span>
-				<input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
-			</span>
-			<span class="window-search-box">
-				<span>订单号：</span>
-				<input type="text">	
-			</span>
-			<span class="window-search-box">
-				<span>物料名：</span>
-				<input type="text">	
-			</span>
-			<span class="window-search-box">
-				<span>物料编码：</span>
-				<input type="text">	
-			</span>
-			<a href="javascript:;" class="ml-30 window-search-button" ng-click="change_window_table()">查询</a>
+			</div>
+			<!-- .table END -->
 		</div>
-		<div class="show-table">
-			<div class="table-space">
-				<table>
-					<thead>
+		<!-- .wrap-content END -->
+		<date-controller controller-date="controllerDate" is-small="isSmall" refresh-margin-left="refresh_margin_left" get-date-change-width="get_date_change_width" change-model="change_model()"></date-controller>
+	</div>
+	<!-- .pbody-wrap END -->
+	<!--右键点击小目录-->
+	<right-click-nav></right-click-nav>
+	<!--右键点击小目录-->
+
+	<!--透明遮盖层-->
+	<div class="cover" ng-style="{display : cover_show?'block':'none'}"></div>
+
+	<!--保存时的loading-->
+	<div class="save-loading uil-reload-css" style='-webkit-transform:scale(0.6)' ng-style="{display : cover_show?'block':'none'}">
+		<div class="round"></div>
+	</div>
+
+	<div style="display: none;" id="do_detail_dialog_1" title="临时派工单详细信息">
+		<div class="do_detail_dialog">
+			<!--详细信息弹出框建议格式-->
+			<table>
+				<tr>
+					<td>销售订单</td>
+					<td>:</td>
+					<td>{{do_detail.saleOrderCode}}</td>
+				</tr>
+				<!--生产主计划号（缺）-->
+				<tr>
+					<td>自制件计划号</td>
+					<td>:</td>
+					<td>{{do_detail.moCode}}</td>
+				</tr>
+				<!--车间计划号（缺）-->
+				<tr class="do-code">
+					<td>派工单号</td>
+					<td>:</td>
+					<td>{{do_detail.doCode}}</td>
+				</tr>
+				<tr>
+					<td>物料编码</td>
+					<td>:</td>
+					<td>{{do_detail.materialCode}}</td>
+				</tr>
+				<tr>
+					<td>物料助记码</td>
+					<td>:</td>
+					<td>{{do_detail.materialMnem}}</td>
+				</tr>
+				<tr>
+					<td>物料名称</td>
+					<td>:</td>
+					<td>{{do_detail.materialName}}</td>
+				</tr>
+				<tr>
+					<td>物料规格</td>
+					<td>:</td>
+					<td>{{do_detail.materialSpec}}</td>
+				</tr>
+				<tr>
+					<td>物料单位</td>
+					<td>:</td>
+					<td>{{do_detail.materialUnit}}</td>
+				</tr>
+
+				<tr>
+					<td>工序编码</td>
+					<td>:</td>
+					<td>{{do_detail.processCode}}</td>
+				</tr>
+				<tr>
+					<td>工序名称</td>
+					<td>:</td>
+					<td>{{do_detail.processName}}</td>
+				</tr>
+
+				<tr>
+					<td>开始时间</td>
+					<td>:</td>
+					<td>{{do_detail.startTime}}</td>
+				</tr>
+				<tr>
+					<td>结束时间</td>
+					<td>:</td>
+					<td>{{do_detail.endTime}}</td>
+				</tr>
+				<tr>
+					<td>计划数</td>
+					<td>:</td>
+					<td>{{do_detail.taskNum}}</td>
+				</tr>
+			</table>
+			<a style="" class="sure" href="javascript:;">确定</a>
+		</div>
+	</div>
+
+	<!--二级页面-->
+	<div class="table-dialog-window table-window jPunitDetail jMovable" ng-show="table_dialog_window_show" ng-mousedown="priorityDisplay($event)" ng-mouseup="stopWindowMove()" >
+		<div class="dialog-window-head" ng-mousemove="isMove && windowMove($event)" ng-mouseleave="stopWindowMove()">
+			设备详情
+			<i class="close-dialog-window" ng-click="close_dialog_window()"></i>
+		</div>
+		<div class="dialog-window-body">
+			<div class="info-show">
+				<span class="window-search-box jStartTime">
+					<span>选择时间：</span>
+				<input id="windowStartTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'%y-%M-%d'})">
+				</span>
+				<span class="window-search-box jEndTime" style="display: none;">
+					<span>结束时间：</span>
+				<input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">
+				</span>
+				<span class="window-search-box jPunitName">
+					<span>设备名称：</span>
+				<input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
+				</span>
+<!--				<search-drop-down-list-with-id search-data="shiftData" style="{'width' : '104px'}" class="jShiftName"></search-drop-down-list-with-id>-->
+				<span class="window-search-box jSaleOrder">
+					<span>订单编号：</span>
+				<input type="text">
+				</span>
+				<span class="window-search-box jMaterialName">
+					<span>物料名称：</span>
+				<input type="text">
+				</span>
+				<span class="window-search-box jMaterialCode">
+					<span>物料编码：</span>
+				<input type="text">
+				</span>
+				<a href="javascript:;" class="ml-30 window-search-button" ng-click="change_window_table()">查询</a>
+			</div>
+			<div class="show-table">
+				<div class="table-space">
+					<table ng-style="{width : (headDataView.length * 100) + 'px'}">
+						<thead>
+							<tr>
+								<th>选择</th>
+								<th>操作</th>
+								<th ng-repeat="title in headDataView track by $index" >{{title}}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="tableRow in tableDataView track by $index" source={{tableRow[0].source}} ng-class="tableRow[0].source ? 'orange' : ''" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}} index={{tableRow[0].index}}>
+								<td class="check-box">
+									<!--<input id="SecondPage{{$index}}" name="single" type="checkbox" />-->
+									<!--<label for="SecondPage{{$index}}" ng-style="{pointerEvents:tableRow[0].source?'none':'auto'}"></label>-->
+								</td>
+								<td>
+									<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
+									<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" title="修改开始时间"></span>
+									<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
+								</td>
+								<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="fix-table-column">
+					<table class="fix-table">
+						<thead>
 						<tr>
-							<th>选择</th>
-							<th ng-repeat="title in headDataView track by $index">{{title}}
+							<th style="min-width: 44px;">
+								<input type="checkbox" id="" name="all" />
+								<label for="" class="headCheckbox"></label>
 							</th>
+							<th>操 作</th>
 						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="tableRow in tableDataView track by $index" source={{tableRow[0].source}} pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}} index={{tableRow[0].index}}>
-							<td class="check-box"><label for="SecondPage{{$index}}" ng-style="{pointerEvents:tableRow[0].source?'none':'auto'}"><input id="SecondPage{{$index}}" name="single" type="checkbox" /><span class="check"></span></label></td>
-							<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}
+						</thead>
+						<tbody>
+						<tr ng-repeat="tableRow in tableDataView track by $index" ng-class="tableRow[0].source ? 'orange' : ''"  source={{tableRow[0].source}} pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}} index={{tableRow[0].index}}>
+							<td>
+								<input id="SecondPage{{$index}}" name="single" type="checkbox" ng-disabled="tableRow[0].source"/>
+								<label for="SecondPage{{$index}}" ></label>
 							</td>
 							<td>
-								<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span>
-								<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline'}">微调</span>
+								<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
+								<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" title="修改开始时间"></span>
+								<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
 							</td>
 						</tr>
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				</div>
+				<div class="cover-head">
+					<div class="fixed-column">
+						<input type="checkbox" ng-style="" style="display: none;" id="headtrSelect" name="all" />
+						<label for="headtrSelect" class="headCheckbox"></label>
+					</div>
+					<div class="fixed-column">操作</div>
+					<div ng-repeat="title in headDataView track by $index">{{title}}</div>
+				</div>
 			</div>
-			<div class="cover-head">
-				<div><label for="headtrSelect" class="headCheckbox"><input type="checkbox" ng-style="" style="display: none;" id="headtrSelect" name="all"/><span class="check"></span></label></div>
-				<div ng-repeat="title in headDataView track by $index">{{title}}</div>
-			</div>			
-		</div>
-		<div class="move-to-cache">
-			<span ng-click="move_to_cache()">移出日程</span>
-			<span class="cance-move">取消</span>
+			<div class="move-to-cache">
+				<span ng-click="move_to_cache()">移出日程</span>
+				<span class="cance-move">取消</span>
+			</div>
 		</div>
 	</div>
-</div>
-<!--二级页面结束-->
+	<!--二级页面结束-->
 
-<!--二级页面差异化-->
-    	<div class="table-dialog-differ">
-    		<p class="table-window-alert">
-    			<span class="alert-info">差异化提示</span>
-    			<!--<span class="alert-same alert-line alert-line-own"></span>
-    			<span class="alert-same table-window-info_equ">右</span>-->
-    			<span class="alert-same alert-line">|</span>
-    			<!--<span class="alert-same table-window-info_date">左</span>-->
-    			<span class="alert-close" ng-click="differ_close()"></span>
-    		</p>
-    		<span style="position: absolute;top: 10px;right: 200px;">视图切换：</span>
-    		<div class="slider-track" id="J_sliderBar">
-		        <span class="slider-thumb" id="J_point"></span>
-		    </div>
-		    <ul class="slider-bg">
-	        	<li class="ul-outer"></li>
-	        	<li class="ul-inner"></li>
-	        	<li class="ul-outer"></li>
-	        	<li class="ul-inner"></li>
-	        	<li class="ul-outer"></li>
-	        </ul>
-    		<div style="position: absolute;left: 45px;top: 8px;z-index: 999;font-size: 14px;cursor: pointer;">
-    			<span class="isTaskBtn switch-result">工单</span>
-	    		<b style="display: inline-block;margin: 0 10px;font-weight: normal;color: #ccc;">|</b>
-	    		<span class="isPoolBtn">车间计划</span>
-    		</div>
-	    	<div class="isTask">
-	    		<div class="table-window-left table-window-differ tableTask_left">
-	    			<p class="dialog-window-heads title-left">排程前</p>
-		    		<div class="differ-wrap-table differ-table-task table-left" id="front" onscroll="document.getElementById('back').scrollLeft = this.scrollLeft;">
-		    			<div class="cover-heads cover-heads_left">
-							<div ng-repeat="title in headDataView_left track by $index">{{title}}</div>
-						</div>
-		    			<div class="show-table-differ" >
-							<div class="table-space-differ">
-								<table>
-									<thead>
-										<tr>
-											<th ng-repeat="title in headDataView_left">{{title}}</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr ng-repeat="tableRow in tableDataView_left" rowNum={{tableRow[0].rowNum}} ng-style={{tableRow[0].isHighLight?'':'highL'}} isHighLight={{tableRow[0].isHighLight}}>
-											<td ng-repeat="tableCell in tableRow" ng-click="click_show($event)">{{tableCell.showText}}</td>
-										</tr>
-									</tbody>
-								</table>	
-							</div>	
-						</div>
+	<!--二级页面差异化-->
+	<div class="table-dialog-differ">
+		<p class="table-window-alert">
+			<!--<span class="alert-info">差异化提示</span>-->
+			<!--<span class="alert-same alert-line alert-line-own"></span>
+					<span class="alert-same table-window-info_equ">右</span>-->
+			<span class="alert-same alert-line">|</span>
+			<!--<span class="alert-same table-window-info_date">左</span>-->
+			<span class="alert-close" ng-click="differ_close()"></span>
+		</p>
+		<span style="position: absolute;top: 10px;right: 200px;">视图切换：</span>
+		<div class="slider-track" id="J_sliderBar">
+			<span class="slider-thumb" id="J_point"></span>
+		</div>
+		<ul class="slider-bg">
+			<li class="ul-outer"></li>
+			<li class="ul-inner"></li>
+			<li class="ul-outer"></li>
+			<li class="ul-inner"></li>
+			<li class="ul-outer"></li>
+		</ul>
+		<div style="position: absolute;left: 45px;top: 8px;z-index: 999;font-size: 14px;cursor: pointer;">
+			<span class="isTaskBtn switch-result">工单</span>
+			<b style="display: inline-block;margin: 0 10px;font-weight: normal;color: #ccc;">|</b>
+			<span class="isPoolBtn">车间计划</span>
+		</div>
+		<div class="isTask">
+			<div class="table-window-left table-window-differ tableTask_left">
+				<p class="dialog-window-heads title-left">排程前</p>
+				<div class="differ-wrap-table differ-table-task table-left" id="front" onscroll="document.getElementById('back').scrollLeft = this.scrollLeft;">
+					<div class="cover-heads cover-heads_left">
+						<div ng-repeat="title in headDataView_left track by $index">{{title}}</div>
 					</div>
-	    		</div>
-	    		<div class="table-window-right table-window-differ tableTask_right">
-	    			<p class="dialog-window-heads title-right">排程后</p>
-	    			<div class="differ-wrap-table differ-table-task table-right" id="back" onscroll="document.getElementById('front').scrollLeft = this.scrollLeft;">
-		    			<div class="cover-heads cover-heads_right">
-							<div ng-repeat="title in headDataView_right">{{title}}</div>
-						</div>
-		    			<div class="show-table-differ" >
-							<div class="table-space-differ">
-								<table>
-									<thead>
-										<tr>
-											<th ng-repeat="title in headDataView_right">{{title}}</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr ng-repeat="tableRow in tableDataView_right" rowNum={{tableRow[0].rowNum}} ng-style={{tableRow[0].isHighLight?'':'highL'}} isHighLight={{tableRow[0].isHighLight}}>
-											<td ng-repeat="tableCell in tableRow" ng-click="click_show($event)" >{{tableCell.showText}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-	    		</div>
-	    		<div class="differ-line"></div>   <!--分割线-->
-	    		<div class="differ-show">
-	    			<p class="differ-show-info differ-show-top" ></p>
-	    			<p class="differ-show-info differ-show-front" >排程前</p>
-	    			<p class="differ-show-info differ-show-back" >排程后</p>
-		    		<table id="show" ></table>
-		    	</div>
-		    </div>
-	    	<!--车间计划差异  开始-->
-	    <div class="isPooltaskId">
-	    	<div class="table-window-left table-window-differ tablePool_left">
-    			<p class="dialog-window-heads title-left">排程前</p>
-	    		<div class="differ-wrap-table differ-table-pool table-left" id="front-task" onscroll="document.getElementById('back-task').scrollLeft = this.scrollLeft;">
-	    			<div class="cover-heads cover-headsPool_left">
-						<div ng-repeat="title in headDataView_leftPool">{{title}}</div>
-					</div>
-	    			<div class="show-table-differ">
+					<div class="show-table-differ">
 						<div class="table-space-differ">
-							<table>
+							<table ng-style="{width : (headDataView_left.length * 100) + 'px'}">
 								<thead>
 									<tr>
-										<th ng-repeat="title in headDataView_leftPool">{{title}}</th>
+										<th ng-repeat="title in headDataView_left track by $index">{{title}}</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr ng-repeat="tableRow in tableDataView_leftPool" rowNum={{tableRow[0].rowNum}} ng-style={{tableRow[0].isHighLight?'':'highL'}} isHighLight={{tableRow[0].isHighLight}}>
+									<tr ng-repeat="tableRow in tableDataView_left track by $index" rowNum={{tableRow[0].rowNum}} ng-class="tableRow[0].isHighLight ? '' : 'orange'" isHighLight={{tableRow[0].isHighLight}}>
 										<td ng-repeat="tableCell in tableRow" ng-click="click_show($event)">{{tableCell.showText}}</td>
-									</tr>
-								</tbody>
-							</table>	
-						</div>	
-					</div>
-				</div>
-    		</div>
-    		<div class="table-window-right table-window-differ tablePool_right">
-    			<p class="dialog-window-heads title-right">排程后</p>
-    			<div class="differ-wrap-table differ-table-pool table-right" id="back-task" onscroll="document.getElementById('front-task').scrollLeft = this.scrollLeft;">
-	    			<div class="cover-heads cover-headsPool_right">
-						<div ng-repeat="title in headDataView_rightPool">{{title}}</div>
-					</div>
-	    			<div class="show-table-differ" >
-						<div class="table-space-differ">
-							<table>
-								<thead>
-									<tr>
-										<th ng-repeat="title in headDataView_rightPool">{{title}}</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="tableRow in tableDataView_rightPool " ng-click="aaa(tableRow)" rowNum={{tableRow[0].rowNum}} ng-style={{tableRow[0].isHighLight?'':'highL'}} isHighLight={{tableRow[0].isHighLight}}>
-										<td ng-repeat="tableCell in tableRow" ng-click="click_show($event)" >{{tableCell.showText}}</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 					</div>
 				</div>
-    		</div>
-    		<div class="differ-line"></div>   <!--分割线-->
-    	</div>
-	    	<!--车间计划差异 end-->
-    		<div class="table-window-button table-window-hide" ng-click="differ_keep()" title="保留差异">差异</div>
-    	</div>
-<!--二级页面差异化结束-->
-	
-<!--暂存间-->
-<div class="cache-window table-window" >
-	<div class="dialog-window-head">暂存区
-		<i class="close-window"></i>
-	</div>
-	<div class="dialog-window-body">
-		<div class="info-show">
-			<span class="window-search-box">
-				<span>订单号：</span>
-				<input type="text">	
-			</span>
-			<span class="window-search-box">
-				<span>物料名：</span>
-				<input type="text">	
-			</span>
-			<span class="window-search-box">
-				<span>物料编码：</span>
-				<input type="text">	
-			</span>
-			<a href="javascript:;" class="ml-30 window-search-button" ng-click="change_cache_window()">查询</a>
-		</div>
-		<div class="show-table">
-			<div class="table-space">
-				<table>
-					<thead>
-						<tr>
-							<th>选择</th>
-							<th ng-repeat="title in cacheHeadDataView track by $index">{{title}}
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="tableRow in cacheTableDataView track by $index" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
-							<td class="check-box"><label for="Storage{{$index}}"><input id="Storage{{$index}}" name="StorageSingle" type="checkbox" /><span class="check"></span></label></td>
-							<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}
-							</td>
-							<td>
-								<!--<span class="sale-order-look" ng-click="look_sale_order(tableRow)">查看</span>-->
-								<span class="sale-order-change" ng-click="part_move_out_cache(tableRow,$event)"><!--ng-style="{display:tableRow[0].canChange}"-->微调</span>
-							</td>
-						</tr>
-					</tbody>
-				</table>
 			</div>
-			<div class="cover-head">
-				<div><label for="headtrChoose"><input id="headtrChoose" name="StorageAll" type="checkbox" /><span class="check"></span></label></div>
-				<div ng-repeat="title in cacheHeadDataView track by $index">{{title}}</div>
+			<div class="table-window-right table-window-differ tableTask_right">
+				<p class="dialog-window-heads title-right">排程后</p>
+				<div class="differ-wrap-table differ-table-task table-right" id="back" onscroll="document.getElementById('front').scrollLeft = this.scrollLeft;">
+					<div class="cover-heads cover-heads_right">
+						<div ng-repeat="title in headDataView_right track by $index">{{title}}</div>
+					</div>
+					<div class="show-table-differ">
+						<div class="table-space-differ">
+							<table ng-style="{width : (headDataView_right.length * 100) + 'px'}">
+								<thead>
+									<tr>
+										<th ng-repeat="title in headDataView_right track by $index">{{title}}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="tableRow in tableDataView_right track by $index" rowNum={{tableRow[0].rowNum}} ng-class="tableRow[0].isHighLight ? '' : 'orange'" isHighLight={{tableRow[0].isHighLight}}>
+										<td ng-repeat="tableCell in tableRow" ng-click="click_show($event)">{{tableCell.showText}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="differ-line"></div>
+			<!--分割线-->
+			<div class="differ-show">
+				<p class="differ-show-info differ-show-top"></p>
+				<p class="differ-show-info differ-show-front">排程前</p>
+				<p class="differ-show-info differ-show-back">排程后</p>
+				<table id="show"></table>
 			</div>
 		</div>
-		<div class="move-to-cache">
-			<span ng-click="move_out_cache()">排入日程</span>
-			<span class="cance-move">取消</span>
+		<!--车间计划差异  开始-->
+		<div class="isPooltaskId">
+			<div class="table-window-left table-window-differ tablePool_left">
+				<p class="dialog-window-heads title-left">排程前</p>
+				<div class="differ-wrap-table differ-table-pool table-left" id="front-task" onscroll="document.getElementById('back-task').scrollLeft = this.scrollLeft;">
+					<div class="cover-heads cover-headsPool_left" >
+						<div ng-repeat="title in headDataView_leftPool track by $index" on-finish-render="testOnFinishEnd()">{{title}}</div>
+					</div>
+					<div class="show-table-differ">
+						<div class="table-space-differ">
+							<table ng-style="{width : (headDataView_leftPool.length * 100) + 'px'}">
+								<thead>
+									<tr>
+										<th ng-repeat="title in headDataView_leftPool track by $index">{{title}}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="tableRow in tableDataView_leftPool track by $index" rowNum={{tableRow[0].rowNum}} ng-class="tableRow[0].isHighLight ? '' : 'orange'" isHighLight={{tableRow[0].isHighLight}}>
+										<td ng-repeat="tableCell in tableRow track by $index" ng-click="click_show($event)">{{tableCell.showText}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="table-window-right table-window-differ tablePool_right">
+				<p class="dialog-window-heads title-right">排程后</p>
+				<div class="differ-wrap-table differ-table-pool table-right" id="back-task" onscroll="document.getElementById('front-task').scrollLeft = this.scrollLeft;">
+					<div class="cover-heads cover-headsPool_right">
+						<div ng-repeat="title in headDataView_rightPool track by $index">{{title}}</div>
+					</div>
+					<div class="show-table-differ">
+						<div class="table-space-differ">
+							<table ng-style="{width : (headDataView_rightPool.length * 100) + 'px'}">
+								<thead>
+									<tr>
+										<th ng-repeat="title in headDataView_rightPool track by $index">{{title}}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="tableRow in tableDataView_rightPool track by $index " rowNum={{tableRow[0].rowNum}} ng-class="tableRow[0].isHighLight ? '' : 'orange'" isHighLight={{tableRow[0].isHighLight}}>
+										<td ng-repeat="tableCell in tableRow track by $index" ng-click="click_show($event)">{{tableCell.showText}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="differ-line"></div>
+			<!--分割线-->
+		</div>
+		<!--车间计划差异 end-->
+		<div class="table-window-button table-window-hide" ng-click="differ_keep()" title="保留差异">差异</div>
+	</div>
+	<!--二级页面差异化结束-->
+
+	<!--暂存间-->
+	<div class="cache-window table-window jMovable" ng-mousedown="priorityDisplay($event)" ng-mouseup="stopWindowMove()">
+		<div class="dialog-window-head" ng-mousemove="isMove && windowMove($event)" ng-mouseleave="stopWindowMove()">暂存区
+			<i class="close-window"></i>
+		</div>
+		<div class="dialog-window-body">
+			<div class="info-show">
+				<span class="window-search-box jMaterialCode">
+					<span>物料编码：</span><input name="" type="text"/>
+				</span>
+				<span class="window-search-box jMaterialName">
+					<span>物料名称：</span><input name="" type="text"/>
+				</span>
+				<span class="window-search-box jProcessName">
+					<span>工序名称：</span><input name="" type="text"/>
+				</span>
+				<span class="window-search-box jProcessCode">
+					<span>工序编码：</span><input name="" type="text"/>
+				</span>
+				<span class="window-search-box jSaleOrder">
+					<span>&nbsp;&nbsp;&nbsp;订单号：</span><input name="" type="text"/>
+				</span>
+				<a href="javascript:;" class="ml-30 window-search-button" ng-click="change_cache_window()">查询</a>
+				<a href="javascript:;" class="ml-30 window-search-button" ng-click="cache_window_type()">{{cache_box_type}}</a>
+			</div>
+			<div class="show-table">
+				<div class="table-space">
+					<table ng-style="{width : (cacheHeadDataView.length * 100) + 'px'}">
+						<thead>
+							<tr>
+								<th ng-if="isByPk">选择</th>
+								<th ng-if="isByPk">操作</th>
+								<th ng-repeat="title in cacheHeadDataView track by $index">{{title}}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="tableRow in cacheTableDataView track by $index" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
+								<td class="check-box" ng-if="isByPk">
+									<input name="StorageSingle" type="checkbox" />
+									<label ng-click="cache_tip(tableRow,$event)"></label>
+								</td>
+								<td ng-if="isByPk">
+									<!--<span class="sale-order-look" ng-click="look_sale_order(tableRow)">查看</span>-->
+									<span class="sale-order-change" ng-click="part_move_out_cache(tableRow,$event)" title="微调"><!--ng-style="{display:tableRow[0].canChange}"--></span>
+								</td>
+								<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="cover-head">
+					<div class="fixed-column" ng-if="isByPk">
+						<input id="headtrChoose" name="StorageAll" type="checkbox" />
+						<label for="headtrChoose" ng-if="table_dialog_window_show"></label>
+					</div>
+					<div class="fixed-column" ng-if="isByPk">操作</div>
+					<div ng-repeat="title in cacheHeadDataView track by $index">{{title}}</div>
+				</div>
+				<div class="fix-table-column" ng-if="isByPk">
+					<table class="fix-table" style="width: 92px;">
+						<thead>
+							<tr>
+								<th>
+									<input  name="StorageAll" type="checkbox" />
+									<label for="" ng-if="table_dialog_window_show"></label>
+								</th>
+								<th>操 作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="tableRow in cacheTableDataView track by $index" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
+								<td class="check-box">
+									<input id="Storage{{$index}}" name="StorageSingle" type="checkbox" />
+									<label for="Storage{{$index}}" ng-click="cache_tip(tableRow,$event)"></label>
+								</td>
+								<td>
+									<!--<span class="sale-order-look" ng-click="look_sale_order(tableRow)">查看</span>-->
+									<span class="sale-order-change" ng-click="part_move_out_cache(tableRow,$event)" title="微调"><!--ng-style="{display:tableRow[0].canChange}"--></span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="move-to-cache">
+				<span ng-click="move_out_cache()" ng-if="table_dialog_window_show && isByPk">排入日程</span>
+				<span class="cance-move">取消</span>
+			</div>
 		</div>
 	</div>
-</div>
-<!--暂存间END-->
+	<!--暂存间END-->
 
-<!--拆分订单的数量弹窗-->
-<div class="num-window">
-	<div class="num-window-head">
-		<i class="close-num-window"></i>
-	</div>
-	<div class="num-window-body">
-		<input type="number" placeholder="请输入数量"/>
-	</div>
-	<div class="num-window-sure">
-		确定
-	</div>
-</div>
-
-<!--地点选择-->
-<div class="out-bg"><span class="point-click" ></span></div>
-<div class="location-choose">
-	<span class="point-click" ></span>
-	<div class="read-show">
-		<h1 class="location-title location-title-res">请选择需要显示的地点</h1>
-		<!--<p class="location-scheme-select"></p>-->
-		<p class="location-scheme-select">
-			<span class="scheme-header" style="display: inline-block;width: 48px;height: 30px;color: #fff;">方案：</span>
-			<span class="scheme-select" ></span>
-		</p>
-		<ul class="location-scheme-option">
-			<li ng-repeat="x in resData" data-schemeId={{x.schemeId}} ng-click="scheme_btn(x.schemeId)">{{x.schemeName}}</li>
-		</ul>
-		<div class="wrap-result">
-			<div class="location-list location-result">
-	        	<folder-tree current-folder="folder"></folder-tree>
-	        </div>
+	<!--拆分订单的数量弹窗-->
+	<div class="num-window">
+		<div class="num-window-head">
+			{{numWindowState}}
+			<i class="close-num-window"></i>
+		</div>
+		<div class="num-window-body">
+			{{numWindowState.substring(0,2)}} <input type="number" placeholder="请输入数量" />
+		</div>
+		<div class="num-window-sure">
+			确定
 		</div>
 	</div>
-	<div class="location-btn location-btn-res">
-		<span class="btn-save" ng-click="sure()">确定</span>
+
+	<!--左边栏地点选择-->
+	<div class="out-bg" ng-hide="full_screen"><span class="point-click"></span></div>
+	<div class="location-choose" ng-hide="full_screen">
+		<span class="point-click"></span>
+		<div class="read-show">
+			<h1 class="location-title location-title-res">请选择需要查看的车间</h1>
+			<!--<p class="location-scheme-select"></p>-->
+			<p class="location-scheme-select">
+				<span class="scheme-header" style="display: inline-block;width: 48px;height: 30px;color: #fff;">方案：</span>
+				<span class="scheme-select"></span>
+			</p>
+			<ul class="location-scheme-option">
+				<li ng-repeat="x in schemeList" data-schemeId={{x.schemeId}} ng-click="scheme_btn(x.schemeId)">{{x.schemeName}}</li>
+			</ul>
+			<div class="wrap-result">
+				<div class="location-list location-result jleftLocationTree">
+					<!--<folder-tree current-folder="folder"></folder-tree>-->
+					<folder-tree ng-repeat="folder in locationTreeList" current-folder="folder"></folder-tree>
+				</div>
+			</div>
+		</div>
+		<div class="location-btn location-btn-res">
+			<span class="btn-save" ng-click="sure()">确定</span>
+		</div>
 	</div>
 </div>

@@ -1,8 +1,9 @@
 <div class="config-main" ng-controller="displayDaysController">
     <div class="mt-20 ml-55 relative">
         <dl class="clearfix" ng-repeat="data in firstPage.showItemLists">
-            <dt class="fl">{{data.valueAlias}} ：</dt>
-            <dd class="fl ml-5">
+            <dt class="fl">{{data.valueAlias}}(当前地点：{{currentShowLocationName}})</dt>
+            <br/>
+            <dd class="fl mt-5">
                 <input class="input-text-box" maxlength="3" type="text" ng-value="data.valueContent" value={{data.valueContent}} ng-model="$parent.selectValue"
                 ng-keyup="validateNum(selectValue)" title="大于0小于31"/>
                 <span class="info">(请输入1-30范围内的整数)</span>

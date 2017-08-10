@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>物料信息</title>
+		<link rel="stylesheet" href="../styles/materialInfo.css" />
+	</head>
+	<body ng-app="myApp" ng-controller="mainCtrl">
+		<header>
+			<div></div>
+		</header>
+		<div class="main">
+			<!--模块-->
+			<div class="menu">
+				<span ui-sref="date" class={{isDate}} ng-click="goDate()">日期</span>
+				<span ui-sref="materialName" class={{isMaterialName}} ng-click="goMaterialName()">物料</span>
+				<!--<span class="count">汇总</span>-->
+				
+				<span class="material-name-box" ng-show="isMaterialName">
+					<span class="material-name-show" ng-click="showList()"></span>
+					<div>
+						<p>
+							<input type="text" class="material-name-search" ng-model="inputname"/>
+						</p>
+						<ul>
+							<li ng-repeat="material in materialNameList track by $index" ng-click="jump(material)">{{material}}</li>
+						</ul>
+					</div>
+				</span>
+			</div>
+			<div class="selectInfo">
+				<label for="startTime">开始时间</label>
+				<input type="text" id="startTime" class="Wdate" onClick="WdatePicker()" ng-model="start_time">
+				<label for="startTime">结束时间</label>
+				<input type="text" id="endTime" class="Wdate" onClick="WdatePicker()" ng-model="end_time">
+				<span class="search" ng-click="time_search()">查询</span>
+			</div>
+			<!--主页面-->
+			<div ui-view  ng-style="dataDown?{opacity:1}:{opacity:0}" class="pbody"></div>
+		</div>
+			
+	</body>
+	
+	<!--库文件-->
+	<script src="../scripts/lib/angular1.5.js" ></script>
+	<script src="../scripts/lib/jquery.js" ></script>
+	<script src="../scripts/lib/ui-router.js" ></script>
+	<script src="../scripts/lib/layer/layer.js" ></script>
+	<script src="../scripts/lib/angular-translate.js"></script>
+	<script src="../scripts/lib/angular-translate-loader-static-files.min.js"></script>
+	<script src="../scripts/lib/My97DatePicker/WdatePicker.js"></script>
+	
+	<!--app.js-->
+	<script src="../scripts/app.js"></script>
+	<script src="../scripts/config/app.js"></script>
+	<!--路由-->
+	<script src="../scripts/config/materialInfo.js"></script>
+	<!--服务-->
+	<script src="../scripts/services/tool.js" ></script>
+	<script src="../scripts/services/http.js" ></script>
+	<!--控制器-->
+	<script src="../scripts/controllers/materialInfo/dateCtrl.js" ></script>
+	<script src="../scripts/controllers/materialInfo/mainCtrl.js" ></script>
+	<script src="../scripts/controllers/materialInfo/materialNameCtrl.js" ></script>
+</html>

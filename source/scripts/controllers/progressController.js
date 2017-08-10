@@ -102,19 +102,14 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 					},0)
 	             }
 	            $scope.states=listState;
-//	            console.log(listState);
 		},$location.$$absUrl)
-    //提示信息操作
-	var ele = $(".wrap-content");
-	ele.on("click","b",function(){
-		$(this).next("p").toggle().next("i").toggle();
-		$(this).parent().siblings().find("p").hide().end().find("i").hide();
-	});
-		
-	$(".prompt_msg i").click(function(){
+
+	//弹窗关闭
+	$scope.close_megPromt = function() {
 		$(".prompt_msg").hide();
 		$(".pbody-wrap .wrap-info li b").removeClass("click-detail");
-	})
+	}
+
 	//按钮
 	$scope.wrap_back = function() {
 		$location.path("/preview");
@@ -136,14 +131,9 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 				"剩余任务：" + briefInfoMap.undoTaskNum + "个",
 				"总任务数：" + briefInfoMap.totalTaskNum + "个",
 				"排程所花时间：" + briefInfoMap.useTime + "秒"
-			)
-//			$scope.doTaskNum = "已排任务：" + briefInfoMap.doTaskNum + "个";
-//			$scope.undoTaskNum ="剩余任务：" + briefInfoMap.undoTaskNum + "个";
-//			$scope.totalTaskNum = "总任务数：" + briefInfoMap.totalTaskNum + "个";
-//			$scope.useTime = "排程所花时间：" + briefInfoMap.useTime + "秒";			
+			)			
 		}else if(state == "自动排程失败"){
 			var briefInfo = info.briefInfo;
-//			$scope.detail = briefInfo;
 			$scope.in_alert_data.push(briefInfo);
 		}
 
@@ -157,7 +147,7 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 			var body = $("body");
 			var scrollTop=$(".page-wrapper").scrollTop(),
         		scrollLeft=$(".page-wrapper").scrollLeft();
-			console.log($(".page-wrapper").scrollLeft());
+//			console.log($(".page-wrapper").scrollLeft());
 			var d_left = $($event.target).offset().left + 56 + scrollLeft + 5;
 			var d_top = $($event.target).offset().top - 71 + scrollTop;
 			var targetHeight = $($event.target).css("top").split("px");
@@ -167,23 +157,17 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
                       "top" :  d_top > (document.body.clientHeight - 100) ? document.body.clientHeight - 100 : d_top		
 			})
 		})
-//		var msgLayer = layer.open({
-//          type: 1,
-//          title: "提示信息",
-//          shadeClose: true,
-//          skin: 'yourclass',
-//          content : $("#prompt_msg"),
-//          success : function(){
-//              // 272是显示框正常宽度，450是高度
-//              $(".layui-layer").css({
-//                    "left" : $event.pageX - 152,
-//                    "top" : $event.pageY >(document.body.clientHeight - 450) ? document.body.clientHeight - 450 : $event.pageY
-//              })
-//              $("#prompt_msg").on("click",".sure",function(){
-//                    layer.close(msgLayer);
-//              })
-//            }
-//      })
-	}	
-
+	}
+	
+	//点击空白处隐藏 弹窗
+	document.onclick = function(){
+		$scope.close_megPromt();
+	};
+	$("body").on("click","#prompt_msg",function(){
+		if(document.all){
+			window.event.cancelBubble = true;
+	 	}else{
+			event.stopPropagation(); 
+		}
+	})
 });

@@ -2,6 +2,7 @@
 /*常用颜色*/
 /*主题色*/
 /*表格灰框颜色*/
+/*标题栏背景灰色*/
 .c-theme-color {
   color: #1E7CD9; }
 
@@ -11,6 +12,9 @@ body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, fo
 
 body, button, input, select, textarea, a {
   font: 14px/24px  "Microsoft YaHei",Tahoma,Helvetica,Arial,sans-serif; }
+
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, "PingFang SC", "Microsoft Yahei", "WenQuanYi Micro Hei", ui-icon, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
 
 h1, h2, h3, h4, h5, h6 {
   font-size: 100%;
@@ -246,5 +250,8 @@ input::-webkit-input-placeholder {
 
 .red {
   color: #f00; }
+
+.orange {
+  color: #ee8f00; }
 
 /*# sourceMappingURL=reset.css.map */

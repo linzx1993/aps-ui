@@ -31,8 +31,14 @@ app
             http.get({
                 url: $rootScope.restful_api.task_column_config + $scope.locationId,
                 successFn: (res) => {
-                    //获得get到的数据，渲染页面
-                    $scope.setDisplayGetData(res);
+                    //如果请求到的数据有列信息，没有则给出提醒信息
+                    if(res.data.optionList.length){
+                        //获得get到的数据，渲染页面
+                        $scope.setDisplayGetData(res);
+                        $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
+                    }else{
+                        $scope.info.fail("没有显示信息需要配置")
+                    }
                 },
                 errorFn: () => {
                     $scope.info.fail("获取数据失败，请检查是否连上服务器")
@@ -70,7 +76,6 @@ app
             http.delete({
                 url: $rootScope.restful_api.task_column_config + $scope.locationId,
                 successFn: function(res){
-
                     $(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
@@ -92,8 +97,14 @@ app
             http.get({
                 url: $rootScope.restful_api.cache_room_config + $scope.locationId,
                 successFn: (res) => {
-                    //获得get到的数据，渲染页面
-                    $scope.setDisplayGetData(res);
+                    //如果请求到的数据有列信息，没有则给出提醒信息
+                    if(res.data.optionList.length){
+                        //获得get到的数据，渲染页面
+                        $scope.setDisplayGetData(res);
+                        $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
+                    }else{
+                        $scope.info.fail("没有显示信息需要配置")
+                    }
                 },
                 errorFn: () => {
                     $scope.info.fail("获取数据失败，请检查是否连上服务器")
@@ -131,7 +142,6 @@ app
             http.delete({
                 url: $rootScope.restful_api.cache_room_config + $scope.locationId,
                 successFn: function(res){
-
                     $(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);

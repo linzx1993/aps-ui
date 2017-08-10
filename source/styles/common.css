@@ -1,4 +1,11 @@
 @charset "UTF-8";
+/*常用颜色*/
+/*主题色*/
+/*表格灰框颜色*/
+/*标题栏背景灰色*/
+.c-theme-color {
+  color: #1E7CD9; }
+
 /*
  * 页面头部的样式设置。
  */
@@ -6,8 +13,8 @@ html {
   height: 100%; }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px; }
+  width: 9px;
+  height: 9px; }
 
 ::-webkit-scrollbar-track {
   background-color: transparent;
@@ -20,7 +27,7 @@ html {
   /*滑道圆角宽度*/ }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #bfbfbf;
+  background-color: rgba(191, 191, 191, 0.6);
   /*滑动条表面*/
   border-radius: 10px;
   /*滑动条圆角宽度*/ }
@@ -42,9 +49,9 @@ body .page-wrapper {
 
 .header {
   flex: 0 0 68px;
-  min-width: 1650px;
+  min-width: 700px;
   /*text-align: center;*/
-  background: url(../images/new-logo.png) #FFFFFF left 30px center no-repeat; }
+  background: url(../images/wanfeng-logo.png) #FFFFFF left 30px center no-repeat; }
 
 .header .header-top {
   height: 60px;
@@ -335,7 +342,7 @@ body .page-wrapper {
   -ms-transform: rotate(180deg);
   transform: rotate(180deg); }
 
-.ConfigMain .itemOrder, .table-sort .itemOrder {
+.config-main .itemOrder, .table-sort .itemOrder {
   display: inline-block;
   position: absolute;
   right: 20px;
@@ -425,7 +432,7 @@ body .page-wrapper {
 .pbody .user-info-box li {
   height: 20px;
   line-height: 20px;
-  padding: 4px;
+  padding: 4px 0;
   color: #666;
   cursor: pointer; }
 
@@ -435,7 +442,8 @@ body .page-wrapper {
   background-color: #d9d9d9; }
 
 .pbody .user-info-box a {
-  display: inline; }
+  display: inline-block;
+  width: 100%; }
 
 .pbody .active .user-info-box {
   display: block; }
@@ -448,5 +456,164 @@ body .page-wrapper {
   -ms-user-select: none;
   /*IE10*/
   user-select: none; }
+
+.multiple-choice-box {
+  display: flex; }
+  .multiple-choice-box .multiple-select-choice {
+    position: relative;
+    padding: 0 10px;
+    width: 180px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #ccc;
+    box-sizing: border-box; }
+  .multiple-choice-box .multiple-choice-ul {
+    position: absolute;
+    top: 28px;
+    left: -1px;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #ccc; }
+  .multiple-choice-box .multiple-choice-li {
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer; }
+    .multiple-choice-box .multiple-choice-li span {
+      width: 16px;
+      height: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      vertical-align: -3px; }
+    .multiple-choice-box .multiple-choice-li:hover {
+      color: #1E7CD9; }
+      .multiple-choice-box .multiple-choice-li:hover span {
+        border: 1px solid #ccc; }
+    .multiple-choice-box .multiple-choice-li.active span {
+      border: none;
+      background: url("../images/selected.png") no-repeat; }
+
+.clear-value {
+  width: 14px;
+  height: 14px;
+  background: url(../images/cancel.png) no-repeat; }
+
+.search-item {
+  position: relative;
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+  color: #333; }
+  .search-item.drag-item:after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-bottom: 1px solid #999;
+    border-left: 1px solid #999;
+    -webkit-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s;
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
+  .search-item .drop-down-list {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 29px;
+    z-index: 11;
+    width: 100%;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: #fff; }
+    .search-item .drop-down-list input {
+      width: calc(100% - 32px);
+      border: 1px solid #ccc;
+      padding-left: 10px; }
+    .search-item .drop-down-list ul {
+      max-height: 120px;
+      overflow: auto; }
+    .search-item .drop-down-list li {
+      padding: 0 10px;
+      width: calc(100% - 20px);
+      min-width: 88px;
+      line-height: 30px;
+      cursor: pointer; }
+      .search-item .drop-down-list li:hover, .search-item .drop-down-list li.active {
+        color: #1E7CD9; }
+      .search-item .drop-down-list li:last-child {
+        border-bottom: 0; }
+    .search-item .drop-down-list .list-li-check {
+      color: #1E7CD9; }
+  .search-item.active .drop-down-list {
+    display: block; }
+  .search-item.active:after {
+    top: 13px;
+    -webkit-transform: rotate(135deg);
+    -ms-transform: rotate(135deg);
+    transform: rotate(135deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
+  .search-item.active > input {
+    border-color: #1E7CD9; }
+  .search-item.active .drop-down-list {
+    border-color: #1E7CD9; }
+  .search-item input:focus {
+    border-color: #1E7CD9; }
+  .search-item .search-item-name {
+    width: 70px;
+    text-align: right; }
+
+.search-item-name {
+  width: 70px;
+  text-align: right; }
+
+.start-search {
+  margin: 20px auto 0;
+  width: 60px;
+  height: 28px;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  line-height: 28px;
+  background-color: #1e7cd9;
+  cursor: pointer; }
+
+.search-input-item {
+  position: relative;
+  display: inline-block;
+  outline: none; }
+
+.search-input {
+  height: 28px;
+  width: 144px;
+  padding: 0 25px 0 9px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px; }
+
+.cancal-search-value {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  width: 14px;
+  height: 14px;
+  background: url(../images/cancel.png) no-repeat;
+  background-size: 80%;
+  cursor: pointer; }
 
 /*# sourceMappingURL=common.css.map */

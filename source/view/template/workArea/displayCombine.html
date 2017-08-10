@@ -1,6 +1,6 @@
 <div class="config-main" ng-controller="displayCombineController">
     <div class="mt-20 ml-55 relative display-combine">
-        <p>请选择翻转显示项</p>
+        <p>请选择显示合并项(当前地点：{{currentShowLocationName}})</p>
         <label class="ml-20 mt-10 display-combine-line" for={{data.valueContent}} ng-repeat="data in firstPage.combineItemList">
             <input id={{data.valueContent}} value={{data.valueContent}} name="combineItem" type="radio" ng-checked="selectValue === data.valueContent" ng-model="$parent.selectValue">
             <span class="mr-15 column-content-checkbox input-radio"></span>{{data.valueAlias}}</label>

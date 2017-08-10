@@ -26,6 +26,7 @@ app
 				successFn: (res) => {
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
+                    $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
                 },
 				errorFn: () => {
                     $scope.info.fail("获取数据失败，请检查是否连上服务器")
@@ -34,8 +35,8 @@ app
         };
         getColumnData();
 
-        //获取数据，创造车间树
-        $scope.createWorkshop(true,getColumnData);
+        // //获取数据，创造车间树
+        // $scope.createWorkshop(true,getColumnData);
 
         //初始化拖拽
         $scope.clickLiGetItem();
@@ -80,6 +81,7 @@ app
     .controller("sortController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService","http",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService,http) {
         //设置面包屑导航
         $scope.secondPage.showPageConfig = "多列排序项";
+        $scope.displayData = {leftDisplay : "可用配置项",rightDisplay : "已排序配置项"};
 
         function getSortConfig(){
 			http.get({
@@ -117,8 +119,8 @@ app
                 }
 			});	
         }
-        //创建车间树
-        $scope.createWorkshop(true,getSortConfig);
+        // //创建车间树
+        // $scope.createWorkshop(true,getSortConfig);
 
         //渲染数据
         getSortConfig();

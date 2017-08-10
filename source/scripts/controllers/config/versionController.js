@@ -17,4 +17,17 @@ app.controller("versionController",["$rootScope","$scope","$http","$state","tool
             layer.alert("获取系统版本失败，请检查服务器");
         }
 	});
+
+    //清楚后端缓存
+    $scope.clearCache = () =>{
+        http.post({
+            url: $rootScope.restful_api.clearCatch,
+            successFn: function(res){
+                layer.msg('已清除后端缓存');
+            },
+            errorFn: function(res){
+                layer.msg('清除后端缓存失败，请检查服务器');
+            },
+        });
+    };
 }]);

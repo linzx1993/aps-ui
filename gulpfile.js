@@ -53,6 +53,14 @@ const config = require("./gulp/config");
 //是否为发布环境
 const isProduct = false;
 
+//gulp监测到错误，打印出来但不退出进城
+function swallowError(error) {
+    // If you want details of the error in the console
+    console.error(error.toString())
+
+    this.emit('end')
+}
+
 //拷贝已经编译好的css,js,html,json
 gulp.task("copyHtml",function(){
     // if(isProduct){
@@ -109,6 +117,7 @@ gulp.task("concat",function(){
     gulp.src(config.combine.configController.src)
         .pipe(concat('configController.js'))
         .pipe(babel({presets: ['es2015']}))
+        .on('error', swallowError)
         .pipe(gulp.dest(config.combine.configController.dest));
 });
 
@@ -127,11 +136,12 @@ gulp.task("copyJs",function(){
     }else{
         gulp.src([config.scripts.src,"!source/scripts/lib/**/*.*"])
             .pipe(babel({presets: ['es2015']}))
+            .on('error', swallowError)
             .pipe(gulp.dest(config.scripts.dest));
     }
     // //将一些图片相关文件进行迁移
     gulp.src("source/scripts/lib/**/*.*")
-        .pipe(gulp.dest(config.scripts.dest));
+        .pipe(gulp.dest(config.scripts.dest + "/lib"));
 
 });
 

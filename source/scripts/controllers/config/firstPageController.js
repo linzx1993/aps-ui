@@ -5,7 +5,7 @@
 app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
         //默认显示第一个tab---start
-        $state.go('config.workArea.displayDays');
+        $state.go('config.workArea.displayCombine');
         //显示正确的目录class-active
         $scope.configNav.activeNav = ".workArea";
         //默认显示第一个tab---end
@@ -14,74 +14,6 @@ app
             showItemLists : [],//显示天数
             combineItemList : [],//显示合并项数组
         };
-    }])
-    .controller("displayDaysController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
-        //设置面包屑导航
-        $scope.firstPage.title = "显示天数";
-
-        /**
-         *根据点击的车间树获得相应的车间ID,显示对应显示天数的数据
-         */
-        let getDisplayDayData = () =>{
-			http.get({
-				url: $rootScope.restful_api.firstPage_display_days + $scope.locationId,
-				successFn: (res) => {
-                    //获得get到的数据，渲染页面
-                    $scope.firstPage.showItemLists = res.data.selectList;
-                    $scope.firstPage.showItemLists.map((item)=>{
-                        item.valueContent = Number(item.valueContent);
-                    });
-                    $scope.selectValue = $scope.firstPage.showItemLists[0].valueContent;
-                },
-				errorFn: () => {
-                    layer.alert("获取一级页面显示天数失败，请检查服务器");
-                }
-			})
-        };
-        getDisplayDayData();
-
-        //显示输入数字范围
-        $scope.validateNum = (val) =>{
-            if (val.length == 1) {
-                val = val.replace(/[^1-9]/g, '')
-            } else {
-                val = val.replace(/\D/g, '')
-            }
-            if (val > 90) {
-                val = 30;
-            }
-            $scope.selectValue = val;
-        };
-
-        //保存数据
-        $scope.saveDisplayDays = () => {
-            let postData = {
-                "selectList" : []
-            };
-            $scope.firstPage.showItemLists.forEach(function(item){
-                let obj = {};
-                obj.valueContent = $(".input-text-box").val();
-                obj.valueAlias = item.valueAlias;
-                postData.selectList.push(obj);
-            });
-			http.put({
-				url: $rootScope.restful_api.firstPage_display_days + $scope.locationId,
-				data: postData,
-				successFn: (res)=>{
-                    if(res.data){
-                        $scope.info.success("数据保存成功")
-                    }else{
-                        $scope.info.fail("数据保存失败")
-                    }
-                },
-				errorFn: ()=>{
-                    layer.alert("数据保存失败，请检查服务器");
-                }
-			})
-        };
-
-        //创建车间树
-        $scope.createWorkshop(true,getDisplayDayData);
     }])
     .controller("displayCombineController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
         //设置面包屑导航
@@ -105,8 +37,8 @@ app
         };
         getDisplayCombineData();
 
-        //创建车间树
-        $scope.createWorkshop(true,getDisplayCombineData);
+        // //创建车间树
+        // $scope.createWorkshop(true,getDisplayCombineData);
 
         //保存数据
         $scope.saveDisplayCombine = () =>{
@@ -188,6 +120,6 @@ app
 			})
         }
 
-        //创建车间树
-        $scope.createWorkshop(true,getDisplayFlipData);
-    }])
+        // //创建车间树
+        // $scope.createWorkshop(true,getDisplayFlipData);
+    }]);

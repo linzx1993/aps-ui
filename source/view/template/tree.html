@@ -1,8 +1,7 @@
 <ul class="location-tree-ul">
     <b class="column-border"></b>
-    <!--<li ng-repeat="subfolder in currentFolder.children" ng-include="'template/tree.html'" ng-init="currentFolder = subfolder">-->
-    <li ng-repeat="subfolder in currentFolder.children">
-        <i class="select-status unselect" data-location-id={{subfolder.locationId}} ng-click="addId(subfolder.locationId)"></i>
+    <li ng-repeat="subfolder in currentFolder.children" class="location-tree-li">
+        <i class="select-status" ng-class="{'disabled' : !subfolder.chooseAble}" data-location-id={{subfolder.locationId}} data-merge-location={{subfolder.chooseAble}}></i>
         <span ng-class="{'title-open' : subfolder.children}" class="ml-10"><s ng-show="subfolder.children" class="open-btn mr-10"></s>{{subfolder.name}}</span>
         <folder-tree current-folder="subfolder"></folder-tree>
     </li>

@@ -2,6 +2,7 @@
 /*常用颜色*/
 /*主题色*/
 /*表格灰框颜色*/
+/*标题栏背景灰色*/
 .c-theme-color {
   color: #1E7CD9; }
 
@@ -11,6 +12,9 @@ body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, fo
 
 body, button, input, select, textarea, a {
   font: 14px/24px  "Microsoft YaHei",Tahoma,Helvetica,Arial,sans-serif; }
+
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, "PingFang SC", "Microsoft Yahei", "WenQuanYi Micro Hei", ui-icon, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
 
 h1, h2, h3, h4, h5, h6 {
   font-size: 100%;
@@ -247,6 +251,9 @@ input::-webkit-input-placeholder {
 .red {
   color: #f00; }
 
+.orange {
+  color: #ee8f00; }
+
 /*========参数配置页面左边目录栏==========*/
 .config-box {
   width: 1366px;
@@ -276,10 +283,14 @@ input::-webkit-input-placeholder {
   border-left: 4px solid transparent;
   cursor: pointer; }
 
-.configLi a:hover, .configLi.active > a {
+.configLi a:hover {
   color: #fff;
-  border-left: 4px solid #1E7CD9;
   background-color: #375373; }
+
+.configLi.active > a {
+  color: #fff;
+  background-color: #375373;
+  border-left: 4px solid #1E7CD9; }
 
 .config-nav li li a {
   font-size: 14px; }
@@ -303,6 +314,9 @@ input::-webkit-input-placeholder {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+  -webkit-transition: transform 0.5s;
+  -ms-transition: transform 0.5s;
+  transition: transform 0.5s;
   -webkit-transition: all 0.5s;
   -ms-transition: all 0.5s;
   transition: all 0.5s; }
@@ -315,6 +329,9 @@ input::-webkit-input-placeholder {
   -webkit-transform: rotate(-135deg);
   -ms-transform: rotate(-135deg);
   transform: rotate(-135deg);
+  -webkit-transition: transform 0.5s;
+  -ms-transition: transform 0.5s;
+  transition: transform 0.5s;
   -webkit-transition: all 1s;
   -ms-transition: all 1s;
   transition: all 1s; }
@@ -357,7 +374,7 @@ input::-webkit-input-placeholder {
 .config-box .config-content {
   width: 1138px;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
   box-sizing: border-box;
   background-color: #f0f3fa; }
 
@@ -419,39 +436,30 @@ input:checked + .input-radio {
   display: flex;
   align-items: center; }
 
-/*/校验规则可配/*/
+/*/===========校验规则可配===============/*/
 .check-rule-nav {
   width: 200px;
-  height: 746px;
   background-color: #dde5f0; }
-  .check-rule-nav .schedulePlanLi.active, .check-rule-nav .schedulePlanLi:hover, .check-rule-nav .ruleLi.active, .check-rule-nav .ruleLi:hover {
+  .check-rule-nav ul {
+    height: 700px;
+    overflow: auto;
+    background-color: #dde5f0; }
+  .check-rule-nav li.active {
+    background-color: #f0f3fa; }
+  .check-rule-nav li:hover {
+    padding-right: 40px;
     background-color: #f0f3fa; }
   .check-rule-nav li b {
     display: none;
     position: absolute;
-    top: 14px;
-    right: 20px;
-    width: 14px;
-    height: 14px;
-    background: url("../images/garbage.png") no-repeat;
+    top: 0;
+    right: 0;
+    width: 38px;
+    height: 46px;
+    background: url("../images/garbage.png") no-repeat 8px 14px #f0f3fa;
     z-index: 10; }
-    .check-rule-nav li b.delete {
-      display: block; }
-  .check-rule-nav .addRule, .check-rule-nav .nav-manage {
-    position: absolute;
-    top: 14px;
-    left: 20px;
-    padding-left: 20px;
-    height: 16px;
-    line-height: 16px;
-    background: url("../images/add-rule-blue.png") no-repeat;
-    cursor: pointer; }
-    .check-rule-nav .addRule:hover, .check-rule-nav .nav-manage:hover {
-      color: #1E7CD9; }
-  .check-rule-nav .nav-manage {
-    left: auto;
-    right: 20px;
-    background-image: url("../images/set-blue.png"); }
+  .check-rule-nav li:hover b {
+    display: block; }
   .check-rule-nav input {
     width: 126px;
     height: 30px;
@@ -462,9 +470,38 @@ input:checked + .input-radio {
       border: 1px solid #1E7CD9;
       background-color: #fff; }
 
+.addRule {
+  padding-left: 20px;
+  height: 46px;
+  line-height: 46px;
+  background: url("../images/add-rule-blue.png") no-repeat 0 14px;
+  cursor: pointer; }
+  .addRule:hover {
+    color: #1E7CD9; }
+
 .config-form {
+  padding: 0 50px 60px 0;
   overflow: auto;
   box-sizing: border-box; }
+
+.display-content .check-rule-nav li:first-child:hover {
+  background-color: #f0f3fa; }
+
+.rule-content {
+  width: calc(100% - 200px); }
+
+.rule-name {
+  border-bottom: 1px solid #dedede; }
+  .rule-name input {
+    padding-left: 20px;
+    width: 100%;
+    line-height: 45px;
+    font-size: 20px;
+    border: none;
+    background-color: transparent;
+    box-sizing: border-box; }
+    .rule-name input:hover {
+      text-decoration: underline; }
 
 .check-rule-nav li, .check-scheme-nav li {
   position: relative;
@@ -494,18 +531,18 @@ input:checked + .input-radio {
   .config-box dd.relative:hover {
     border: 1px solid #1E7CD9; }
 
-.config-box .checkItem input[type=text] {
+.config-box .config-form input[type=text] {
   display: inline-block;
   padding-left: 5px;
   width: 133px;
   height: 28px;
   line-height: 24px;
   border: 1px solid #d9d9d9; }
-  .config-box .checkItem input[type=text].error {
+  .config-box .config-form input[type=text].error {
     border: 1px solid red; }
-  .config-box .checkItem input[type=text]:focus {
+  .config-box .config-form input[type=text]:focus {
     border: 1px solid #1E7CD9; }
-  .config-box .checkItem input[type=text] label {
+  .config-box .config-form input[type=text] label {
     display: inline-block;
     min-width: 100px; }
 
@@ -614,14 +651,20 @@ input.disabled {
     border-top: 1px solid #0490f1;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
-    transform: rotate(45deg); }
+    transform: rotate(45deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
   .show-advanced-configuration:after {
     top: 13px; }
   .show-advanced-configuration.reverse:after, .show-advanced-configuration.reverse:before {
     top: 10px;
     -webkit-transform: rotate(-135deg);
     -ms-transform: rotate(-135deg);
-    transform: rotate(-135deg); }
+    transform: rotate(-135deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
   .show-advanced-configuration.reverse:before {
     top: 5px; }
 
@@ -631,20 +674,27 @@ input.disabled {
 
 /*排程方案*/
 .planContent {
-  height: 700px;
-  overflow: auto; }
+  height: 650px;
+  border-bottom: 1px solid #dedede;
+  margin-bottom: 20px;
+  padding-bottom: 30px; }
 
-.config-box .leftPlan {
+.config-box .left-plan {
   width: 200px;
-  height: 700px; }
-
-.config-box .leftPlan .addPlan {
-  padding-left: 10px;
-  color: #1E7CD9;
-  cursor: pointer; }
+  background-color: #dde5f0; }
+  .config-box .left-plan .left-plan-title {
+    height: 46px;
+    border-bottom: 1px solid #dedede;
+    box-sizing: border-box; }
+  .config-box .left-plan .addPlan {
+    padding-left: 10px;
+    color: #1E7CD9;
+    cursor: pointer; }
 
 .config-box .middle-workshop {
-  width: 340px; }
+  width: 340px;
+  height: 680px;
+  border-right: 1px solid #dedede; }
   .config-box .middle-workshop h6 span {
     color: #808080;
     font-size: 12px; }
@@ -662,21 +712,27 @@ input.disabled {
     background-color: #d9d9d9;
     vertical-align: middle;
     box-sizing: border-box; }
-  .config-box .middle-workshop nav .select-rule {
-    width: 140px;
-    padding-right: 10px; }
-  .config-box .middle-workshop nav .select-rule:after {
-    content: "";
-    position: absolute;
-    right: 5px;
-    top: 6px;
-    width: 7px;
-    height: 7px;
-    border-right: 1px solid #999;
-    border-bottom: 1px solid #999;
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    transform: rotate(45deg); }
+  .config-box .middle-workshop nav {
+    height: 580px;
+    overflow: auto; }
+    .config-box .middle-workshop nav .select-rule {
+      width: 140px;
+      padding-right: 10px; }
+    .config-box .middle-workshop nav .select-rule:after {
+      content: "";
+      position: absolute;
+      right: 5px;
+      top: 6px;
+      width: 7px;
+      height: 7px;
+      border-right: 1px solid #999;
+      border-bottom: 1px solid #999;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+      -webkit-transition: transform 0.5s;
+      -ms-transition: transform 0.5s;
+      transition: transform 0.5s; }
   .config-box .middle-workshop li > a .delete {
     position: absolute;
     top: -10px;
@@ -690,14 +746,6 @@ input.disabled {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis; }
-
-.workshop-manage {
-  width: 16px;
-  height: 16px;
-  background: url("../images/set-gray.png") no-repeat;
-  cursor: pointer; }
-  .workshop-manage:hover {
-    background-image: url("../images/set-blue.png"); }
 
 .workshop-ruleNav {
   position: relative;
@@ -764,9 +812,10 @@ input.disabled {
 .config-box .location-show {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -52px;
   padding-top: 0;
-  width: 400px;
+  width: 596px;
+  height: 650px;
   background-color: transparent; }
 
 .planContent .rightLocation {
@@ -774,45 +823,38 @@ input.disabled {
   .planContent .rightLocation h6 {
     height: 54px;
     line-height: 54px; }
+  .planContent .rightLocation .location-list {
+    height: 580px;
+    overflow: auto; }
   .planContent .rightLocation i.disabled {
-    background-color: #fff;
+    background: #eee;
+    border: 1px solid #ccc;
     pointer-events: none; }
 
-/*pap*/
-.papRuleContent label {
-  display: block; }
-
-/*/保存提示框/*/
-.config-box .info-mask {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 120; }
-
-.config-box .info-mask.active {
-  display: block; }
-
 .config-box .info-box {
-  position: absolute;
+  position: fixed;
   top: calc(50% - 130px);
   left: 50%;
-  min-width: 178px;
+  z-index: 120;
   padding: 0 10px;
+  min-width: 178px;
   height: 58px;
   line-height: 58px;
-  border: 1px solid #dedede;
-  overflow: hidden;
   box-shadow: 1px 1px 30px rgba(0, 0, 0, 0.3);
   background-color: #fff;
+  -webkit-transition: transform 0.3s;
+  -ms-transition: transform 0.3s;
+  transition: transform 0.3s;
   -webkit-transform: scale(0);
   -ms-transform: scale(0);
   transform: scale(0);
   -webkit-transform-origin: 50% 50%;
   -ms-transform-origin: 50% 50%;
   transform-origin: 50% 50%; }
+  .config-box .info-box.active {
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1); }
 
 @-webkit-keyframes show {
   from {

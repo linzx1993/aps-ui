@@ -24,7 +24,10 @@
                 </nav>
             </div>
         </div>
-        <config-folder-tree></config-folder-tree>
+        <div id="columnWorkshop" class="location-list fl location-show">
+            <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+            <folder-tree current-folder="folder"></folder-tree>
+        </div>
     </div>
     <div style="margin-top: 150px;" class="m-0-auto mt-30 mb-20 tc clearfix">
         <a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveAdminDefaultDisplay()">应用</a>

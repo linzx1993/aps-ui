@@ -1,0 +1,33 @@
+<div class="table-space show-table" ng-click="test()">
+	<table>
+		<thead>
+			<tr>
+				<th>日期</th>
+				<th>物料名称</th>
+				<th>物料编码</th>
+				<th>需求数量</th>
+				<th>库存数量</th>
+				<th>需采购数量</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="tr in tableBody"  on-finish-render-filters>
+				<!--<td ng-repeat="td in tr track by $index">{{td}}</td>-->
+				<td class="tr-date">{{tr.datetime}}</td>
+				<td>{{tr.materialName}}</td>
+				<td>{{tr.materialCode}}</td>
+				<td>{{tr.quantity}}</td>
+				<td>{{tr.has}}</td>
+				<td>{{tr.buy}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div class="cover-head">
+	<div>日期</div>
+	<div>物料名称</div>
+	<div>物料编码</div>
+	<div>需求数量</div>
+	<div>库存数量</div>
+	<div>需采购数量</div>
+</div>

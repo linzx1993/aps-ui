@@ -3,16 +3,17 @@
 
 .table-dialog-differ {
     display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: -355px;
-    margin-left: -635px;
-    width: 1270px;
+    //position: absolute;
+    //top: 50%;
+    //left: 50%;
+    //margin-top: -355px;
+    //margin-left: -635px;
+    position: relative;
+    //width: 1270px;
     height: 710px;
     background-color: #fff;
-    border: 1px solid #ddd;
-    z-index: 5;
+    //border: 1px solid #ddd;
+    z-index: 20;
     
     .differ-line {
         position: absolute;
@@ -71,7 +72,7 @@
 }
 
 .table-window-alert {
-    width: 1270px;
+    //width: 1270px;
     height: 40px;
     line-height: 40px;
     border-bottom: 1px solid #ccc;
@@ -117,10 +118,10 @@
     bottom: 70px;
     left: 40px;
     width: 1190px;
-    height: 80px;
+    height: 81px;
     border: 1px #ccc solid;
     background-color: #fefefe;
-    
+    overflow: auto;
     .differ-show-info {
         display: none;
         position: absolute;
@@ -150,9 +151,8 @@
 #show {
     position:absolute;
     left:50px;
-    width: 1140px;
+    min-width: calc(100% - 50px);
     text-align: center;
-    
     td {
         border: 1px #ccc solid;
     }
@@ -163,7 +163,6 @@
         tr {
             background-color: #ededed;
             height: 30px;
-            font-family: "宋体";
         }
     }
 }
@@ -186,17 +185,18 @@
     .show-table-differ {
         position: absolute;
         top: 0;
-        width: 874px;
+        width: 100%;
         font-size: 14px;
         
         .table-space-differ {
             height: auto;
-            width: 874px;
+            width: 100%;
         }
         
         table {
             border-collapse:collapse;
             width: 100%;
+            min-width: 100%;
             text-align: center;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -212,6 +212,7 @@
             th {
                 height: 30px;
                 line-height: 30px;
+                min-width: 88px;
                 table-layout: fixed;
                 margin: 0 5px;
                 color: #fff;

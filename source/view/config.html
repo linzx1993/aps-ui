@@ -4,7 +4,7 @@
     <span class="user-info">
 		<ul class="user-info-box">
 			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
-			<li class="out-login">退出</li>
+			<li class="out-login" ng-click="loginOut()">退出</li>
 		</ul>
 		{{userName||"用户"}}</span>
 </div>
@@ -22,21 +22,9 @@
                     </ul>
                 </li>
             </ul>
-        <!--<accordion>-->
-            <!--<exli ng-class='showMe ? active : ""' ng-repeat='li in configLis'>-->
-                <!--{{expander.text}}-->
-            <!--</exli>-->
-        <!--</accordion>-->
     </nav>
-    <!--<div class="config-content" ui-view=""/>-->
     <div class="config-content" ui-view></div>
-    <!--<div class="config-content fl" ui-view></div>-->
-    <!--<div class="config-content fl" ng-include="dataUrl"></div>-->
-    <div class="info-mask" ng-class="infoObj.mask ? 'active' : ''">
-        <div class="info-box" ng-class="infoObj.errorInfo ? 'error' : ''">
-            <!--<h6 class="info-title"><i>提示</i><b class="fr mt-15 mr-20 delete-mask" ng-click="hideInfo()"></b></h6>-->
-            <!--<div class="info-content tc">-->
+        <div class="info-box" ng-class="{'active':infoObj.mask,'error':infoObj.errorInfo}">
             <p class="tc"><span class="mr-15"></span>{{infoObj.text}}</p>
         </div>
-    </div>
 </div>

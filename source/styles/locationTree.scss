@@ -130,7 +130,7 @@ $whiteColor : #fff;
 .location-preview { margin: 0 50px 0 20px; }
 .location-result { margin: 0 55px 0 20px; }
 .wrap-preview {
-  height: 630px;
+  height: 100%;
   overflow: auto;
 }
 .wrap-result {
@@ -140,18 +140,21 @@ $whiteColor : #fff;
 .location-choose {
   position: absolute;
   top: 0;
-  left: -100%;
+  left: -50%;
   padding-top: 110px;
   width: auto;
   height: calc(100% - 120px);
   text-align: center;
   background: rgba(0,0,0,0.3);
-  transition: left 0.5s;
-  @include transition(left ,0.5s);
+  //transition: left 0.5s;
+  //@include transition(left ,0.5s);
   z-index:20;
+  //&.active{
+  //  left: 0;
+  //  @include transition(left ,0.5s);
+  //}
   &.active{
     left: 0;
-    @include transition(left ,0.5s);
   }
   .read-show {
     width: calc(100%);

@@ -73,7 +73,7 @@ app.service('http', function($rootScope,$http) {
 		
 		//调用公用方法
 		return ajaxService(obj)
-	}
+	};
 	
 	function ajaxService(httpObj){
 		let type = httpObj.type,

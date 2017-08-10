@@ -2,33 +2,78 @@
  * Created by lzx on 2016/8/30.
  */
 'use strict';
-$("body").on("click",".check-rule-nav .ruleLi,.check-rule-nav .schedulePlanLi",function(){
+$("body").on("click",".check-rule-nav .rule-li,.check-rule-nav .schedulePlanLi",function(){
     $(this).addClass("active").siblings().removeClass("active");
 });
-app.controller("configController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","$state","scheduleTableViewModelService","tool","http", function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,$state,scheduleTableViewModelService,tool,http){
-    //默认跳转初始版本页面
-    $state.go('config.version');
+app.controller("configController",["$rootScope","$scope","$http","$location","$timeout","$state","scheduleTableViewModelService","tool","http", function($rootScope,$scope,$http,$location,$timeout,$state,scheduleTableViewModelService,tool,http){
+    //如果某些树没有权限则隐藏需要可写树的目录
+    http.get({
+        url: $rootScope.restful_api.get_new_location,
+        successFn: (res) => {
+            //没有可写树权限，删除管理员目录目录
+            if(tool.isEmptyObject(res.data)){
+                // $scope.adminController.adminNav = false;
+                $("a[ui-sref='.admin'],a[ui-sref='.scheme']").parent().hide();
+            }
+        },
+        errorFn : () =>{
+            $("a[ui-sref='.admin'],a[ui-sref='.scheme']").parent().hide();
+        }
+    });
+
+
+    let historyUrl = sessionStorage.getItem("historyUrl") ? sessionStorage.getItem("historyUrl").split(",") : [];
+    //如果由设备详情页，手动微调页，帮助页跳过来，默认到版本页，否则刷新仍然停留在原页面
+    if($scope.historyUrl){
+        $state.go('config.version');
+    }
+
+    //获得来源页面(手动微调页面需要)
+    $rootScope.lastSourcePage = $location.$$url;
+
+    //配置页面一级对象
     $scope.configNav = {};
+
     //获取跳转过来的地点ID,去除最后的生产线
-    $scope.historyUrl.reverse().every((item)=>{
+    historyUrl.reverse().every((item)=>{
         if(item === "/result"){
-            $scope.locationId = sessionStorage.getItem("locationId_res");
+            $scope.locationId = sessionStorage.getItem("locationId_res") || "01";
             return true
         }else if(item === "/preview"){
-            $scope.locationId = (sessionStorage.getItem("locationId_pre"));
+            $scope.locationId = sessionStorage.getItem("locationId_pre") || "01";
             return true
         }else{
             return false;
         }
     });
+
+    //获得来源页面(手动微调页面需要)
+    $rootScope.lastSourcePage = $location.$$url;
+
+    //如果由设备详情页，手动微调页，帮助页跳过来，默认到版本页，否则刷新仍然停留在原页面
+    //根据来源页面获得车间ID和车间名字进行显示
+    if($scope.historyUrl){
+        $state.go('config.version');
+    }
+
+    $scope.currentShowLocationName = sessionStorage.currentShowLocationName;//刷新直接使用缓存的车间名字
+    //***********************//
+    //获取显示地点ID，以及地点名字
+    // if(sessionStorage.currentShowLocationName){
+    //     $scope.currentShowLocationName = sessionStorage.currentShowLocationName;
+    // }else{
+    // sessionStorage.currentShowLocationName = $scope.currentShowLocationName = tool.getLocationName($scope.locationId,$rootScope.locationTreeData);
+
+    // }
+
+    //配置页面一级对象
+    $scope.configNav = {};
+
     //添加目录class-active
     $scope.isActiveNav = function(val){
         return $scope.configNav.activeNav ===  val;
     };
-    //***********************//
-    //生成车间树,设置车间选中
-    $scope.columnWorkshop = true;
-    $scope.locationId = $scope.locationId || "01";
+
     //自定义目录栏数据
     $scope.configLis = [
         {text : "VersionNav", url : "view/version.html","sref":".version"},
@@ -43,7 +88,7 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         {text : "SchedulingSchemeSettings", url : "view/schedulePlan.html","sref":".scheme"},
         {text : "AdministratorConfigurationItem",url : "view/adminProperty.html","sref":".admin",
             children : [
-                {text : "默认显示项",url : "view/adminDisplay.html","sref":".defaultDisplay"}
+                {text : "默认显示项",url : "view/adminDisplay.html","sref":".defaultDisplay",class : "adminNav"}
             ]
         }
     ];
@@ -72,14 +117,6 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     };
 
     /**************=======================相关零散代码========================************/
-    //清楚后端缓存
-    $scope.clearCache = () =>{
-		http.post({
-			url: $rootScope.restful_api.clearCatch,
-			successFn: function(res){},
-			errorFn: function(res){},
-		});
-    };
     //保存和还原弹出提示框
     $scope.infoObj = {
         mask : false,
@@ -89,14 +126,13 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     class Info{
         common(str){
             $scope.infoObj.mask = true;
-            $scope.infoObj.text = str
+            $scope.infoObj.text = str;
             $timeout(function(){
                 $scope.infoObj.mask = false;
             },2500)
         }
         msg(str){
             this.common(str);
-            //
         }
         success(str){
             this.common(str);
@@ -105,9 +141,6 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         fail(str){
             this.common(str);
             $scope.infoObj.errorInfo = true;
-        }
-        hide(){
-            $scope.infoObj.mask = false;
         }
     }
     $scope.info = new Info();
@@ -144,8 +177,6 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
             $scope.info.fail(str);
             return false;
         }
-        console.log(resData);
-        console.log(selectValue);
         //新建一个需要发送的数据
         let postData = {};
         postData.optionList = resData.optionList;
@@ -181,74 +212,7 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
     };
 
     $("body")
-    //选择添加/删除车间
-        .on("click", "#workshop .select-status", function(event) {
-            let e = event || window.event;
-            let target = e.target || e.srcElement;
-            let id = target.getAttribute("location-id");
-            let firstRule = $scope.ruleList[0];
-            let containMenu = false; //点击车间是否由子车间已经被选择了
-            //判断有没有排程规则
-            if(!firstRule) {
-                layer.alert("请先添加排程规则");
-            }
-            //子列表变为不可编辑状态
-            //临时代码===判断是否为二级树===原因：树的结构一开始设计的不对
-            if(id.length <= 4) {
-                $(target).parent().next().find("i").addClass("disabled");
-            }
-            //开始添加,先判断是否有车间,没有车间直接添加
-            if(!$scope.locationRuleList.length) {
-                $scope.locationRuleList.push({
-                    locationId: id,
-                    locationName: target.nextElementSibling.innerHTML,
-                    ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
-                    ruleId: firstRule ? firstRule.ruleId : ""
-                });
-            } else {
-                //=====判断点击车间是够已经被选择
-                var repeatLocationId = $scope.locationRuleList.every(function(item, index, arr) {
-                    if(item.locationId == id) {
-                        arr.splice(index, 1);
-                    }
-                    return item.locationId != id;
-                });
-                //======
-                //车间没被选中
-                if(repeatLocationId) {
-                    //点击一级之后取消所有二级(有选中的二级情况下)
-                    for(var i = $scope.locationRuleList.length - 1; i >= 0; i--) {
-                        if($scope.locationRuleList[i].locationId.slice(0, id.length) == id) {
-                            containMenu = true;
-                            $scope.locationRuleList.splice(i, 1);
-                        }
-                    }
-                    //====================（没有选中的二级情况下）
-                    $scope.locationRuleList.push({
-                        locationId: id,
-                        locationName: target.nextElementSibling.innerHTML,
-                        ruleName: firstRule ? firstRule.ruleName : "请选择排程规则",
-                        ruleId: firstRule ? firstRule.ruleId : ""
-                    });
-                    // secondToFirst(target);
-                    //如果该元素有子集列表,该元素的子列表变为不可点击
-                    console.log(target.parentNode.nextElementSibling);
-                    if(target.parentNode.nextElementSibling && target.parentNode.nextElementSibling.nodeName === "UL") {
-                        Array.prototype.forEach.call(target.parentNode.nextElementSibling.getElementsByClassName("select-status"), function(item, index) {
-                            item.className += " disabled";
-                        });
-                    }
-                }
-                //车间已被选中
-                else {
-                    //子列表变为可点击
-                    $(target).parent().next().find("i").removeClass("disabled");
-                }
-            }
-            //强制刷新dom
-            $scope.$apply();
-        })
-        //合并项下拉代码
+        //配置页所有下拉列表代码
         .on("click","dd.relative",function(){
             //判断是否可编辑，是否生效
             if($(this).hasClass("not-edit")){
@@ -270,27 +234,33 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         });
 
     /**
-     * 根据排程数据渲染页面
+     * 根据获得的排程规则数据渲染页面
+     * 放在configController而不是ruleController是因为排程方案页面也需要展示排程规则
      * @param res: 获得到的排程规则数据
      * @return 页面渲染所需数据
      */
-    $scope.setCheckData = (res) => {
+    $scope.renderRulePage = (res) => {
         $scope.scheduleCheckData = $.extend({}, res);
+        // $scope.ruleName = $scope.scheduleCheckData.ruleName;
         //设定排程前的顺序 === [颜色信息校验,刀具信息校验,夹具信息校验,产能校验,物料信息校验,PAP信息校验,工艺路线信息校验,排程步骤校验,适宜设备校验,系统配置校验]
         $scope.scheduleFrontData = [];
         let frontData = scheduleTableViewModelService.validation_rules_from(res);//获得排程前需要的数据
-        let scheduleFrontData = ["COLOR_INFO_CHECKING","CT_INFO_CHECKING","FIXTURE_INFO_CHECKING","CAPABILITY_INFO_CHECKING","MATERIAL_INFO_CHECKING",
-        "PAP_INFO_CHECKING","ROUTING_INFO_CHECKING","SCHEDULE_STEP_CHECKING","SUITABLE_PRODUCT_INFO_CHECKING","SYSTEM_CONFIG_CHECKING"];
-        scheduleFrontData.forEach((item)=>{
+        //"CT_INFO_CHECKING","FIXTURE_INFO_CHECKING","PAP_INFO_CHECKING",
+        let scheduleFrontData = ["COLOR_INFO_CHECKING","CAPABILITY_INFO_CHECKING","MATERIAL_INFO_CHECKING",
+            "ROUTING_INFO_CHECKING","SUITABLE_PRODUCT_INFO_CHECKING","SYSTEM_CONFIG_CHECKING"];
+        scheduleFrontData.forEach((item,index)=>{
             $scope.scheduleFrontData.push(frontData[item]);
         });
-        //设定排程后的顺序 === [物流疏通校验,齐套性校验,组合件校验,超产能校验]
+
+        //设定排程后的顺序 === [物流疏通校验,齐套性校验,组合件校验,超产能校验,生产时间校验]
         $scope.scheduleLaterData = [];
         let laterData = scheduleTableViewModelService.validation_rules_later(res);//获得排程后需要的数据
-        let scheduleLaterData = ["PROCESS_SEQ_CHECKING","POMO_SUIT_CHECKING","ASSEMBLING_UNIT","CAPABILITY_OVER_CHECKING"];
+        //"PROCESS_SEQ_CHECKING","POMO_SUIT_CHECKING","ASSEMBLING_UNIT",
+        let scheduleLaterData = ["CAPABILITY_OVER_CHECKING","PRODUCTION_TIME_CHECKING"];
         scheduleLaterData.forEach((item)=>{
             $scope.scheduleLaterData.push(laterData[item]);
         });
+
         //设置选中的option
         $scope.schedulePointSelected = $scope.scheduleCheckData.schedulePoint;
         $scope.papTypeSelected = $scope.scheduleCheckData.papType;
@@ -307,6 +277,54 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
             //控制选中状态
         }, 0);
     };
+    //根据此模块设置各个排程规则项的是否要展示
+    $scope.scheduleRuleItemShow = {
+        isLoadOverduePoolTask : true,   //当前日期前的车间计划 ：
+        overduePeriod : true,   //拉取当前车间计划天数
+        schedulePeriodSelected : true,  //排程周期
+        scheduleInterval : true,    //排程间隔
+        minScheduleDay : true,  //最早起排日期
+        freezePeriod : true,    //冻结期
+        //排程前校验
+        preScheduleCheckMap : {
+            CAPABILITY_INFO_CHECKING : false,    //产能校验
+            COLOR_INFO_CHECKING : false,         //颜色信息校验
+            CT_INFO_CHECKING : true,            //刀具信息校验
+            FIXTURE_INFO_CHECKING : true,       //夹具信息校验
+            MATERIAL_INFO_CHECKING : false,      //物料信息校验
+            PAP_INFO_CHECKING : true,           //PAP信息校验
+            ROUTING_INFO_CHECKING : false,       //排程步骤校验
+            SUITABLE_PRODUCT_INFO_CHECKING : false,  //适宜设备校验
+            SYSTEM_CONFIG_CHECKING : false,      //系统配置校验
+        },
+        //排程后校验
+        postScheduleCheckMap : {
+            ASSEMBLING_UNIT : true,             //组合件校验
+            CAPABILITY_OVER_CHECKING : false,    //超产能校验
+            POMO_SUIT_CHECKING : true,          //齐套性校验
+            PROCESS_SEQ_CHECKING : true,        //物流疏通校验
+            PRODUCTION_TIME_CHECKING : false,    //生产时间校验
+
+        },
+        papTypeSelected : true,
+        schedulePointSelected : true,   //起排工序
+        isAheadOn: true,   //启用延迟生产
+        isCombinationOn: true, //启用组合件
+        isEconomicOn: true,    //启用经济批量
+        isFrequencyOn: true,   //启用生产频度
+        isUseNotMassEqu: true, //使用非批量设备
+        //排程因子权重
+        scheduleWeightMap : {
+            KEY_EQUIPMENT : true,       //关键设备
+            MOST_USED_EQUIPMENT : true, //高负荷设备
+            SAME_COLOR : true,          //相同颜色
+            SAME_CT : true,             //相同刀具
+            SAME_FIXTURE : true,        //相同物料
+            SAME_MATERIAL : true,       //相似物料
+            SIMILAR_MATERIAL : true,    //相似物料
+        }
+    };
+
 
     /**
      * 创造车间树
@@ -322,11 +340,13 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
 			http.get({
 				url: $rootScope.restful_api.get_new_location,
 				successFn: (res) => {
-                    $scope.resWorkshop = res.data;
-                    $scope.folder = tool.getLocationTreeData($.extend({},$scope.resWorkshop))[0];//处理数据,并绑定到页面
-                    // $scope.folder = {
-                    //     children : tool.getLocationTreeData($.extend({},$scope.resWorkshop))
-                    // }
+                    $scope.folder = {"children": [scheduleTableViewModelService.getData($scope.resWorkshop)[0]]};//处理数据,并绑定到页面
+                    $timeout(function () {
+                        $("[data-location-id=" + $scope.locationId + "]").addClass("active");
+                        let li = $("#columnWorkshop").find("li");//获得最上级一级车间的li
+                        li.eq(0).children("ul").show();
+                        li.eq(0).children("span").addClass("active");
+                    })
                 },
 				errorFn: function(res){
                     layer.alert("读取车间失败，请检查服务器");
@@ -336,29 +356,24 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
         //先点击默认地点
         $timeout(function(){
             $("[data-location-id=" + $scope.locationId + "]").addClass("active");
-            $(".all-location span").eq(0).trigger("click");
+            let li = $("#columnWorkshop").find("li");//获得最上级一级车间的li
+            li.eq(0).children("ul").show();
+            li.eq(0).children("span").addClass("active");
         });
         var outerEle=$(".location-list");
-        let mainTreeHeight = $(".location-tree-ul").eq(0).height();
         outerEle  //改变状态
             .on("click","ul .title-open",function(){
                 $(this).toggleClass("active").next().toggle();
                 //设置前面线的高度
-                // let thisUL = $(this).parents("ul");
-                // let thisB = thisUL.children("b");
-                // let thisLI = thisUL.children("li");
-                // let thisHeight = 0;
-                // for(var i = 0;i < thisLI.length-1;i++){
-                //     thisHeight += $(thisLI[i]).height();
-                // }
-                // thisB.height(thisHeight + 120);
-                // if(!$(this).parents("li").eq(0).next().length){
-                //     let ul= $(".location-tree-ul");
-                //     let mainTreeHeight = ul.eq(0).height();
-                //     console.log(mainTreeHeight);
-                //     console.log(ul.last().height());
-                //     ul.eq(0).height(mainTreeHeight - ul.last().height());
-                // }
+                let li = $(this).parent(),
+                    index = li.index() + 1,
+                    ul = li.parent(),
+                    height = ul.height() - li.height(); //设置线的高度为ul的高度减去li的高度
+                if (index === ul.children().length) {
+                    ul.children("b").height(height + 50);
+                } else {
+                    ul.children("b").height("auto");
+                }
             });
 
         //根据点击不同的车间选择不同的显示项
@@ -386,18 +401,6 @@ app.controller("configController",["$rootScope","$scope","$http", "$window", "$l
             thisSelect.attr("class","select-status");
             thisSelect.parent("li").find("ul i").attr("class","select-status");
         }
-        // //处于其影响范围内的祖先的改变
-        // thisSelect.parents("ul").each(function(){
-        //     var thisTree = $(this);
-        //     var thisStatus = thisTree.siblings(".select-status");
-        //     if(thisTree.find(".selected").length < 1){
-        //         thisStatus.attr("class","select-status")
-        //     }else if(thisTree.find(".unselect").length < 1){
-        //         thisStatus.attr("class","select-status active")
-        //     }else{
-        //         thisStatus.attr("class","select-status select-some")
-        //     }
-        // })
     }
 
     //拖拽区域进行初始化

@@ -1,28 +1,29 @@
 <div class="config-main sortContent">
     <div class="fl ml-45">
-        <h3 class="mt-15 ml-20 fs-16">排序配置</h3>
-        <div id="all-item" class="table-sort-itemList" onselectstart="return false">
-            <div class="provide-item">
-                <h6 class="sort-title">可用配置项</h6>
-                <nav>
-                    <ul id="provide-item">
-                        <li ng-repeat="data in userConfigData" class="normal mt-5" data-select="option" data-keyname={{data.valueContent.replace(":desc","")}} data-order="up"><div>{{ data.valueAlias }}</div><span ng-class={{data.valueContent.slice(-4)}} class="itemOrder"></span></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="middleBtn">
-                <span class="toggleBtn addAllItem"></span>
-                <span class="toggleBtn removeAllItem"></span>
-            </div>
-            <div class="sort-item">
-                <h6 class="sort-title">已排序配置项 <span class="order up-order"></span><span class="order down-order"></span></h6>
-                <nav>
-                    <ul id="sort-item">
-                        <li ng-repeat="data in userSelectConfigData" data-select="select" class="normal mt-5" data-keyname={{data.valueContent.replace(":desc","")}} data-order={{data.order}}><div>{{ data.valueAlias }}</div><span ng-class="data.valueContent.slice(-4)" class="itemOrder"></span></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
+        <h3 class="mt-15 ml-20 fs-16">排序配置(当前地点：{{currentShowLocationName}}) </h3>
+        <!--<div id="all-item" class="table-sort-itemList" onselectstart="return false">-->
+            <!--<div class="provide-item">-->
+                <!--<h6 class="sort-title">可用配置项</h6>-->
+                <!--<nav>-->
+                    <!--<ul id="provide-item">-->
+                        <!--<li ng-repeat="data in userConfigData" class="normal mt-5" data-select="option" data-keyname={{data.valueContent.replace(":desc","")}} data-order="up"><div>{{ data.valueAlias }}</div><span ng-class={{data.valueContent.slice(-4)}} class="itemOrder"></span></li>-->
+                    <!--</ul>-->
+                <!--</nav>-->
+            <!--</div>-->
+            <!--<div class="middleBtn">-->
+                <!--<span class="toggleBtn addAllItem"></span>-->
+                <!--<span class="toggleBtn removeAllItem"></span>-->
+            <!--</div>-->
+            <!--<div class="sort-item">-->
+                <!--<h6 class="sort-title">已排序配置项 <span class="order up-order"></span><span class="order down-order"></span></h6>-->
+                <!--<nav>-->
+                    <!--<ul id="sort-item">-->
+                        <!--<li ng-repeat="data in userSelectConfigData" data-select="select" class="normal mt-5" data-keyname={{data.valueContent.replace(":desc","")}} data-order={{data.order}}><div>{{ data.valueAlias }}</div><span ng-class="data.valueContent.slice(-4)" class="itemOrder"></span></li>-->
+                    <!--</ul>-->
+                <!--</nav>-->
+            <!--</div>-->
+        <!--</div>-->
+        <drag-select-item display-data="displayData" user-config-data="userConfigData" user-select-config-data="userSelectConfigData" is-sort="true"></drag-select-item>
         <div class="combine-item">
             <dl class="relative clearfix">
                 <dt class="fl">合并项：</dt>

@@ -2,11 +2,10 @@
   display: none;
   flex-direction: column;
   position: absolute;
-  width: 1000px;
-  height: 500px;
-  margin-left: 50%;
-  left: -500px;
-  top: 150px;
+  width: 80%;
+  height: 80%;
+  left: 10%;
+  top: 10%;
   background-color: #FFF;
   text-align: center;
   opacity: 0;
@@ -181,6 +180,16 @@
           line-height: 28px;
           font-size: 13px;
           color: #333; }
+    .pbody .exDiffer-window .dialog-window-head .exDiffer-dimension {
+      position: absolute;
+      right: 70px;
+      padding: 0 10px;
+      font-size: 14px;
+      color: #888;
+      cursor: pointer; }
+      .pbody .exDiffer-window .dialog-window-head .exDiffer-dimension:hover {
+        background-color: #e8e8e8;
+        color: #3e7ec3; }
     .pbody .exDiffer-window .dialog-window-head i {
       position: absolute;
       right: -10px;

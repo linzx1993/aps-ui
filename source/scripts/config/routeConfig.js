@@ -1,8 +1,6 @@
-/**
- * Created by xujun on 2016/7/1.
- */
-app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function($stateProvider,$urlRouterProvider,$translateProvider) {
-    // 在这里定义路由
+app.config(['$stateProvider','$urlRouterProvider', function($stateProvider,$urlRouterProvider) {
+
+	//============================路由配置================================//
     $urlRouterProvider.otherwise('/preview');
     $urlRouterProvider.when("", "/preview");
     $stateProvider
@@ -61,9 +59,7 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
          .state('config.display',{
              url:'/display',
              templateUrl:'view/template/workArea/displayFirstPage.html',
-             controller: function($state){
-                 $state.go('config.workArea.displayDays');//默认显示第一个tab
-             }
+             controller: "displayController"
          })
          // 配置页-一级页面
          .state('config.workArea',{
@@ -71,11 +67,6 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              templateUrl:'view/template/workArea/displayFirstPage.html',
              controller : "firstPageController",
          })
-         // 配置页-一级页面-显示天数
-        .state('config.workArea.displayDays',{
-            url:'/displayDays',
-            templateUrl:'view/template/workArea/displayDays.html',
-        })
         // 配置页-一级页面-显示合并项
         .state('config.workArea.displayCombine',{
             url:'/displayCombine',
@@ -91,15 +82,6 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              url:'/workUnit',
              templateUrl:'view/template/workUnit/displaySecondPage.html',
              controller: "secondPageController",
-             // abstract:true
-             // views: {
-             //     'column': {
-             //         templateUrl: 'view/template/columnConfig.html',
-             //     },
-             //     'sortColumn': {
-             //         templateUrl: 'view/template/sortConfig.html',
-             //     },
-             // }
          })
          //配置页-二级页面-显示排序
         .state('config.workUnit.column',{
@@ -139,13 +121,20 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
          .state('config.scheme',{
              url:'/scheme',
              templateUrl:'view/template/schedulePlan.html',
-             controller: "planController"
+             controller: "planController",
+			 // onExit: function () {
+              //    //如果有临时创建的方案未保存退出，则给出提醒
+				//  if(Number(sessionStorage.temporarySchemeLength) > 0){
+				//      layer.confirm("你有未保存的临时方案，离开页面将会丢失数据，是否确定离开", {
+				// 		 btn: ['确定','取消'] //按钮
+				// 	 }, function(){
+			 //
+				// 	 }, function(){
+				// 	     return '/scheme'
+				// 	 })
+              //    }
+			 // }
          })
-         // .state('config.papRule',{
-         //     url:'/papRule',
-         //     templateUrl:'view/template/papRule.html',
-         //     controller: 'papRuleController'
-         // })
          .state('config.admin',{
              url:'/admin',
              templateUrl:'view/template/adminDisplay.html',
@@ -158,15 +147,4 @@ app.config(['$stateProvider','$urlRouterProvider','$translateProvider', function
              templateUrl:'view/template/adminDisplay.html',
              controller: 'adminConfigController'
          });
-
-    //============================多语言================================//
-    //指明加载哪些语言配置文件
-    $translateProvider.useStaticFilesLoader({
-        prefix: './language/',//指定文件前缀.
-        suffix: '.json'// 指定文件后缀.
-    });
-    var lang = 'zh-cn';//设置默认的语言
-    // var lang = 'en-us';//设置默认的语言
-    // var lang = window.localStorage.lang||'en-us';//设置默认的语言
-    $translateProvider.preferredLanguage(lang); //加载默认已注册的语言
 }]);

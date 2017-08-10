@@ -1,0 +1,7 @@
+.change-a-to-b .table-window {
+  width: calc(100% - 40px);
+  margin: 20px; }
+  .change-a-to-b .table-window .info-show {
+    padding: 0; }
+
+/*# sourceMappingURL=changeAToB.css.map */

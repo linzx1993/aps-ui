@@ -2,6 +2,7 @@
 /*常用颜色*/
 /*主题色*/
 /*表格灰框颜色*/
+/*标题栏背景灰色*/
 .c-theme-color {
   color: #1E7CD9; }
 
@@ -107,7 +108,7 @@
   margin: 0 55px 0 20px; }
 
 .wrap-preview {
-  height: 630px;
+  height: 100%;
   overflow: auto; }
 
 .wrap-result {
@@ -117,22 +118,15 @@
 .location-choose {
   position: absolute;
   top: 0;
-  left: -100%;
+  left: -50%;
   padding-top: 110px;
   width: auto;
   height: calc(100% - 120px);
   text-align: center;
   background: rgba(0, 0, 0, 0.3);
-  transition: left 0.5s;
-  -webkit-transition: left 0.5s;
-  -ms-transition: left 0.5s;
-  transition: left 0.5s;
   z-index: 20; }
   .location-choose.active {
-    left: 0;
-    -webkit-transition: left 0.5s;
-    -ms-transition: left 0.5s;
-    transition: left 0.5s; }
+    left: 0; }
   .location-choose .read-show {
     width: calc(100%);
     text-align: center;

@@ -37,7 +37,7 @@ const CONFIG = {
     },
     combine: {
         configController: {
-            src: [PATH_SOURCE + "/scripts/controllers/config/*.js","!" + PATH_SOURCE + "/scripts/controllers/config/allConfigController.js"],
+            src: [PATH_SOURCE + "/scripts/controllers/config/*.js"],
             dest: PATH_SOURCE + "/scripts/controllers"
         }
     }

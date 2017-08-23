@@ -28,10 +28,12 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 	
 	//传入一级界面时间控制器的初始数据
 	$scope.getDateChangeWidth = function(){
-		let smallWidth = 62,
-			defaultDay = 60,
-			minStartDate = tool.dateToString(today),
-			maxEndDate = tool.dateToString(tool.dateChange(defaultDay-1),today),
+		let time = new Date(today),
+			smallWidth = 62,
+			bigWidth = 160,
+			minStartDate = tool.dateToString(time),
+			maxEndDate = tool.dateToString(new Date(time.setMonth(time.getMonth() + 2)).setDate(0)),
+			defaultDay = (tool.stringToDate(maxEndDate) - tool.stringToDate(minStartDate))/86400000 + 1,  //86400000是一天的毫秒数
 			smallTableMarginLeft = 0,
 			bigTableMarginLeft = 0;
 		
@@ -44,8 +46,7 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 			bigTableMarginLeft = $scope.controllerDate.bigTableMarginLeft;
 		}
 	
-		let	bigWidth = 160,
-			tableWidth = $(".wrap-content").width(),
+		let	tableWidth = $(".wrap-content").width(),
 			smallTableWidth = tableWidth - 82,
 			bigTableWidth = tableWidth - 160,
 			scrollbarWidth = $(".scrollbar").width(),
@@ -305,8 +306,6 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
                     }else{
                         $rootScope.tableBodyData = $rootScope.cacheTableBodyData.slice(0,$rootScope.pageIndex * $rootScope.pageNumber);
                     }
-					console.log($rootScope.cacheTableBodyData);
-					console.log($rootScope.tableBodyData);
 
 					$(".table-content").on("scroll", function () {
 						$(this).parents(".j-table").find(".table-equipment-head>div").css("margin-top", -1 * $(this)[0].scrollTop + 1);
@@ -1060,14 +1059,7 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 	 * 判断是否有已排程的方案
 	 **/
 	$scope.isHadScheduleScheme = function () {
-	    //获得所有的排程方案
-		function getAllScheme() {
-			return $http.get($rootScope.restful_api.all_schedule_plan).then((function (res) {
-				return res.data;
-			}),function () {
-				layer.alert('获取方案列表失败,请联系技术人员');
-			});
-		}
+
 		//获得哪些方案已经排程
 		function getHadScheduleScheme() {
 			return $http.get($rootScope.restful_api.aps_location_writable).then((function (res) {
@@ -1076,18 +1068,17 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 				layer.alert('获取方案内容失败,请联系技术人员');
 			});
 		}
-		$q.all([getAllScheme(),getHadScheduleScheme()]).then(function (res) {
-		    $scope.schemeNameList = res[0];//设置方案下拉展示列表
-			const selectScheme = res[1];
+		$q.all([getHadScheduleScheme()]).then(function (res) {
+			const selectScheme = res[0];
 			//根据获取的已选择方案，添加所有方案列表一个是否选择的参数
-			$scope.schemeNameList.forEach((item) => {
+			$scope.allSchedulePlan.forEach((item) => {
 			    //判断该方案是否被选中
 				item.isSelected = selectScheme.some((selectItem) => {
 				    return item.schemeId === selectItem.schemeId
                 });
             });
             //初始设置第一个方案为展示方案
-			$scope.selectLiScheme($scope.schemeNameList[0]);
+			$scope.selectLiScheme($scope.allSchedulePlan[0]);
 		})
 	};
 
@@ -1100,9 +1091,9 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
         http.get({
             url: $rootScope.restful_api.all_schedule_plan,
             successFn: function (res) {
-                const schemeLength = res.data.length;
+				$scope.allSchedulePlan = res.data;
                 //若没有方案,弹窗提示
-                if (schemeLength === 0) {
+                if ($scope.allSchedulePlan.length === 0) {
                     layer.alert("您没有配置方案,无法排程!", {
                         skin: 'layer-alert-themecolor' //样式类名
                     });
@@ -1211,10 +1202,9 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
         http.get({
             url: $rootScope.restful_api.all_schedule_plan,
             successFn: function (res) {
-                res = res.data;
-                const sechemeLength = res.length;
+                $scope.allSchedulePlan = res.data;
                 //若没有方案,弹窗提示
-                if (sechemeLength === 0) {
+                if ($scope.allSchedulePlan.length === 0) {
                     layer.alert("您没有配置方案,无法再编辑!", {
                         skin: 'layer-alert-themecolor' //样式类名
                     });
@@ -1344,6 +1334,10 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
         return locationIdList;
     };
 	
+	
+	let startDateIndex = 0,
+		endDateIndex = 0,
+		spanIndex = 0;
 	//当时间跨度改变时(起始时间)
 	$scope.$watch("controllerDate.minStartDate",function(newStartDate,oldStartDate){			
 		//转成时间对象
@@ -1352,8 +1346,35 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 		if(oldStartDate){
 			//开始时间大于结束时间，无操作
 			if(newStart > tool.stringToDate($scope.controllerDate.maxEndDate)){
+				if(startDateIndex === 0 || endDateIndex !== 0){
+					layer.close(endDateIndex);
+					endDateIndex = 0;
+					startDateIndex = layer.tips('请设置开始时间不晚于结束时间。', $(".scrollbar-min-startdate"), {
+					  tips: [1, '#3595CC'],
+					  time: 0
+					});
+				}
 				return;
 			}
+			
+			//限制时间跨度
+			if((tool.stringToDate($scope.controllerDate.maxEndDate) - newStart)/86400000 > 89){
+				if(spanIndex !== 0){
+					return;
+				}
+				spanIndex = layer.tips('请设置时间跨度小于90天。', $(".scrollbar-min-startdate"), {
+				  tips: [1, '#3595CC'],
+				  time: 0
+				});
+				return;
+			}
+			
+			layer.close(startDateIndex);
+			startDateIndex = 0;
+			layer.close(endDateIndex);
+			endDateIndex = 0;
+			layer.close(spanIndex);
+			spanIndex = 0;
 //			//起始时间前移，查询新起始时间到原起始时间之间的数据
 //			if(newStart < oldStart){
 //				preview_show_table($scope.locationId_pre, $scope.locationFilterList_pre);  
@@ -1382,9 +1403,35 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 		if(oldEndDate){
 			//结束时间小于开始时间，无操作
 			if(newEnd < tool.stringToDate($scope.controllerDate.minStartDate)){
+				if(endDateIndex === 0 || startDateIndex !== 0){
+					layer.close(startDateIndex);
+					startDateIndex = 0;
+					endDateIndex = layer.tips('请设置结束时间不早于开始时间。', $(".scrollbar-max-enddate"), {
+					  tips: [1, '#3595CC'],
+					  time: 0
+					});
+				}
 				return;
 			}
 			
+			//限制时间跨度
+			if((newEnd - tool.stringToDate($scope.controllerDate.minStartDate))/86400000 > 89){
+				if(spanIndex !== 0){
+					return;
+				}
+				spanIndex = layer.tips('请设置时间跨度小于90天。', $(".scrollbar-max-enddate"), {
+				  tips: [1, '#3595CC'],
+				  time: 0
+				});
+				return;
+			}
+			console.log(2);
+			layer.close(startDateIndex);
+			startDateIndex = 0;
+			layer.close(endDateIndex);
+			endDateIndex = 0;
+			layer.close(spanIndex);
+			spanIndex = 0;
 //			//结束时间后延，查询原结束时间到新结束时间之间的数据
 //			if(newEnd > oldEnd){
 //				preview_show_table($scope.locationId_pre, $scope.locationFilterList_pre);  

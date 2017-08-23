@@ -359,17 +359,18 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			navY = event.pageY + document.body.scrollTop;
 		//限定不超出可视区
 		$timeout(function(){
-			if($("#jLeftClickNav").width() + navX > window.innerWidth){
-				navX = window.innerWidth - $("#jLeftClickNav").width();
-			};
-			if($("#jLeftClickNav").height() + navY > window.innerHeight){
-				navY = window.innerHeight - $("#jLeftClickNav").height();
-			};
-			$("#jLeftClickNav").show().css({
+			const jLeftClickNav = $("#jLeftClickNav");
+			if(jLeftClickNav.width() + navX > window.innerWidth){
+				navX = window.innerWidth - jLeftClickNav.width();
+			}
+			if(jLeftClickNav.height() + navY > window.innerHeight){
+				navY = window.innerHeight - jLeftClickNav.height();
+			}
+			jLeftClickNav.show().css({
 				left: navX,
 				top: navY
 			});
-		},0)
+		},0);
 		event.stopPropagation();
 	};
 	
@@ -378,7 +379,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	 *time:2017-07-17
 	 **/
 	$scope.baseIndex = 20;
-	$scope.isMove = false,		
+	$scope.isMove = false;
 	$scope.priorityDisplay = function($event){
 		let thisTarget = $($event.target),
 			parentWindow = thisTarget.parents(".table-window") || thisTarget;
@@ -391,14 +392,15 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			$scope.isMove = true;
 		}
 		$event.stopPropagation();
-	}
+	};
 	/**
 	 *desc:结束位移
 	 *time:2017-07-17
 	 **/
 	$scope.stopWindowMove = function(){
 		$scope.isMove = false;
-	}
+	};
+
 	/**
 	 *desc:位移中
 	 *time:2017-07-17
@@ -415,8 +417,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 		}
 		parentWindow.css("transform","translate(" + moveX + "px," + moveY + "px)");
 		$event.stopPropagation();
-	}
-	
+	};
 
     //获得查询框中产线数据
     $scope.getProductLineSelectedData = (event) => {
@@ -455,7 +456,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 
 	//右边栏弹出小提示
 	$(function () {
-		var removeActive = 0;
+		let removeActive = 0;
 		$("body")
 			//右边栏提示信息打开
 			.on("mouseenter", ".right-menu-button", function () {
@@ -518,7 +519,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			})
 			//打开和收起右边栏
 			.on("click", ".right-menu-switch", function () {
-				var thisPositionX = $(this).css("background-position-x");
+				let thisPositionX = $(this).css("background-position-x");
 				// if(!!window.ActiveXObject || "ActiveXObject" in window){
 				// 	var thisPosition = $(this).css("background-position").split(" ");
 				// 	thisPositionX = thisPosition[0];
@@ -590,8 +591,8 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			})
 			//全选全不选
 			.on("click", "input[name='factPnameAll']", function () {
-				var checkValue = $(this).is(':checked') ;
-				if (checkValue == true) {
+				let checkValue = $(this).is(':checked') ;
+				if (checkValue === true) {
 					$("input[name='factPnameSingle']").prop("checked", true);
 				} else {
 					$("input[name='factPnameSingle']").prop("checked", false);
@@ -599,9 +600,9 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			})
 			//复选框反选
 			.on("click", "input[name='factPnameSingle']", function () {
-				var  chsub  =  $("input[name='factPnameSingle']").length;
-				var  checkedsub  =  $("input[name='factPnameSingle']:checked").length;
-				if (chsub == checkedsub) {
+				let  chsub  =  $("input[name='factPnameSingle']").length;
+				let  checkedsub  =  $("input[name='factPnameSingle']:checked").length;
+				if (chsub === checkedsub) {
 					$("input[name='factPnameAll']").prop("checked", true);
 				} else {
 					$("input[name='factPnameAll']").prop("checked", false);
@@ -728,10 +729,10 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	});
 
     /*************=========================拖拽项目排序js=========================*************/
-    var $id = function (element) {
-        return typeof element == "string" ? document.getElementById(element) : element;
+    let $id = function (element) {
+        return typeof element === "string" ? document.getElementById(element) : element;
     };
-    var $find = function (parent, nodeName) {
+    let $find = function (parent, nodeName) {
         return parent.getElementsByTagName(nodeName);
     };
 //拖拽项目类
@@ -751,7 +752,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
             this.mainDiv = $id(mainDivId);//获取最外面的div
             this.myApp = $id(myAppId);//获取第一个div
             this.otherApp = $id(otherAppId);//获取第二个div
-            this.repeatTransfer()
+            this.repeatTransfer();
             this.addItem().removeItem();
         },
         //局部刷新页面时每次需要重复确认操作的区域
@@ -763,40 +764,40 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //鼠标移入移出图标
         _OnApp: function (mainDiv) {
-            var _this = this;
+            let _this = this;
             //鼠标移入可以移动的li时，加一个出现虚线的class
             mainDiv.onmouseover = function (event) {
-                var e = event || window.event;//获取鼠标
-                var t = e.target || e.srcElement;//获取鼠标触发源
-                if (t.nodeName.toLowerCase == "li") {
+                let e = event || window.event;//获取鼠标
+                let t = e.target || e.srcElement;//获取鼠标触发源
+                if (t.nodeName.toLowerCase === "li") {
                     _this.addClass(t, "js-liBorderStyle");
-                } else if (t.parentNode.nodeName.toLowerCase() == "li") {
+                } else if (t.parentNode.nodeName.toLowerCase() === "li") {
                     _this.addClass(t.parentNode, "js-liBorderStyle")
                 }
             };
             //鼠标移出可以移动的li时，移除一个出现虚线的lcas
             mainDiv.onmouseout = function (event) {
-                var e = event || window.event;//获取鼠标
-                var t = e.target || e.srcElement;//获取鼠标触发源
-                if (t.nodeName.toLowerCase == "li") {
+                let e = event || window.event;//获取鼠标
+                let t = e.target || e.srcElement;//获取鼠标触发源
+                if (t.nodeName.toLowerCase === "li") {
                     _this.removeClass(t, "js-liBorderStyle");
-                } else if (t.parentNode.nodeName.toLowerCase() == "li") {
+                } else if (t.parentNode.nodeName.toLowerCase() === "li") {
                     _this.removeClass(t.parentNode, "js-liBorderStyle")
                 }
             }
         },
         //拖动鼠标改变位置
         _moveApp: function (dragUl, otherUl) {
-            var _this = this;
+            let _this = this;
             dragUl.onmousedown = function () {
-                var e = event || window.event;//获取鼠标
-                var t = e.target || e.srcElement;//获取鼠标触发源
+                let e = event || window.event;//获取鼠标
+                let t = e.target || e.srcElement;//获取鼠标触发源
                 _this.liList = [];//class不是js-liBorderStyle的li元素集合
-                if (t.nodeName.toLowerCase() == "div" && t.className != "appDiv") {
-                    var oLi = t.parentNode;
-                    var oCopyLi = oLi.cloneNode(true);
+                if (t.nodeName.toLowerCase() === "div" && t.className !== "appDiv") {
+                    let oLi = t.parentNode;
+                    let oCopyLi = oLi.cloneNode(true);
                     let scrollTop = $(t).parents("nav").scrollTop();
-                    var oNewLi = oCopyLi.cloneNode(true);
+                    let oNewLi = oCopyLi.cloneNode(true);
                     _this.removeClass(oNewLi, "js-liBorderStyle");
                     _this.removeClass(oNewLi, "js-move");
                     //oNewLi.innerHTML = oCopyLi.innerHTML;
@@ -817,9 +818,9 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
                     _this._offsetTop = oCopyLi.offsetTop;//鼠标按下时获取新生成的虚线li的坐标top
 
                     _this._liList = $find(_this.mainDiv, "li");//获取要拖拽下的ul里的所有li
-                    for (var i = 0, length = _this._liList.length; i < length; i++) {
-                        var li = _this._liList[i];
-                        if (li.className != "js-liBorderStyle") {//获取到class不是js-liBorderStyle的li
+                    for (let i = 0, length = _this._liList.length; i < length; i++) {
+                        let li = _this._liList[i];
+                        if (li.className !== "js-liBorderStyle") {//获取到class不是js-liBorderStyle的li
                             _this.liList.push(li);
                         }
                     }
@@ -828,25 +829,25 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 
 
                     document.onmousemove = function (event) {
-                        var e = event || window.event;//获取鼠标
-                        var t = e.target || e.srcElement;//获取鼠标触发源
-                        var _X = e.clientX, _Y = e.clientY;//获取鼠标的坐标值
-                        var _mLeft = _this._offsetLeft + _X - _this._downX,//获取图标移动时每一次坐标值
+                        let e = event || window.event;//获取鼠标
+                        let t = e.target || e.srcElement;//获取鼠标触发源
+                        let _X = e.clientX, _Y = e.clientY;//获取鼠标的坐标值
+                        let _mLeft = _this._offsetLeft + _X - _this._downX,//获取图标移动时每一次坐标值
                             _mTop = _this._offsetTop + _Y - _this._downY;
-                        var oSize = _this._overBorder(_mLeft, _mTop);//获取每次移动经过判断后（是否超过box范围）的坐标
+                        let oSize = _this._overBorder(_mLeft, _mTop);//获取每次移动经过判断后（是否超过box范围）的坐标
                         _mLeft = oSize.left ? oSize.left : _mLeft;
                         _mTop = oSize.top ? oSize.top : _mTop;
                         oCopyLi.style.left = _mLeft + "px";
                         oCopyLi.style.top = _mTop - scrollTop + "px";
-                        var index = _this.getAppLocation(_mLeft, _mTop);//？？获取需要插入的li的下标
+                        let index = _this.getAppLocation(_mLeft, _mTop);//？？获取需要插入的li的下标
                         _this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
                         _this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
-                    }
+                    };
                     document.onmouseup = function (event) {
-                        var e = event || window.event;//获取鼠标
-                        var t = e.target || e.srcElement;//获取鼠标触发源
-                        var left = _this.offset(oNewLi).left;
-                        var top = _this.offset(oNewLi).top;
+                        let e = event || window.event;//获取鼠标
+                        let t = e.target || e.srcElement;//获取鼠标触发源
+                        let left = _this.offset(oNewLi).left;
+                        let top = _this.offset(oNewLi).top;
                         //                        var oSpan2;
                         _this.animate(oCopyLi, {left: left, top: top}, 100, function () {
                             document.body.removeChild(oCopyLi);
@@ -876,7 +877,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
             var string = node.className;
             if (string.indexOf(className) > 0) {
                 node.className = string.replace(" " + className, "");
-            } else if (string.indexOf(className) == 0) {//判断class是否在第一个class，进行删除
+            } else if (string.indexOf(className) === 0) {//判断class是否在第一个class，进行删除
                 if (string.indexOf(" ") < 0) {
                     node.className = string.replace(className, "");
                 } else {
@@ -888,11 +889,11 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //元素在文档中的位置
         offset: function (obj) {
-            var _offset = {};
-            var node = $id(obj);
-            var left = node.offsetLeft;
-            var top = node.offsetTop;
-            var parent = node.offsetParent;
+            let _offset = {};
+            let node = $id(obj);
+            let left = node.offsetLeft;
+            let top = node.offsetTop;
+            let parent = node.offsetParent;
             //不断向上获取父元素的offsetLeft，知道获取到与页面的距离
             while (parent != null) {
                 left += parent.offsetLeft;
@@ -906,11 +907,11 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //计算移动图标所处的位置
         getAppLocation: function (x, y) {
-            var liList = this.liList;
-            var liW = liList[0].offsetWidth;//
-            var liH = liList[0].offsetHeight;//
-            for (var i = 0, length = liList.length; i < length; i++) {
-                var li = liList[i], left = this.offset(li).left, top = this.offset(li).top;
+            let liList = this.liList;
+            let liW = liList[0].offsetWidth;//
+            let liH = liList[0].offsetHeight;//
+            for (let i = 0, length = liList.length; i < length; i++) {
+                let li = liList[i], left = this.offset(li).left, top = this.offset(li).top;
                 if ((x > left - liW && x < left + liW) && (y > top - liH && y < top + liH)) {
                     this._index = i;
                     break;
@@ -920,9 +921,9 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //图标超出边界处理
         _overBorder: function (left, top) {
-            var x = 0, y = 0, mainDiv = this.mainDiv, oSize = {};
-            var mainDivLeft = this.offset(document.getElementById("all-item")).left;//因为绝对定位的原因，所有需要通过获取点击按钮的offsetLeft计算出来offsetLeft
-            var mainDivTop = this.offset(document.getElementById("all-item")).top;
+            let x = 0, y = 0, mainDiv = this.mainDiv, oSize = {};
+            let mainDivLeft = this.offset(document.getElementById("all-item")).left;//因为绝对定位的原因，所有需要通过获取点击按钮的offsetLeft计算出来offsetLeft
+            let mainDivTop = this.offset(document.getElementById("all-item")).top;
             if (left < mainDivLeft) {
                 x = mainDivLeft
             }
@@ -941,10 +942,9 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //边框随鼠标移动改变位置,然后选择插入到哪个li后面
         _insertApp: function (x, y, oldElement, newElement,my, other) {
-            var parent
-            var liList = $id(parent, "li");
-            //var lastLi = liList[liList.length - 1];
-            var selectX =  this.offset(document.getElementsByClassName("middleBtn")[0]).left;
+            let parent;
+            let liList = $id(parent, "li");
+            let selectX =  this.offset(document.getElementsByClassName("middleBtn")[0]).left;
             ///此段代码中的x大雨的值不同环境需要计算
             if (x > selectX) {
                 parent = other;
@@ -964,16 +964,16 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         },
         //动画方法，
         animate: function (obj, params, time, handler) {
-            var node = $id(obj), handlerFlag = true, _style = node.currentStyle ? node.currentStyle : window.getComputedStyle(node, null);
+            let node = $id(obj), handlerFlag = true, _style = node.currentStyle ? node.currentStyle : window.getComputedStyle(node, null);
             time = document.all ? time * 0.6 : time * 0.9;
-            for (var p in params) {
+            for (let p in params) {
                 (function (n) {
                     n = p;
-                    if (n == "left" || n == "top") {
-                        var _old = parseInt(_style[n]), _new = parseInt(params[n]), _length = 0, _tt = 10;
+                    if (n === "left" || n === "top") {
+                        let _old = parseInt(_style[n]), _new = parseInt(params[n]), _length = 0, _tt = 10;
                         if (!isNaN(_old)) {
-                            var count = _old, length = _old <= _new ? (_new - _old) : (_old - _new), speed = length / time * _tt, flag = 0;
-                            var anim = setInterval(function () {
+                            let count = _old, length = _old <= _new ? (_new - _old) : (_old - _new), speed = length / time * _tt, flag = 0;
+                            let anim = setInterval(function () {
                                 node.style[n] = count + "px";
                                 count = _old <= _new ? count + speed : count - speed;
                                 flag += _tt;
@@ -987,8 +987,8 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
                 })(p);
             }
 
-            var timeHandler = setTimeout(function () {
-                if (handler && typeof handler == "function") {
+            let timeHandler = setTimeout(function () {
+                if (handler && typeof handler === "function") {
                     handler();
                     clearTimeout(timeHandler);
                 }
@@ -997,21 +997,21 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         //一次性添加所㓟可排序字段
         addItem: function () {
             $("body").on("click", ".addAllItem", function () {
-                var elem = $("#provide-item li");
-                for (var i = 0; i < elem.length; i++) {
-                    var cloneElem = $(elem[i]).clone().addClass("js-move");
+                let elem = $("#provide-item li");
+                for (let i = 0; i < elem.length; i++) {
+                    let cloneElem = $(elem[i]).clone().addClass("js-move");
                     $(".sort-item ul").append(cloneElem);
                     elem.remove();
                 }
-            })
+            });
             return this;
         },
         //一次性移除所有已排序字段
         removeItem: function () {
             $("body").on("click", ".removeAllItem", function () {
-                var elem = $("#sort-item li");
-                for (var i = 0; i < elem.length; i++) {
-                    var cloneElem = $(elem[i]).clone().addClass("js-move");
+                let elem = $("#sort-item li");
+                for (let i = 0; i < elem.length; i++) {
+                    let cloneElem = $(elem[i]).clone().addClass("js-move");
                     $(".provide-item ul").append(cloneElem);
                     elem.remove();
                 }

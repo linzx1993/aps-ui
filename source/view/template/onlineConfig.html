@@ -1,0 +1,34 @@
+<div class="config-main online-config">
+	<h1 class="config-content-title">{{"onlineConfig" | translate}}</h1>
+	<div class="online-content">
+		<h3 class="ml-35" style="font-size: 18px;font-weight: bold">初始生产状况</h3>
+		<cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="getEquipment()"></cascader>
+		<search-drop-down-list class="ml-10" search-data="equipmentTypeData" ng-model="equipmentSelectTypeList"  on-change="getEquipment()"></search-drop-down-list>
+		<search-drop-down-list class="ml-10" search-data="equipmentData" ng-model="equipmentSelectList" ></search-drop-down-list>
+		<a href="javascript:void(0)" class="ml-20 start-search" ng-click="searchOnlineConfig()">查询</a>
+		<div class="mt-20 online-table-box" ng-show="isShowSearchConfig">
+			<table class="online-content-table">
+				<thead>
+				<tr>
+					<td>设备编码</td>
+					<td>设备名称</td>
+					<td>生产物料编码</td>
+					<td>生产物料名称</td>
+				</tr>
+				</thead>
+				<tbody>
+				<tr ng-repeat="data in onlineConfigList">
+					<td>{{data.equipmentCode}}</td>
+					<td>{{data.equipmentName}}</td>
+					<td><aps-select filterable id="'materialCode'" query="'materialCodeParam'" ng-model="data.materialCode" repeat-data="materialCodeList" remote-method="getMaterialCodeBySearch(123)" on-change="selectMaterialName(data)"></aps-select></td>
+					<td><aps-select filterable id="'materialName'" query="'materialNameParam'" ng-model="data.materialName" repeat-data="materialNameList" remote-method="getMaterialNameBySearch(123)" on-change="selectMaterialCode(data)"></aps-select></td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="m-0-auto mt-20 mb-20 tc clearfix" ng-show="isShowSearchConfig">
+			<a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveOnlineConfig()">应用</a>
+			<a class="ml-15 reset-config" href="javascript:void(0);" ng-click="resetOnlineConfig()">还原</a>
+		</div>
+	</div>
+</div>

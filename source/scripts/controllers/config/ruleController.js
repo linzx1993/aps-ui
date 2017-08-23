@@ -347,8 +347,184 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
         }, function(){
             layer.close(deleteRule);
         });
-
     };
+
+    //查看设备初始状态
+	//获取所有的地点
+	http.get({
+		url : $rootScope.restful_api.aps_location_readable,
+		successFn : function (res) {
+			$scope.location_data = {
+				repeatData : res.data,
+				showText : '地点',
+				className : "location"
+			}
+		}
+	});
+
+	//获取所有设备类型
+	//设备类型下拉列表数据
+	$scope.equipmentSelectTypeList = [];
+	$scope.equipmentTypeData = {
+		showText : "设备类型",
+		value : "",
+		repeatData : [],
+	};
+	http.get({
+		url : $rootScope.restful_api.get_equipment_type + "?startTime=" + tool.getCorrectDate(new Date) + "&endTime=" + tool.getCorrectDate(new Date),
+		successFn : function (res) {
+			res.data.forEach((item) => {
+				$scope.equipmentTypeData.repeatData.push({
+					dragItemText : item.modelName,
+					id : item.modelId
+				});
+			});
+		}
+	});
+
+	//获取所有设备
+	//设备下拉列表数据
+	$scope.equipmentSelectList = [];
+	$scope.equipmentData = {
+		showText : "设备",
+		value : "",
+		repeatData : [],
+	};
+	http.get({
+		url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
+		+ "&endTime=" + tool.getCorrectDate(new Date)
+		+ "&searchType=1"
+		+ "&modelIdList="
+		+ "&locationFilterList=" ,
+		successFn : function (res) {
+			$scope.equipmentList = res.data;
+			let equipmentList = [];
+			for(let i in $scope.equipmentList){
+				equipmentList.push({
+					dragItemText : $scope.equipmentList[i].productUnitName,
+					id : $scope.equipmentList[i].productUnitId + "_" + $scope.equipmentList[i].type,
+					equipmentCode : $scope.equipmentList[i].productUnitCode
+				});
+			}
+			$scope.equipmentData.repeatData = equipmentList;
+		}
+	});
+
+	//根据改动条件，获得equipment设备列表
+	$scope.getEquipment = function () {
+		console.log($scope.equipmentSelectTypeList);
+		http.get({
+			url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
+			+ "&endTime=" + tool.getCorrectDate(new Date)
+			+ "&searchType=1"
+			+ "&modelIdList=" + $scope.equipmentSelectTypeList.join(",")
+			+ "&locationFilterList=" + $scope.get_selected_location().join(","),
+			successFn : function (res) {
+				let productUnit = res.data;
+				let equipmentList = [];
+				for(let i in productUnit){
+					equipmentList.push({
+						dragItemText : productUnit[i].productUnitName,
+						id : productUnit[i].productUnitId + "_" + (productUnit[i].type === "PRODUCTION_UNIT" ? 1 : 0)
+					});
+				}
+				$scope.equipmentData.repeatData = equipmentList;
+			}
+		});
+	};
+
+	//打开查看详细的上限配置
+    $scope.lookOnlineConfig = function () {
+        layer.open({
+            content : $(".jOnlineContent"),
+			type: 1,
+			title: "初始生产状态",
+            area : ["600","700px"],
+			shadeClose: true,
+			success : ()=> {
+
+			}
+        });
+		$scope.isShowSearchConfig = true;
+	};
+
+	$scope.searchOnlineConfig = function () {
+		let postData = [];
+		//创建好待会需要渲染表格的数组
+		$scope.onlineConfigList = [];
+		/*因为坑爹的后台数据没法一次提供所有需要的，
+		 所以要先从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
+		 然后再去到请求获得数据里面根据设备id_type去获取对应的物料信息，
+		 */
+		if($scope.equipmentSelectList.length === 0){
+			for(let i in $scope.equipmentList){
+				postData.push({
+					"equipmentId":$scope.equipmentList[i].productUnitId,
+					"produceUnitType":$scope.equipmentList[i].type
+				})
+			}
+			//坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+			postData.forEach((selectItem) => {
+				$scope.equipmentData.repeatData.some((item) => {
+					if(item.id === (selectItem.equipmentId + "_" + selectItem.produceUnitType)){
+						$scope.onlineConfigList.push({
+							equipmentName : item.dragItemText,
+							equipmentCode : item.equipmentCode,
+							equipmentId:item.id.split("_")[0],
+							equipmentType:item.id.split("_")[1],
+						});
+						return true;
+					}
+				});
+			});
+		}else{
+			$scope.equipmentSelectList.forEach((item) => {
+				let arr = item.split("_");
+				postData.push({
+					"equipmentId":arr[0],
+					"pUnitType":arr[1]
+				})
+			});
+			//坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+			$scope.equipmentSelectList.forEach((selectItem) => {
+				$scope.equipmentData.repeatData.some((item) => {
+					if(item.id === selectItem){
+						$scope.onlineConfigList.push({
+							equipmentName : item.dragItemText,
+							equipmentCode : item.equipmentCode,
+							equipmentId:item.id.split("_")[0],
+							equipmentType:item.id.split("_")[1],
+						});
+						return true;
+					}
+				});
+			});
+		}
+		//第一步筛选出用户选中的数据
+		http.post({
+			url : $rootScope.restful_api.search_online_config,
+			data : postData,
+			successFn : function (res) {
+				res.data.forEach((resItem) => {
+					//获得渲染表格所需要的数据
+					$scope.onlineConfigList.forEach((onlineItem) => {
+						if(resItem.equipmentId + "_" + resItem.produceUnitType  === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
+							// ({
+							// 	materialCode:onlineItem.materialCode,
+							// 	materialId:onlineItem.materialId,
+							// 	materialName:onlineItem.materialName
+							// } = resItem);
+							onlineItem.materialCode = resItem.materialCode;
+							onlineItem.materialId = resItem.materialId;
+							onlineItem.materialName = resItem.materialName;
+						}
+					});
+				});
+				//出现table表格和按钮
+				$scope.isShowSearchConfig = true;
+			},
+		})
+	};
 
     //显示规则时，js设置目录栏高度,使左边目录栏的高度可以撑满整个div
     //展开规则时，实时获取规则高度设置，收起时，保证不小于规则最小区域

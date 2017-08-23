@@ -43,10 +43,12 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
     /**************以下是本页实际执行的代码，上面都为函数和事件绑定****************/
 	//传入一级界面时间控制器的初始数据
 	$scope.getDateChangeWidth = function(){
-		let smallWidth = 62,
-			defaultDay = 60,
-			minStartDate = tool.dateToString(today),
-			maxEndDate = tool.dateToString(tool.dateChange(defaultDay-1),today),
+		let time = new Date(today),
+			smallWidth = 62,
+			bigWidth = 160,
+			minStartDate = tool.dateToString(time),
+			maxEndDate = tool.dateToString(new Date(time.setMonth(time.getMonth() + 2)).setDate(0)),
+			defaultDay = (tool.stringToDate(maxEndDate) - tool.stringToDate(minStartDate))/86400000 + 1,  //86400000是一天的毫秒数
 			smallTableMarginLeft = 0,
 			bigTableMarginLeft = 0;
 		
@@ -58,9 +60,8 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 			smallTableMarginLeft = $scope.controllerDate.smallTableMarginLeft;
 			bigTableMarginLeft = $scope.controllerDate.bigTableMarginLeft;
 		}
-					
-		let	bigWidth = 160,
-			tableWidth = $(".wrap-content").width(),
+		
+		let	tableWidth = $(".wrap-content").width(),
 			smallTableWidth = tableWidth - 82,
 			bigTableWidth = tableWidth - 160,
 			scrollbarWidth = $(".scrollbar").width(),
@@ -2911,6 +2912,9 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
         }
     }
 	
+	let startDateIndex = 0,
+		endDateIndex = 0,
+		spanIndex = 0;
 	//当时间跨度改变时(起始时间)
 	$scope.$watch("controllerDate.minStartDate",function(newStartDate,oldStartDate){			
 		//转成时间对象
@@ -2919,8 +2923,35 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 		if(oldStartDate){
 			//开始时间大于结束时间，无操作
 			if(newStart > tool.stringToDate($scope.controllerDate.maxEndDate)){
+				if(startDateIndex === 0 || endDateIndex !== 0){
+					layer.close(endDateIndex);
+					endDateIndex = 0;
+					startDateIndex = layer.tips('请设置开始时间不晚于结束时间。', $(".scrollbar-min-startdate"), {
+					  tips: [1, '#3595CC'],
+					  time: 0
+					});
+				}
 				return;
 			}
+			
+			//限制时间跨度
+			if((tool.stringToDate($scope.controllerDate.maxEndDate) - newStart)/86400000 > 89){
+				if(spanIndex !== 0){
+					return;
+				}
+				spanIndex = layer.tips('请设置时间跨度小于90天。', $(".scrollbar-min-startdate"), {
+				  tips: [1, '#3595CC'],
+				  time: 0
+				});
+				return;
+			}
+			
+			layer.close(startDateIndex);
+			startDateIndex = 0;
+			layer.close(endDateIndex);
+			endDateIndex = 0;
+			layer.close(spanIndex);
+			spanIndex = 0;
 //			//起始时间前移，查询新起始时间到原起始时间之间的数据
 //			if(newStart < oldStart){
 //				result_show_table($rootScope.locationId_res, sessionStorage.locationFilterList_res);
@@ -2949,9 +2980,35 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 		if(oldEndDate){
 			//结束时间小于开始时间，无操作
 			if(newEnd < tool.stringToDate($scope.controllerDate.minStartDate)){
+				if(endDateIndex === 0 || startDateIndex !== 0){
+					layer.close(startDateIndex);
+					startDateIndex = 0;
+					endDateIndex = layer.tips('请设置结束时间不早于开始时间。', $(".scrollbar-max-enddate"), {
+					  tips: [1, '#3595CC'],
+					  time: 0
+					});
+				}
 				return;
 			}
 			
+			//限制时间跨度
+			if((newEnd - tool.stringToDate($scope.controllerDate.minStartDate))/86400000 > 89){
+				if(spanIndex !== 0){
+					return;
+				}
+				spanIndex = layer.tips('请设置时间跨度小于90天。', $(".scrollbar-max-enddate"), {
+				  tips: [1, '#3595CC'],
+				  time: 0
+				});
+				return;
+			}
+			console.log(2);
+			layer.close(startDateIndex);
+			startDateIndex = 0;
+			layer.close(endDateIndex);
+			endDateIndex = 0;
+			layer.close(spanIndex);
+			spanIndex = 0;
 			//结束时间后延，查询原结束时间到新结束时间之间的数据
 //			if(newEnd > oldEnd){
 //				result_show_table($rootScope.locationId_res, sessionStorage.locationFilterList_res);

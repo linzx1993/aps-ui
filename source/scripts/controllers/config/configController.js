@@ -88,10 +88,12 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
         {text : "SchedulingSchemeSettings", url : "view/schedulePlan.html","sref":".scheme"},
         {text : "AdministratorConfigurationItem",url : "view/adminProperty.html","sref":".admin",
             children : [
-                {text : "默认显示项",url : "view/adminDisplay.html","sref":".defaultDisplay",class : "adminNav"}
+                {text : "默认显示项",url : "view/adminDisplay.html","sref":".defaultDisplay",class : "adminNav"},
+				{text : "onlineConfig", url : "view/onlineConfig.html","sref":".onlineConfig"},
             ]
-        }
+        },
     ];
+
 
     /**
      * 1.点击目录跳转加上class-active;

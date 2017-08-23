@@ -210,7 +210,7 @@ app.controller("configController", ["$rootScope", "$scope", "$http", "$location"
         { text: "WorkUnit", url: "view/columnConfig.html", "sref": ".workUnit" }, //原名为二级页面
         { text: "WorkMenu", url: "view/displayDays", "sref": ".workMenu" }]
     }, { text: "ScheduleRuleSetting", url: "view/checkFrom.html", "sref": ".rule" }, { text: "SchedulingSchemeSettings", url: "view/schedulePlan.html", "sref": ".scheme" }, { text: "AdministratorConfigurationItem", url: "view/adminProperty.html", "sref": ".admin",
-        children: [{ text: "默认显示项", url: "view/adminDisplay.html", "sref": ".defaultDisplay", class: "adminNav" }]
+        children: [{ text: "默认显示项", url: "view/adminDisplay.html", "sref": ".defaultDisplay", class: "adminNav" }, { text: "onlineConfig", url: "view/onlineConfig.html", "sref": ".onlineConfig" }]
     }];
 
     /**
@@ -825,6 +825,263 @@ app.controller("functionModuleController", ["$rootScope", "$scope", "$http", "$s
                 $scope.info.fail("还原配置失败");
             }
         });
+    };
+}]);
+/**
+ * Created by linzx on 2017/8/17.
+ */
+app.controller("onlineConfigController", ["$rootScope", "$scope", "$state", "tool", "$http", "http", "$timeout", "$q", function ($rootScope, $scope, $state, tool, $http, http, $timeout, $q) {
+    //显示正确的目录class-active
+    $scope.configNav.activeNav = ".onlineConfig";
+
+    //获取所有的地点
+    http.get({
+        url: $rootScope.restful_api.aps_location_readable,
+        successFn: function successFn(res) {
+            $scope.location_data = {
+                repeatData: res.data,
+                showText: '地点',
+                className: "location"
+            };
+        }
+    });
+
+    //获取所有设备类型
+    //设备类型下拉列表数据
+    $scope.equipmentSelectTypeList = [];
+    $scope.equipmentTypeData = {
+        showText: "设备类型",
+        value: "",
+        repeatData: []
+    };
+    http.get({
+        url: $rootScope.restful_api.get_equipment_type + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()),
+        successFn: function successFn(res) {
+            res.data.forEach(function (item) {
+                $scope.equipmentTypeData.repeatData.push({
+                    dragItemText: item.modelName,
+                    id: item.modelId
+                });
+            });
+        }
+    });
+
+    //获取所有设备
+    //设备下拉列表数据
+    $scope.equipmentList = {};
+    $scope.equipmentSelectList = [];
+    $scope.equipmentData = {
+        showText: "设备",
+        value: "",
+        repeatData: []
+    };
+    http.get({
+        url: $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()) + "&searchType=1" + "&modelIdList=" + "&locationFilterList=",
+        successFn: function successFn(res) {
+            $scope.equipmentList = res.data;
+            var equipmentList = [];
+            for (var i in $scope.equipmentList) {
+                equipmentList.push({
+                    dragItemText: $scope.equipmentList[i].productUnitName,
+                    id: $scope.equipmentList[i].productUnitId + "_" + $scope.equipmentList[i].type,
+                    equipmentCode: $scope.equipmentList[i].productUnitCode
+                });
+            }
+            $scope.equipmentData.repeatData = equipmentList;
+        }
+    });
+
+    /**
+     * 根据输入的参数名和参数，对物料相关进行模糊查询
+     * @param params : string 输入的参数名
+     */
+    $scope.getMaterialCodeBySearch = function () {
+        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+        return $http.get($rootScope.restful_api.search_material_code + params).then(function (res) {
+            $scope.materialCodeList = res.data.slice(0, 100);
+            $scope.materialCodeList.forEach(function (item) {
+                item.text = item.materialCode;
+            });
+        }, function () {
+            layer.alert('获取物料编码数据失败,请联系技术人员');
+        });
+    };
+
+    $scope.getMaterialNameBySearch = function () {
+        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+        $http.get($rootScope.restful_api.search_material_name + params).then(function (res) {
+            $scope.materialNameList = res.data.slice(0, 100);
+            $scope.materialNameList.forEach(function (item) {
+                item.text = item.materialName;
+            });
+        }, function () {
+            layer.alert('获取物料名称数据失败,请联系技术人员');
+        });
+    };
+    $scope.getMaterialCodeBySearch();
+    $scope.getMaterialNameBySearch();
+
+    //==========================以上是初始进入页面所需执行代码----分割线================
+
+    //根据改动条件，获得equipment设备列表
+    $scope.getEquipment = function () {
+        console.log($scope.equipmentSelectTypeList);
+        http.get({
+            url: $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()) + "&searchType=1" + "&modelIdList=" + $scope.equipmentSelectTypeList.join(",") + "&locationFilterList=" + $scope.get_selected_location().join(","),
+            successFn: function successFn(res) {
+                var productUnit = res.data;
+                var equipmentList = [];
+                for (var i in productUnit) {
+                    equipmentList.push({
+                        dragItemText: productUnit[i].productUnitName,
+                        id: productUnit[i].productUnitId + "_" + (productUnit[i].type === "PRODUCTION_UNIT" ? 1 : 0)
+                    });
+                }
+                $scope.equipmentData.repeatData = equipmentList;
+            }
+        });
+    };
+
+    $scope.searchOnlineConfig = function () {
+        var postData = [];
+        //创建好待会需要渲染表格的数组
+        $scope.onlineConfigList = [];
+        //坑爹的后台数据，前台加个判断，如果设备不选，默认全部全选
+        if ($scope.equipmentSelectList.length === 0) {
+            for (var i in $scope.equipmentList) {
+                postData.push({
+                    "equipmentId": $scope.equipmentList[i].productUnitId,
+                    "produceUnitType": $scope.equipmentList[i].type
+                });
+            }
+            //坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+            postData.forEach(function (selectItem) {
+                $scope.equipmentData.repeatData.some(function (item) {
+                    if (item.id === selectItem.equipmentId + "_" + selectItem.produceUnitType) {
+                        $scope.onlineConfigList.push({
+                            equipmentName: item.dragItemText,
+                            equipmentCode: item.equipmentCode,
+                            equipmentId: selectItem.equipmentId,
+                            equipmentType: selectItem.produceUnitType
+                        });
+                        return true;
+                    }
+                });
+            });
+        } else {
+            $scope.equipmentSelectList.forEach(function (item) {
+                var arr = item.split("_");
+                postData.push({
+                    "equipmentId": arr[0],
+                    "produceUnitType": arr[1]
+                });
+            });
+            //坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+            $scope.equipmentSelectList.forEach(function (selectItem) {
+                $scope.equipmentData.repeatData.some(function (item) {
+                    if (item.id === selectItem) {
+                        $scope.onlineConfigList.push({
+                            equipmentName: item.dragItemText,
+                            equipmentCode: item.equipmentCode,
+                            equipmentId: selectItem.equipmentId,
+                            equipmentType: selectItem.produceUnitType
+                        });
+                        return true;
+                    }
+                });
+            });
+        }
+        http.post({
+            url: $rootScope.restful_api.search_online_config,
+            data: postData,
+            successFn: function successFn(res) {
+                res.data.forEach(function (resItem) {
+                    //获得渲染表格所需要的数据
+                    $scope.onlineConfigList.forEach(function (onlineItem) {
+                        if (resItem.equipmentId + "_" + resItem.produceUnitType === onlineItem.equipmentId + "_" + onlineItem.equipmentType) {
+                            // ({
+                            // 	materialCode:onlineItem.materialCode,
+                            // 	materialId:onlineItem.materialId,
+                            // 	materialName:onlineItem.materialName
+                            // } = resItem);
+                            onlineItem.materialCode = resItem.materialCode;
+                            onlineItem.materialId = resItem.materialId;
+                            onlineItem.materialName = resItem.materialName;
+                        }
+                        // //获得生产物料模糊搜索需要的下拉列表数据
+                        // onlineItem.materialCodeList = $scope.materialCodeList;
+                        // onlineItem.materialNameList = $scope.materialNameList;
+                    });
+                });
+
+                //出现table表格和按钮
+                $scope.isShowSearchConfig = true;
+            }
+        });
+    };
+
+    //当用户模糊查询物料编码
+    $scope.$on("materialCodeParam", function (e, value) {
+        $scope.getMaterialCodeBySearch(value);
+    });
+
+    //当用户模糊查询物料名称
+    $scope.$on("materialNameParam", function (e, value) {
+        $scope.getMaterialNameBySearch(value);
+    });
+
+    //物料下拉列表的联动，根据物料编码或者物料名称的选择，确定另外一个
+    /**
+     * @param data
+     */
+    $scope.selectMaterialName = function (data) {
+        $timeout(function () {
+            var selectObj = $scope.materialCodeList.filter(function (item) {
+                return item.materialCode === data.materialCode;
+            });
+            //设置选中的物料各个属性，在保存的时候获取
+            data.materialName = selectObj[0].materialName;
+            data.materialId = selectObj[0].materialId;
+        });
+    };
+
+    $scope.selectMaterialCode = function (data) {
+        $timeout(function () {
+            var selectObj = $scope.materialNameList.filter(function (item) {
+                return item.materialName === data.materialName;
+            });
+            //设置选中的物料各个属性，在保存的时候获取
+            data.materialCode = selectObj[0].materialCode;
+            data.materialId = selectObj[0].materialId;
+        });
+    };
+
+    //保存上线配置数据
+    $scope.saveOnlineConfig = function () {
+        var postData = [];
+        $scope.onlineConfigList.forEach(function (item) {
+            if (item.materialId) {
+                postData.push({
+                    equipmentId: Number(item.equipmentId),
+                    produceUnitType: item.equipmentType,
+                    materialId: item.materialId
+                });
+            }
+        });
+        http.post({
+            url: $rootScope.restful_api.save_online_config,
+            data: postData,
+            successFn: function successFn(res) {
+                $scope.info.success("保存成功");
+            }
+        });
+    };
+
+    //恢复上线配置数据
+    $scope.resetOnlineConfig = function () {
+        $scope.searchOnlineConfig();
     };
 }]);
 /**
@@ -1489,6 +1746,7 @@ app.controller("planController", ["$rootScope", "$scope", "$timeout", "$q", "sch
         $(this).removeClass("active");
     });
 }]);
+
 /**
  * Created by yiend on 2017/1/16.
  */
@@ -1835,6 +2093,173 @@ app.controller("ruleController", ["$rootScope", "$scope", "$http", "$timeout", "
             });
         }, function () {
             layer.close(deleteRule);
+        });
+    };
+
+    //查看设备初始状态
+    //获取所有的地点
+    http.get({
+        url: $rootScope.restful_api.aps_location_readable,
+        successFn: function successFn(res) {
+            $scope.location_data = {
+                repeatData: res.data,
+                showText: '地点',
+                className: "location"
+            };
+        }
+    });
+
+    //获取所有设备类型
+    //设备类型下拉列表数据
+    $scope.equipmentSelectTypeList = [];
+    $scope.equipmentTypeData = {
+        showText: "设备类型",
+        value: "",
+        repeatData: []
+    };
+    http.get({
+        url: $rootScope.restful_api.get_equipment_type + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()),
+        successFn: function successFn(res) {
+            res.data.forEach(function (item) {
+                $scope.equipmentTypeData.repeatData.push({
+                    dragItemText: item.modelName,
+                    id: item.modelId
+                });
+            });
+        }
+    });
+
+    //获取所有设备
+    //设备下拉列表数据
+    $scope.equipmentSelectList = [];
+    $scope.equipmentData = {
+        showText: "设备",
+        value: "",
+        repeatData: []
+    };
+    http.get({
+        url: $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()) + "&searchType=1" + "&modelIdList=" + "&locationFilterList=",
+        successFn: function successFn(res) {
+            $scope.equipmentList = res.data;
+            var equipmentList = [];
+            for (var i in $scope.equipmentList) {
+                equipmentList.push({
+                    dragItemText: $scope.equipmentList[i].productUnitName,
+                    id: $scope.equipmentList[i].productUnitId + "_" + $scope.equipmentList[i].type,
+                    equipmentCode: $scope.equipmentList[i].productUnitCode
+                });
+            }
+            $scope.equipmentData.repeatData = equipmentList;
+        }
+    });
+
+    //根据改动条件，获得equipment设备列表
+    $scope.getEquipment = function () {
+        console.log($scope.equipmentSelectTypeList);
+        http.get({
+            url: $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date()) + "&endTime=" + tool.getCorrectDate(new Date()) + "&searchType=1" + "&modelIdList=" + $scope.equipmentSelectTypeList.join(",") + "&locationFilterList=" + $scope.get_selected_location().join(","),
+            successFn: function successFn(res) {
+                var productUnit = res.data;
+                var equipmentList = [];
+                for (var i in productUnit) {
+                    equipmentList.push({
+                        dragItemText: productUnit[i].productUnitName,
+                        id: productUnit[i].productUnitId + "_" + (productUnit[i].type === "PRODUCTION_UNIT" ? 1 : 0)
+                    });
+                }
+                $scope.equipmentData.repeatData = equipmentList;
+            }
+        });
+    };
+
+    //打开查看详细的上限配置
+    $scope.lookOnlineConfig = function () {
+        layer.open({
+            content: $(".jOnlineContent"),
+            type: 1,
+            title: "初始生产状态",
+            area: ["600", "700px"],
+            shadeClose: true,
+            success: function success() {}
+        });
+        $scope.isShowSearchConfig = true;
+    };
+
+    $scope.searchOnlineConfig = function () {
+        var postData = [];
+        //创建好待会需要渲染表格的数组
+        $scope.onlineConfigList = [];
+        /*因为坑爹的后台数据没法一次提供所有需要的，
+         所以要先从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
+         然后再去到请求获得数据里面根据设备id_type去获取对应的物料信息，
+         */
+        if ($scope.equipmentSelectList.length === 0) {
+            for (var i in $scope.equipmentList) {
+                postData.push({
+                    "equipmentId": $scope.equipmentList[i].productUnitId,
+                    "produceUnitType": $scope.equipmentList[i].type
+                });
+            }
+            //坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+            postData.forEach(function (selectItem) {
+                $scope.equipmentData.repeatData.some(function (item) {
+                    if (item.id === selectItem.equipmentId + "_" + selectItem.produceUnitType) {
+                        $scope.onlineConfigList.push({
+                            equipmentName: item.dragItemText,
+                            equipmentCode: item.equipmentCode,
+                            equipmentId: item.id.split("_")[0],
+                            equipmentType: item.id.split("_")[1]
+                        });
+                        return true;
+                    }
+                });
+            });
+        } else {
+            $scope.equipmentSelectList.forEach(function (item) {
+                var arr = item.split("_");
+                postData.push({
+                    "equipmentId": arr[0],
+                    "pUnitType": arr[1]
+                });
+            });
+            //坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
+            $scope.equipmentSelectList.forEach(function (selectItem) {
+                $scope.equipmentData.repeatData.some(function (item) {
+                    if (item.id === selectItem) {
+                        $scope.onlineConfigList.push({
+                            equipmentName: item.dragItemText,
+                            equipmentCode: item.equipmentCode,
+                            equipmentId: item.id.split("_")[0],
+                            equipmentType: item.id.split("_")[1]
+                        });
+                        return true;
+                    }
+                });
+            });
+        }
+        //第一步筛选出用户选中的数据
+        http.post({
+            url: $rootScope.restful_api.search_online_config,
+            data: postData,
+            successFn: function successFn(res) {
+                res.data.forEach(function (resItem) {
+                    //获得渲染表格所需要的数据
+                    $scope.onlineConfigList.forEach(function (onlineItem) {
+                        if (resItem.equipmentId + "_" + resItem.produceUnitType === onlineItem.equipmentId + "_" + onlineItem.equipmentType) {
+                            // ({
+                            // 	materialCode:onlineItem.materialCode,
+                            // 	materialId:onlineItem.materialId,
+                            // 	materialName:onlineItem.materialName
+                            // } = resItem);
+                            onlineItem.materialCode = resItem.materialCode;
+                            onlineItem.materialId = resItem.materialId;
+                            onlineItem.materialName = resItem.materialName;
+                        }
+                    });
+                });
+                //出现table表格和按钮
+                $scope.isShowSearchConfig = true;
+            }
         });
     };
 

@@ -49,7 +49,7 @@ body .page-wrapper {
 
 .header {
   flex: 0 0 68px;
-  min-width: 700px;
+  min-width: 800px;
   /*text-align: center;*/
   background: url(../images/wanfeng-logo.png) #FFFFFF left 30px center no-repeat; }
 
@@ -396,7 +396,7 @@ body .page-wrapper {
   transform: translateY(0) rotate(-45deg);
   -ms-transform: translateY(0) rotate(-45deg); }
 
-.pbody .active:after {
+.pbody .user-info.active:after {
   color: #0071ce;
   border-color: #0071ce;
   transition: transform 0.5s;
@@ -595,6 +595,7 @@ body .page-wrapper {
 .search-input-item {
   position: relative;
   display: inline-block;
+  margin-left: 4px;
   outline: none; }
 
 .search-input {

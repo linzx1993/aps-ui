@@ -10,10 +10,9 @@ $whiteColor : #fff;
         top: 220px;
         left: 50%;
         width: 450px;
-//        margin-left: -225px;
 		transform: translate(-50%,0);
         font-size: 13px;
-        
+
         .wrap-btn {
             position: absolute;
             width: 450px;
@@ -33,7 +32,6 @@ $whiteColor : #fff;
             background-color: #d9d9d9;
             cursor: pointer;
             text-align: center;
-            
             &:hover {
                 outline: 2px solid #808080;
             }
@@ -66,7 +64,7 @@ $whiteColor : #fff;
         
         ul {
             height: 145px;
-            padding: 10px 0px;
+            padding: 10px 20px;
             overflow-y: auto;
             background-color: $whiteColor;
             
@@ -81,9 +79,7 @@ $whiteColor : #fff;
                 }
                 
                 span {
-                    position: absolute;
-                    width: auto;
-                    height: auto;
+                    margin-right: 50px;
                     text-align: left;
                     font-size: 14px;
                     color: #444;
@@ -91,12 +87,9 @@ $whiteColor : #fff;
                 
                 b {
                     display: none;
-                    position: absolute;
-                    top: 30%;
-                    right: 20px;
-                    height: 16px;
+                    float: right;
                     font-size: 14px;
-                    line-height: 16px;
+                    line-height: 36px;
                     color: #444;
                     font-weight: normal ;
                     cursor: pointer;
@@ -108,11 +101,9 @@ $whiteColor : #fff;
                 
                 i {
                     display: none;
-                    position: absolute;
-                    top: 30%;
-                    left: 35%;
                     width: 16px;
                     height: 16px;
+                    vertical-align: -4px;
                 }
                 
                 .in-state-icon-success {

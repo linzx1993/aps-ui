@@ -30,6 +30,17 @@
 			}
 		}
 		
+		.aps-dropdown-clean{
+			display: inline-block;
+			position: absolute;
+			right: 12px;
+			top: 8px;
+			width: 14px;
+			height: 14px;
+			background: url($gImgBase + "cancel.png") #fff left center no-repeat;
+			z-index: 10;
+		}
+		
 		&:after{
 			content: '';
 			position: absolute;

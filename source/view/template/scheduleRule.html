@@ -14,9 +14,14 @@
             </nav>
         </div>
         <div class="fr rule-content">
-            <h4 class="rule-name"><input maxlength="20" ng-model="rule.ruleName" type="text" value={{rule.ruleName}}></h4>
+            <h4 class="rule-name"><input maxlength="20" ng-model="currentRule.ruleName" type="text" value={{currentRule.ruleName}}></h4>
             <form class="fr config-form" style="width: 100%;">
                 <div class="simpleConfiguration">
+                    <dl class="mt-15 clearfix" data-name={{scheduleRuleItemShow.isLoadLaunchConfig}} ng-hide="scheduleRuleItemShow.isLoadLaunchConfig">
+                        <dt class="fl">上线模式 ：</dt>
+                        <dd class="fl ml-5 isLoadLaunchConfig"><label for="isLoadLaunchConfig"><input id="isLoadLaunchConfig" name="isLoadLaunchConfig" type="checkbox" ng-model="scheduleCheckData.isLoadLaunchConfig" ng-checked="scheduleCheckData.isLoadLaunchConfig"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd>
+                        <a class="look-online-config jLookOnlineConfig" href="javascript:;" ng-click="lookOnlineConfig()">查看设备初始状态</a>
+                    </dl>
                     <dl class="mt-15 clearfix" data-name={{scheduleRuleItemShow.isLoadOverduePoolTask}} ng-hide="scheduleRuleItemShow.isLoadOverduePoolTask"><dt class="fl">当前日期前的车间计划 ：</dt><dd class="fl ml-5 isLoadOverduePoolTask"><label for="isLoadOverduePoolTask"><input id="isLoadOverduePoolTask" name="isLoadOverduePoolTask" type="checkbox" ng-model="scheduleCheckData.isLoadOverduePoolTask" ng-checked="scheduleCheckData.isLoadOverduePoolTask"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
                     <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.overduePeriod"><dt class="fl">拉取当前车间计划天数 ：</dt>
                         <dd class="fl ml-5">
@@ -125,8 +130,34 @@
             </select>
         </div>
         <p class="mt-30 tc">
-            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="postNewRule()">应用</a>
+            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="recordTemporaryPlan()">应用</a>
             <a class="ml-20 mr-20 reset-config cancal" href="javascript:;">取消</a>
         </p>
+    </div>
+</div>
+<div style="display: none;" class="online-content jOnlineContent">
+    <cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="getEquipment()"></cascader>
+    <search-drop-down-list class="ml-10" search-data="equipmentTypeData" ng-model="equipmentSelectTypeList"  on-change="getEquipment()"></search-drop-down-list>
+    <search-drop-down-list class="ml-10" search-data="equipmentData" ng-model="equipmentSelectList" ></search-drop-down-list>
+    <a href="javascript:void(0)" class="ml-20 start-search" ng-click="searchOnlineConfig()">查询</a>
+    <div class="mt-20 online-table-box" ng-show="isShowSearchConfig">
+        <table class="online-content-table">
+            <thead>
+            <tr>
+                <td>设备编码</td>
+                <td>设备名称</td>
+                <td>生产物料编码</td>
+                <td>生产物料名称</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="data in onlineConfigList">
+                <td>{{data.equipmentCode}}</td>
+                <td>{{data.equipmentName}}</td>
+                <td>{{data.materialCode}}</td>
+                <td>{{data.materialName}}</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>

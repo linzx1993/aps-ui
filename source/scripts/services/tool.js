@@ -7,47 +7,57 @@ app.service('tool', function($rootScope) {
 
 	/**
 	 * 设置表格头部宽度
+	 * @param parentNodes ：表格最顶级的父元素
 	 * @param num ：首行固定的数量
 	 */
 	this.setTableHeadWidth = function(parentNodes,num = 0) {
-		var lastLeft = 0;
-		var jCoverHead = parentNodes.find(".cover-head"),
+		let lastLeft = 0;
+		let jCoverHead = parentNodes.find(".cover-head"),
 			jShowTable = parentNodes.find(".show-table thead");
 		jCoverHead.width(jShowTable.width());
 		jCoverHead.height(jShowTable.height());
-		var jCoverTh = jCoverHead.find("div");
-		var jHeadTh = jShowTable.find("th");
-		var thNum = jHeadTh.length;
-		for(var i = 0; i < thNum; i++) {
-			if(!!window.ActiveXObject || "ActiveXObject" in window) {
-				if(i == thNum - 1) {
-					jCoverTh.eq(i).width(jShowTable.width() - jHeadTh.eq(i).position().left - 2);
+		let jHeadTh = jShowTable.find("th");
+		let thNum = jHeadTh.length;
+		jCoverHead.each(function (i) {
+			let jCoverTh = $(this).find("div");
+			for(let i = 0; i < thNum; i++) {
+				//判断是否为IE浏览器
+				if(!!window.ActiveXObject || "ActiveXObject" in window) {
+					if(i === thNum - 1) {
+						jCoverTh.eq(i).width(jShowTable.width() - jHeadTh.eq(i).position().left - 2);
+					} else {
+						let thisWidth = jHeadTh.eq(i + 1).position().left - lastLeft - 2;
+						lastLeft = jHeadTh.eq(i + 1).position().left;
+						jCoverTh.eq(i).width(thisWidth);
+					}
 				} else {
-					var thisWidth = jHeadTh.eq(i + 1).position().left - lastLeft - 2;
-					lastLeft = jHeadTh.eq(i + 1).position().left
-					jCoverTh.eq(i).width(thisWidth);
+					jCoverTh.eq(i).width(jHeadTh.eq(i).width());
 				}
-			} else {
-				jCoverTh.eq(i).width(jHeadTh.eq(i).width());
 			}
-		}
+		});
 		//=====首行固定宽度代码,如果需要固定的话
 		if(num > 0){
-            let width = 0;//获取固定两列的宽度
             parentNodes.each(function () {
+            	let _this = $(this);
+            	//获得table头部栏的宽度，根据table头部栏的宽度来设置div的宽度
                 let td = $(this).find(".show-table thead").children("tr").eq(0).children("th");
-                for(let index = 0;index < num;index ++){
-                    let currentWidth = td.eq(index).width();
-                    jCoverHead.children().eq(index).css("left",width + parentNodes.find(".table-space").scrollLeft());
-                    jCoverHead.children().eq(index).width(currentWidth + 2);
-                    width += currentWidth;
-                }
-				jCoverHead.width(jCoverHead.width() - width);//针对可以看见滚动条，却无法移动的bug（还有一个bug数据太多，是看不见滚动条）
-                $(this).find(".fix-table-column").width(width + num * 3);
+				jCoverHead.each(function () {
+					let width = 0;//获取固定两列的宽度
+					for(let index = 0;index < num;index ++){
+						let currentWidth = td.eq(index).width();
+						console.log(width + parentNodes.find(".table-space").scrollLeft());
+						$(this).children().eq(index).css({
+							left:width + parentNodes.find(".table-space").scrollLeft(),
+							width : currentWidth + 2
+						});
+						width += currentWidth;
+					}
+					$(this).width($(this).width() - width);//针对可以看见滚动条，却无法移动的bug,因为被透明栏挡住了（还有一个bug数据太多，是看不见滚动条）
+					jCoverHead.css("padding-left",width + num * 2);//设置首部固定栏前面的padding-left
+				});
+                $(this).find(".fix-table-column").width(width + num * 3);//加上num的宽度是因为border
                 $(this).find(".fix-table").width(width + num * 3);
-
             });
-            jCoverHead.css("padding-left",width + num * 2);
 		}else{
 			jCoverHead.css("padding-left",0);
 		}
@@ -55,23 +65,23 @@ app.service('tool', function($rootScope) {
 
 	/**二级页面地点下拉框（有时间可封装成共有的下拉框组件）
 	 * 
-	 * @param 所有地点对象
-	 * @param 当前input对象
-	 * @param 是否单选
+	 * @param allInfo:所有地点对象
+	 * @param thisInput:当前input对象
+	 * @param selectOne:是否单选
 	 * 
 	 */
 	this.dialogWindowEquipment = function(allInfo, thisInput, selectOne) {
-		var jTableDialogWindow = $(".table-dialog-window");
-		var thisTarget = thisInput.target;
-		var x = thisTarget.offsetLeft;
-		var y = thisTarget.offsetTop + thisTarget.offsetHeight;
-		var equipmentList = $("<div class='equipment-list'><ul></ul></div>");
-		var equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(","),
+		let jTableDialogWindow = $(".table-dialog-window");
+		let thisTarget = thisInput.target;
+		let x = thisTarget.offsetLeft;
+		let y = thisTarget.offsetTop + thisTarget.offsetHeight;
+		let equipmentList = $("<div class='equipment-list'><ul></ul></div>");
+		let equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(","),
 			equipmentInfo = allInfo.punit,
 			idInfo = allInfo.punitId;
 
-		for(var i in idInfo) {
-			var thisText = equipmentInfo[idInfo[i]].punitName || equipmentInfo[idInfo[i]].productUnitName;
+		for(let i in idInfo) {
+			let thisText = equipmentInfo[idInfo[i]].punitName || equipmentInfo[idInfo[i]].productUnitName;
 			if(equipmentInputVal.indexOf(thisText) >= 0) {
 				equipmentList.find("ul").append($("<li class='li-selected'></li>").text(thisText).attr("equipment-id", i));
 			} else {
@@ -200,6 +210,7 @@ app.service('tool', function($rootScope) {
 	 * @returns 时间字符串（2016-01-01）
 	 */
 	this.dateToString = function(date) {
+		date = new Date(date);
 		var year = date.getFullYear();
 		var month = date.getMonth() + 1;
 		if(month < 10) {
@@ -219,13 +230,13 @@ app.service('tool', function($rootScope) {
 	 * @return{string} 包含从input中读取的、经过转码的参数的数组
 	 */
 	this.getFromInput = function(className) {
-		if(typeof(className) != "string") {
+		if(typeof(className) !== "string") {
 			// return
 		}  else {
 			const thisEle = $(className);
 			if(thisEle.is("input")) {
 				return encodeURIComponent(thisEle.val().trim());
-			} else if(thisEle.find("input").length == 1) {
+			} else if(thisEle.find("input").length === 1) {
 				return encodeURIComponent(thisEle.find("input").val().trim());
 			} else if(thisEle.find("input").length > 1) {
 				// var returnList = [];
@@ -245,14 +256,14 @@ app.service('tool', function($rootScope) {
 	 * @return{string} 包含从input中读取的参数的数组
 	 */
 	this.getFromInput_nocode = function(className) {
-		if(typeof(className) != "string") {
-			return;
+		if(typeof(className) !== "string") {
+			// return;
 		} else {
 			var thisEle = $(className);
 
 			if(thisEle.is("input")) {
 				return thisEle.val().trim();
-			} else if(thisEle.find("input").length == 1) {
+			} else if(thisEle.find("input").length === 1) {
 				return thisEle.find("input").val().trim();
 			} else if(thisEle.find("input").length > 1) {
 				// var returnList = [];
@@ -394,7 +405,7 @@ app.service('tool', function($rootScope) {
 					progressbar.find(".process-label").html(text + "处理中，请稍后……" + progressVal + "%");
 					if(progressVal || progressVal == 0) { //数据正确
 						if(progressVal < 100) {
-							var j = setTimeout(SetProgress, 1000);
+							let j = setTimeout(SetProgress, 1000);
 							if(i > 3600) {
 								layer.alert("进度失败，请联系技术人员处理");
 								clearTimeout(j);
@@ -402,7 +413,7 @@ app.service('tool', function($rootScope) {
 							}
 						} else {
 							//									progressLabel.text(text+"完成");
-							progressLabel.text("100%")
+							progressLabel.text("100%");
 							progressbar.find(".process-label").html(text + "完成" + progressVal + "%");
 							fn(); //参数
 						}
@@ -706,5 +717,35 @@ app.service('tool', function($rootScope) {
 		}
 		//返回重置后的时间
 		return new Date(oldDate.setDate(oldDate.getDate() + moveDay));
+	}
+	/**
+	 * 传入任何时间格式或者错误日期（2017-06-45），将时间输出为2017-07-15的时间格式
+	 * time:2017-06-21
+	 * last : linzx
+	 * @param date
+	 * @returns string 2017-07-15
+	 */
+	this.getCorrectDate = function(date) {
+		const currentTime = date ? new Date(date) : new Date();
+		const month = (currentTime.getMonth() + 1) < 10 ? "0" + (currentTime.getMonth() + 1) :(currentTime.getMonth() + 1);
+		const day = currentTime.getDate() < 10 ? "0" + currentTime.getDate() :currentTime.getDate();
+		return currentTime.getFullYear() + "-" + month + "-" + day;
+	}
+
+	/**
+	 * desc:查询某个月有几天
+	 * time:2017-06-21
+	 * last : linzx
+	 * @param: month ：查询的年月份
+	 * @return: number 查询那个月的天数 0-31
+	 **/
+	this.getMonthDays = function(date) {
+		const curDate = new Date(date || new Date());
+		const curMonth = curDate.getMonth();
+		curDate.setMonth(curMonth + 1);
+		/* 将日期设置为0, 这里为什么要这样设置, 我不知道原因, 这是从网上学来的 */
+		curDate.setDate(0);
+		/* 返回当月的天数 */
+		return curDate.getDate();
 	}
 });

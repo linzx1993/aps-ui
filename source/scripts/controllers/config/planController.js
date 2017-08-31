@@ -245,7 +245,7 @@ app.controller("planController", ["$rootScope", "$scope", "$timeout","$q", "sche
      * desc:根据点击车间，改变中间车间列表展示数据，需要展示哪些车间
      * time:2017-06-12
      * last:linzx
-     * @param: locationId :车间id，
+     * @param: locationId :点击的车间id，
      **/
     let changeParentLocationList = (locationId) => {
         const parentLocationId = locationId.slice(0,-2);
@@ -294,87 +294,6 @@ app.controller("planController", ["$rootScope", "$scope", "$timeout","$q", "sche
         //如果父元素车间不是最上级车间，则继续向上改变
         if(parentLocationId &&　parentLocationId !== "01"){
             changeParentLocationList(parentLocationId);
-        }
-    };
-
-    /**排程方案保存进行发送数据**/
-    $scope.saveSchedulePlan = () => {
-		const planNameVal = $(".jPlanName input").val(),
-            currentPlanLi = $(".schedulePlanLi.active"),
-            locationLi = $("#workshopRule").children("ul").children("li");
-		if (!planNameVal.length) {
-			layer.alert("排程方案名不可以为空");
-			return;
-		}
-        //如果保存方案中时没有车间，则给出提示
-        if (locationLi.length <= 0) {
-            layer.alert("请为排程方案至少选择一个车间");
-            return;
-        }
-		//新建一个需要发送的post数据
-		let postData = {
-			"schemeId": currentPlanLi.attr("data-scheme-id"),
-			"schemeName": planNameVal,
-			"locationRuleList": []
-		};
-        let emptyRule = true;//用于后面判断
-        //遍历所有的车间li用于获取车间顺序和相应的规则信息
-        locationLi.each(function () {
-            let item = $(this)[0];
-            let locationA = item.firstElementChild;
-            let ruleA = item.lastElementChild.firstElementChild;
-            let obj = {
-                "locationId": item.getAttribute("data-location-id"),
-                "locationName": locationA.innerHTML,
-                "ruleId": ruleA.getAttribute("data-rule-id"),
-                "ruleName": ruleA.innerHTML,
-            };
-            if(ruleA.getAttribute("data-rule-id") === ""){
-                emptyRule = false;
-            }
-            postData.locationRuleList.push(obj);
-        });
-		if(!emptyRule){
-			layer.alert("请为每个排程车间配备排程规则");
-			return;
-		}
-        /*判断是否是临时方案，如果是更新，不是则新建方案
-         *true : 临时方案，执行新建操作；false ：已保存方案，执行更新
-        */
-        if (postData.schemeId.slice(0, 9) === "temporary") {
-            delete postData.schemeId;
-            http.post({
-                url: $rootScope.restful_api.single_schedule_plan,
-                data: postData,
-                successFn: (res) => {
-                    if (res.data) {
-                        $scope.info.success("排程方案新建成功");
-                        //将临时id替换成获得的方案id
-                        currentPlanLi.attr("data-scheme-id",res.data);
-                        $scope.currentPlan.schemeId = res.data;
-                        $scope.schemeId = res.data;
-                    }
-                    /*
-                     * 判断是否临时创建的方案，用于离开排程方案页面进行判断，
-                     * 判断代码写在路由配置文件里routerConfig.js
-                     */
-					sessionStorage.temporarySchemeLength = Object.keys($scope.temporarySchemeData).length;
-                },
-                errorFn: function () {
-                    $scope.info.fail("排程方案新建失败，请检查服务器");
-                }
-            });
-        } else {
-            http.put({
-                url: $rootScope.restful_api.single_schedule_plan + $scope.schemeId,
-                data: postData,
-                successFn: (res) => {
-                    $scope.info.success("排程方案更新成功");
-                },
-                errorFn: function () {
-                    $scope.info.fail("排程方案更新失败");
-                }
-            });
         }
     };
 
@@ -451,6 +370,87 @@ app.controller("planController", ["$rootScope", "$scope", "$timeout","$q", "sche
         sessionStorage.temporarySchemeLength = Object.keys($scope.temporarySchemeData).length;
         layer.closeAll();
     };
+
+	/**排程方案保存进行发送数据**/
+	$scope.saveSchedulePlan = () => {
+		const planNameVal = $(".jPlanName input").val(),
+			currentPlanLi = $(".schedulePlanLi.active"),
+			locationLi = $("#workshopRule").children("ul").children("li");
+		if (!planNameVal.length) {
+			layer.alert("排程方案名不可以为空");
+			return;
+		}
+		//如果保存方案中时没有车间，则给出提示
+		if (locationLi.length <= 0) {
+			layer.alert("请为排程方案至少选择一个车间");
+			return;
+		}
+		//新建一个需要发送的post数据
+		let postData = {
+			"schemeId": currentPlanLi.attr("data-scheme-id"),
+			"schemeName": planNameVal,
+			"locationRuleList": []
+		};
+		let emptyRule = true;//用于后面判断
+		//遍历所有的车间li用于获取车间顺序和相应的规则信息
+		locationLi.each(function () {
+			let item = $(this)[0];
+			let locationA = item.firstElementChild;
+			let ruleA = item.lastElementChild.firstElementChild;
+			let obj = {
+				"locationId": item.getAttribute("data-location-id"),
+				"locationName": locationA.innerHTML,
+				"ruleId": ruleA.getAttribute("data-rule-id"),
+				"ruleName": ruleA.innerHTML,
+			};
+			if(ruleA.getAttribute("data-rule-id") === ""){
+				emptyRule = false;
+			}
+			postData.locationRuleList.push(obj);
+		});
+		if(!emptyRule){
+			layer.alert("请为每个排程车间配备排程规则");
+			return;
+		}
+        /*判断是否是临时方案，如果是更新，不是则新建方案
+         *true : 临时方案，执行新建操作；false ：已保存方案，执行更新
+         */
+		if (postData.schemeId.slice(0, 9) === "temporary") {
+			delete postData.schemeId;
+			http.post({
+				url: $rootScope.restful_api.single_schedule_plan,
+				data: postData,
+				successFn: (res) => {
+					if (res.data) {
+						$scope.info.success("排程方案新建成功");
+						//将临时id替换成获得的方案id
+						currentPlanLi.attr("data-scheme-id",res.data);
+						$scope.currentPlan.schemeId = res.data;
+						$scope.schemeId = res.data;
+					}
+                    /*
+                     * 判断是否临时创建的方案，用于离开排程方案页面进行判断，
+                     * 判断代码写在路由配置文件里routerConfig.js
+                     */
+					sessionStorage.temporarySchemeLength = Object.keys($scope.temporarySchemeData).length;
+				},
+				errorFn: function () {
+					$scope.info.fail("排程方案新建失败，请检查服务器");
+				}
+			});
+		} else {
+			http.put({
+				url: $rootScope.restful_api.single_schedule_plan + $scope.schemeId,
+				data: postData,
+				successFn: (res) => {
+					$scope.info.success("排程方案更新成功");
+				},
+				errorFn: function () {
+					$scope.info.fail("排程方案更新失败");
+				}
+			});
+		}
+	};
 
     //查看方案
     $scope.lookPlan = (plan) => {

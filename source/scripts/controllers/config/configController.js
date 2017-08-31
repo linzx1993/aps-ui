@@ -247,18 +247,18 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
         //设定排程前的顺序 === [颜色信息校验,刀具信息校验,夹具信息校验,产能校验,物料信息校验,PAP信息校验,工艺路线信息校验,排程步骤校验,适宜设备校验,系统配置校验]
         $scope.scheduleFrontData = [];
         let frontData = scheduleTableViewModelService.validation_rules_from(res);//获得排程前需要的数据
-        //"CT_INFO_CHECKING","FIXTURE_INFO_CHECKING","PAP_INFO_CHECKING",
+        //
         let scheduleFrontData = ["COLOR_INFO_CHECKING","CAPABILITY_INFO_CHECKING","MATERIAL_INFO_CHECKING",
-            "ROUTING_INFO_CHECKING","SUITABLE_PRODUCT_INFO_CHECKING","SYSTEM_CONFIG_CHECKING"];
+            "ROUTING_INFO_CHECKING","SUITABLE_PRODUCT_INFO_CHECKING","SYSTEM_CONFIG_CHECKING","CT_INFO_CHECKING","FIXTURE_INFO_CHECKING","PAP_INFO_CHECKING",];
         scheduleFrontData.forEach((item,index)=>{
             $scope.scheduleFrontData.push(frontData[item]);
         });
 
-        //设定排程后的顺序 === [物流疏通校验,齐套性校验,组合件校验,超产能校验,生产时间校验]
+        //设定排程后的顺序 === [超产能校验,齐套性校验,组合件校验,生产时间校验]
         $scope.scheduleLaterData = [];
         let laterData = scheduleTableViewModelService.validation_rules_later(res);//获得排程后需要的数据
-        //"PROCESS_SEQ_CHECKING","POMO_SUIT_CHECKING","ASSEMBLING_UNIT",
-        let scheduleLaterData = ["CAPABILITY_OVER_CHECKING","PRODUCTION_TIME_CHECKING"];
+        //
+        let scheduleLaterData = ["CAPABILITY_OVER_CHECKING","POMO_SUIT_CHECKING","ASSEMBLING_UNIT","PRODUCTION_TIME_CHECKING",];
         scheduleLaterData.forEach((item)=>{
             $scope.scheduleLaterData.push(laterData[item]);
         });
@@ -279,53 +279,7 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
             //控制选中状态
         }, 0);
     };
-    //根据此模块设置各个排程规则项的是否要展示
-    $scope.scheduleRuleItemShow = {
-        isLoadOverduePoolTask : true,   //当前日期前的车间计划 ：
-        overduePeriod : true,   //拉取当前车间计划天数
-        schedulePeriodSelected : true,  //排程周期
-        scheduleInterval : true,    //排程间隔
-        minScheduleDay : true,  //最早起排日期
-        freezePeriod : true,    //冻结期
-        //排程前校验
-        preScheduleCheckMap : {
-            CAPABILITY_INFO_CHECKING : false,    //产能校验
-            COLOR_INFO_CHECKING : false,         //颜色信息校验
-            CT_INFO_CHECKING : true,            //刀具信息校验
-            FIXTURE_INFO_CHECKING : true,       //夹具信息校验
-            MATERIAL_INFO_CHECKING : false,      //物料信息校验
-            PAP_INFO_CHECKING : true,           //PAP信息校验
-            ROUTING_INFO_CHECKING : false,       //排程步骤校验
-            SUITABLE_PRODUCT_INFO_CHECKING : false,  //适宜设备校验
-            SYSTEM_CONFIG_CHECKING : false,      //系统配置校验
-        },
-        //排程后校验
-        postScheduleCheckMap : {
-            ASSEMBLING_UNIT : true,             //组合件校验
-            CAPABILITY_OVER_CHECKING : false,    //超产能校验
-            POMO_SUIT_CHECKING : true,          //齐套性校验
-            PROCESS_SEQ_CHECKING : true,        //物流疏通校验
-            PRODUCTION_TIME_CHECKING : false,    //生产时间校验
 
-        },
-        papTypeSelected : true,
-        schedulePointSelected : true,   //起排工序
-        isAheadOn: true,   //启用延迟生产
-        isCombinationOn: true, //启用组合件
-        isEconomicOn: true,    //启用经济批量
-        isFrequencyOn: true,   //启用生产频度
-        isUseNotMassEqu: true, //使用非批量设备
-        //排程因子权重
-        scheduleWeightMap : {
-            KEY_EQUIPMENT : true,       //关键设备
-            MOST_USED_EQUIPMENT : true, //高负荷设备
-            SAME_COLOR : true,          //相同颜色
-            SAME_CT : true,             //相同刀具
-            SAME_FIXTURE : true,        //相同物料
-            SAME_MATERIAL : true,       //相似物料
-            SIMILAR_MATERIAL : true,    //相似物料
-        }
-    };
 
 
     /**

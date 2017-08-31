@@ -14,7 +14,7 @@
 .pbody {
 	flex: 1 1;
 	position: relative;
-	min-width: 700px;
+	min-width: 800px;
 }
 
 /* 页面内容层样式。 */
@@ -1051,12 +1051,8 @@
 			}
 		}	
 		.scrollbar {
-			.scrollbar-date-select {
+			.scrollbar-dateSelect {
 				top: calc(115px - 100vh);
-			}
-			
-			&:before{
-				top: calc(130px - 100vh);
 			}
 		}
 	}
@@ -1121,7 +1117,7 @@
 .cache-window {
 	position: absolute;
 	width: calc(40% - 110px);
-	height: 620px;
+	height: calc(100vh - 150px);
 	min-width: 360px;
 	right: 68px;
 	top: 30px;
@@ -1307,11 +1303,28 @@
 		border-left: 2px solid #a7b7cc;
 		border-right: 2px solid #a7b7cc;
 	}
-	.scrollbar-date-select{
-		position: absolute;
+	.scrollbar-dateSelect{
 		display: flex;
+		position: absolute;
 		top: calc(190px - 100vh);
-		left: 210px;
+		width: 100%;
+	}
+	.scrollbar-dateSelect-between{
+		width: 30px;
+		height: 2px;
+		margin: 14px 5px;
+		background: rgba(255,255,255,0.2);
+	}
+	
+	.quickTime{
+		padding: 0 4px;
+		margin: 0 4px;
+		color: #e5e5e5;
+		line-height: 30px;
+		cursor: pointer;
+	}
+	.scrollbar-date-select{
+		display: flex;
 		width: 160px;
 		height: 16px;
 		padding: 6px 0;
@@ -1379,19 +1392,7 @@
 			}
 		}
 	}
-	.scrollbar-min-startdate{
-		left: 0;
-	}
 	
-	&:before{
-		content: "";
-		position: absolute;
-		top: calc(204px - 100vh);
-		left: 170px;
-		width: 30px;
-		height: 0;
-		border-top: 2px solid rgba(255,255,255,0.2);
-	}
 	&:after{
 		content: "";
 		position: absolute;
@@ -1485,7 +1486,7 @@
 		text-align: right;
 	}
 	.search-input{
-		margin-left: 4px;
+//		margin-left: 4px;
 		height: 22px;
 		width: 100px;
 		padding: 3px 28px 3px 10px;

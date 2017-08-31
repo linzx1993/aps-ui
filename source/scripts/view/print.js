@@ -58,7 +58,7 @@
 	 	$("h1").width(thisWidth);
 	 	
 	 	//首页获取标题
-	 	var thisPageHeight = $(".printBody h1").outerHeight(true);
+//	 	var thisPageHeight = $(".printBody h1").outerHeight(true);
 	 	var tableTr = $("tr");
 	 	var newPrint = $("<div class='newPrint' style='text-align:center;vertical-align:middle'></div>");
 	 	var printBox = $("<div class='printBox nextpage'><table style='width:100%;text-align:center;border-collapse:collapse'></table></div>");

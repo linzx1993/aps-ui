@@ -13,15 +13,21 @@
 				class="aps-dropdown-input"
 				placeholder="请选择"
 				v-model="selectedLabel"
-				:title="selectedLabel.join()"
+				:title="selectedTitle"
 				readonly>
+			<i 
+				class="aps-dropdown-clean"
+				v-if='showClean'
+				title='清除选中'
+				@click='clean'>
+			</i>
 		</span>
 		<div
 			class="aps-dropdown-menus"
 			v-show="menusShow">
 			<div
 				class="aps-dropdown-placeholder"
-				v-if="options.length === 0">
+				v-if="options.length === 0  && !remote">
 				暂无数据
 			</div>
 			<div
@@ -34,13 +40,13 @@
 				全部
 			</div>
 			<div
-				v-if="searchable"
+				v-if="searchable || remote"
 				class="aps-dropdown-search">
 				<input 
 					type="text"
 					v-model="query"
 					class="aps-dropdown-inner-input"
-					placeholder="请输入">
+					:placeholder="placeholder">
 			</div>
 			<ul>
 				<slot></slot>
@@ -79,23 +85,40 @@ export default{
 
 	props: {
 		multiple: Boolean,
+		remote: Boolean,
 		value: {
 			required: true
 		},
 		searchable: {
 			default: true
+		},
+		placeholder: {
+			default: '请输入关键字'
 		}
 	},
 
+	computed: {
+		selectedTitle(){
+			return Array.isArray(this.selectedLabel) ? this.selectedLabel.join(',') : this.selectedLabel;
+		},
+		showClean(){
+			return !!this.selectedTitle
+		}
+	},
+	
 	watch: {
+		options(){
+			this.checkedAll = true;
+			this.broadcast('apsOption', 'queryChange', this.query.toLowerCase());
+		},
 		value(val){
 			
 			this.setSelected()
 			
-			this.$emit('change',val);
+			this.$emit('change',this.value);
 			
 			//更新全选状态
-			if(this.value.length){
+			if(typeof(this.value) === 'number' || this.value.length){
 				this.checkedAll = true;
 				this.broadcast('apsOption', 'queryChange', this.query.toLowerCase());
 			}else{
@@ -103,6 +126,10 @@ export default{
 			}
 		},
 		query(val){
+			if(this.remote){
+				this.$emit('remoteQuery',val);
+				return;
+			}
 			this.checkedAll = true;
           	this.broadcast('apsOption', 'queryChange', val.toLowerCase());
 		}
@@ -110,51 +137,6 @@ export default{
 
 	methods: {
 		/**
-<<<<<<< HEAD
-<<<<<<< HEAD
-		 * desc:li的click，选中或者取消选中
-		 * time:2017-06-29
-		 * author:dww
-		 * last:dww
-		 * @param: node:click的节点
-		 **/
-		liClick: function(node){
-			if(this.multiple){
-				if(node.checked){
-					this.checkedNodeArr.splice(this.checkedNodeArr.indexOf(node.id),1);
-					this.checkedShow.splice(this.checkedShow.indexOf(node.showText),1);
-					this.$set(node, 'checked', false);
-				}else{
-					this.checkedNodeArr.push(node.id);
-					this.checkedShow.push(node.showText);
-					this.$set(node, 'checked', true);
-				}
-			}else{
-				this.checkedNodeArr = [];
-				this.checkedShow = [];
-				if(node.checked){
-					this.$set(node, 'checked', false);
-				}else{
-					this.checkedNodeArr.push(node.id);
-					this.checkedShow.push(node.showText);
-					for(let i = 0,l = this.dropDownList.length ; i < l ; i++){
-						if(this.dropDownList[i].checked){
-							this.$set(this.dropDownList[i], 'checked', false);
-							break;
-						}
-					}
-					this.$set(node, 'checked', true)
-				}
-			}
-
-			this.$emit("input", this.checkedNodeArr);
-
-		},
-
-		/**
-=======
->>>>>>> ed042e48dff273501b52b1aeb0f8edde7163a06a
-=======
 		 * desc:刷新显示选中值
 		 * time:2017-07-26
 		 * author:dww
@@ -163,29 +145,48 @@ export default{
 		setSelected(){
 			const result = [];	
 			//传入值不是数组或者字符串
-			if(!Array.isArray(this.value) && typeof(this.value) !== 'string'){
+			if(!Array.isArray(this.value) && typeof(this.value) !== 'string' && typeof(this.value) !== 'number'){
+				this.$emit('input',this.multiple ? [] : '')
 				return;
 			}
-			//在单选的情况下传入长度大于1的数组
-			if(!this.multiple && Array.isArray(this.value) && this.value.length > 1){
+			//多选
+			if(this.multiple){
+				//传入字符串或者数字
+				if(typeof(this.value) === 'string' || typeof(this.value) === 'number'){
+					this.$emit('input',[this.value])
+				}
+				this.options.every(item =>{
+					if(this.value.indexOf(item.value) > -1){
+						result.push(item.label);
+					}
+					return true;
+				});
+				if(this.remote){
+					for(let i = 0,l = result.length; i < l; i++){
+						if(this.selectedLabel.indexOf(result[i]) === -1){
+							this.selectedLabel.push(result[i]);
+						}
+					}
+					return;
+				}
+				this.selectedLabel = result;
 				return;
-			}
-			//字符串转数组
-			if(typeof(this.value) === 'string'){
-				this.value = this.value ? this.value : [];
 			}
 			
+			if(Array.isArray(this.value)){
+				this.$emit('input',this.value.length ? this.value[0] : '')
+				return;
+			}
+			this.selectedLabel = '';
 			this.options.every(item =>{
-				if(this.value.indexOf(item.value) > -1){
-					result.push(item.label);
+				if(this.value === item.value){
+					this.selectedLabel = item.label;
+					return false;
 				}
 				return true;
 			});
-			
-			this.selectedLabel = result;
 		},
 		/**
->>>>>>> 392a97c5f36cd9074d65eb74d5758f3af182c3b7
 		 * desc:全选全不选
 		 * time:2017-06-29
 		 * author:dww
@@ -219,13 +220,16 @@ export default{
 					  optionIndex = value.indexOf(option.value);
 				if(optionIndex > -1){
 					value.splice(optionIndex, 1);
+					if(this.remote){
+						this.selectedLabel.splice(this.selectedLabel.indexOf(option.label),1);
+					}
 				}else{
 					value.push(option.value);
 				}
 				this.$emit('input', value);
 			}else{
-				if(this.value.indexOf(option.value) > -1){
-					this.$emit('input', []);
+				if(this.value == option.value){
+					this.$emit('input', '');
 					return;
 				}
 				this.$emit('input', option.value);
@@ -254,6 +258,9 @@ export default{
 			if (index > -1) {
 			  this.options.splice(index, 1);
 			}
+			if(this.remote){
+				return;
+			}
 			this.$emit("input", []);
 		},
 		/**
@@ -276,14 +283,27 @@ export default{
 				this.value.push(option.value);
 			}else{
 				this.value.splice(this.value.indexOf(option.value),1);
+				if(this.remote){
+					this.selectedLabel.splice(this.selectedLabel.indexOf(option.label),1);
+				}
 			}
+		},
+		/**
+		 * desc:清除选中
+		 * time:2017-07-28
+		 * author:dww
+		 * last:dww
+		 **/
+		clean(){
+			this.$emit('input', this.multiple ? [] : '');
+			this.selectedLabel = [];
 		}
 	},
 
 	created() {
 		//初始选中的值
-		this.$emit("input", this.initialValue);
-		this.selectedLabel = this.initialLabel.slice();
+//		this.$emit("input", this.initialValue);
+//		this.selectedLabel = this.initialLabel.slice();
 
 		//监听li点击
 		this.$on('handleOptionClick', this.handleOptionSelect);
@@ -293,6 +313,10 @@ export default{
 		this.$on('visibleNotSelected', this.notSelectAll);
 		//监听全选
 		this.$on('selectAllOption', this.selectAllOption);
+		
+		if(this.value.length === 0 || this.value === ''){
+			this.$emit('input', this.multiple ? [] : '');
+		}
 	}
 }
 

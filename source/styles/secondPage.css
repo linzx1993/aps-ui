@@ -19,7 +19,7 @@
 
 .table-dialog-window {
   width: 60%;
-  height: 620px;
+  height: calc(100vh - 150px);
   min-width: 600px;
   top: 30px;
   left: 20px; }
@@ -59,7 +59,6 @@
 .table-dialog-window .info-show {
   position: relative;
   text-align: left;
-  padding: 0 175px 0 0;
   margin-bottom: 10px;
   border-bottom: 1px solid #CCC; }
 

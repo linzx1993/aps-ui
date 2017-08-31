@@ -13,42 +13,40 @@ Object.keys(baseWebpackConfig.entry).forEach(function (name) {
 });
 
 module.exports = merge(baseWebpackConfig, {
-  module: {
-    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap })
-  },
-  // cheap-module-eval-source-map is faster for development
-  devtool: '#cheap-module-eval-source-map',
-  // devtool: '#eval',
-  plugins: [
-    new webpack.ProvidePlugin({
-      JQuery : "jquery",
-      $:"jquery",
-      // url : './src/scripts/url.js',
-      // url : 'url'
-    }),
-    new webpack.DefinePlugin({
-      'process.env': config.dev.env
-    }),
-    // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    // https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
-      inject: true
-    }),
-    new FriendlyErrorsPlugin(),
-    //happypack多开启一个线程进行构想项目
-    new HappyPack({
-      id: 'happybabel',
-      loaders: ['babel-loader'],
-      threads: 4,
-    }),
-    // new HappyPack({
-    //   id: 'vue',
-    //   threads: 2,
-    //   loaders: [ 'vue-loader' ]
-    // })
-  ]
+    module: {
+        rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap })
+    },
+    // cheap-module-eval-source-map is faster for development
+    devtool: '#cheap-module-eval-source-map',
+    // devtool: '#eval',
+    plugins: [
+        new webpack.ProvidePlugin({
+            JQuery : "jquery",
+            $:"jquery",
+        }),
+        new webpack.DefinePlugin({
+            'process.env': config.dev.env
+        }),
+        // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin(),
+        // https://github.com/ampedandwired/html-webpack-plugin
+        new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: 'index.html',
+            inject: true
+        }),
+        new FriendlyErrorsPlugin(),
+        //happypack多开启一个线程进行构想项目
+        new HappyPack({
+            id: 'happybabel',
+            loaders: ['babel-loader'],
+            threads: 4,
+        }),
+        // new HappyPack({
+        //   id: 'vue',
+        //   threads: 2,
+        //   loaders: [ 'vue-loader' ]
+        // })
+    ]
 });

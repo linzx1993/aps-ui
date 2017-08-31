@@ -79,23 +79,16 @@
   opacity: 0;
   z-index: 30; }
   .pbody .exDiffer-window .external-diff-tab {
-    position: absolute;
     width: 125px;
-    height: calc(100% - 41px);
-    left: 0px;
-    top: 40px;
     border-bottom: 1px solid #dedede;
-    background: #d4dfef; }
+    background-color: #d4dfef; }
     .pbody .exDiffer-window .external-diff-tab li {
       display: block;
       position: relative;
-      width: 125px;
-      background: #d4dfef;
+      background-color: #d4dfef;
       font-size: 14px;
       line-height: 45px;
       color: #333333;
-      float: left;
-      margin-right: 30px;
       cursor: pointer; }
       .pbody .exDiffer-window .external-diff-tab li .each-diff-num {
         position: absolute;
@@ -146,9 +139,7 @@
       border: 1px solid #1e7cd9; }
   .pbody .exDiffer-window .dialog-window-body {
     flex: 1 1;
-    padding: 0px 20px 20px 145px;
-    display: flex;
-    flex-direction: column; }
+    display: flex; }
     .pbody .exDiffer-window .dialog-window-body .window-tr-onlook {
       background-color: #fcefa1; }
     .pbody .exDiffer-window .dialog-window-body .move-to-cache {
@@ -170,11 +161,11 @@
     flex: 1 1;
     position: relative;
     width: 100%;
-    margin-top: 20px; }
+    padding: 20px; }
     .pbody .exDiffer-window .show-table .table-space {
       position: absolute;
-      max-height: 100%;
-      width: 100%;
+      max-height: calc(100% - 40px);
+      width: calc(100% - 40px);
       overflow: auto; }
     .pbody .exDiffer-window .show-table table {
       border-collapse: collapse;
@@ -814,6 +805,10 @@ body .differ-tip .layui-layer-content {
   width: 450px;
   transform: translate(-50%, 0);
   font-size: 13px; }
+  .pbody-wrap .wrap-info .check-error {
+    width: 80%;
+    margin-left: 10%;
+    z-index: 100; }
   .pbody-wrap .wrap-info .wrap-btn {
     position: absolute;
     width: 450px;
@@ -854,7 +849,7 @@ body .differ-tip .layui-layer-content {
         background: url(../images/back.png) -20px 0px no-repeat; }
   .pbody-wrap .wrap-info ul {
     height: 145px;
-    padding: 10px 0px;
+    padding: 10px 20px;
     overflow-y: auto;
     background-color: #fff; }
     .pbody-wrap .wrap-info ul li {
@@ -865,20 +860,15 @@ body .differ-tip .layui-layer-content {
       .pbody-wrap .wrap-info ul li .click-detail {
         color: #1e7cd9; }
       .pbody-wrap .wrap-info ul li span {
-        position: absolute;
-        width: auto;
-        height: auto;
+        margin-right: 50px;
         text-align: left;
         font-size: 14px;
         color: #444; }
       .pbody-wrap .wrap-info ul li b {
         display: none;
-        position: absolute;
-        top: 30%;
-        right: 20px;
-        height: 16px;
+        float: right;
         font-size: 14px;
-        line-height: 16px;
+        line-height: 36px;
         color: #444;
         font-weight: normal;
         cursor: pointer; }
@@ -886,11 +876,9 @@ body .differ-tip .layui-layer-content {
           color: #1e7cd9; }
       .pbody-wrap .wrap-info ul li i {
         display: none;
-        position: absolute;
-        top: 30%;
-        left: 35%;
         width: 16px;
-        height: 16px; }
+        height: 16px;
+        vertical-align: -4px; }
       .pbody-wrap .wrap-info ul li .in-state-icon-success {
         background: url(../images/finished.png) no-repeat; }
       .pbody-wrap .wrap-info ul li .in-state-icon-fail {
@@ -1182,7 +1170,7 @@ body .differ-tip .layui-layer-content {
 /*  开始排程弹框       */
 .aps-case {
   min-width: 400px;
-  min-height: 360px;
+  min-height: 500px;
   background-color: #fff;
   border-radius: 4px;
   z-index: 25; }
@@ -1318,7 +1306,7 @@ body .differ-tip .layui-layer-content {
 .pbody {
   flex: 1 1;
   position: relative;
-  min-width: 700px; }
+  min-width: 800px; }
 
 /* 页面内容层样式。 */
 .pbody .pbody-wrap {
@@ -2143,10 +2131,8 @@ body .differ-tip .layui-layer-content {
     max-height: calc(100vh - 236px); }
   .pbody .jFixed .table .table-body .table-equipment-head {
     height: calc(100vh - 236px); }
-  .pbody .jFixed .scrollbar .scrollbar-date-select {
+  .pbody .jFixed .scrollbar .scrollbar-dateSelect {
     top: calc(115px - 100vh); }
-  .pbody .jFixed .scrollbar:before {
-    top: calc(130px - 100vh); }
 
 .show-info {
   position: absolute;
@@ -2194,7 +2180,7 @@ body .differ-tip .layui-layer-content {
 .cache-window {
   position: absolute;
   width: calc(40% - 110px);
-  height: 620px;
+  height: calc(100vh - 150px);
   min-width: 360px;
   right: 68px;
   top: 30px;
@@ -2348,11 +2334,24 @@ body .differ-tip .layui-layer-content {
     background-color: rgba(255, 255, 255, 0.3);
     border-left: 2px solid #a7b7cc;
     border-right: 2px solid #a7b7cc; }
-  .scrollbar .scrollbar-date-select {
-    position: absolute;
+  .scrollbar .scrollbar-dateSelect {
     display: flex;
+    position: absolute;
     top: calc(190px - 100vh);
-    left: 210px;
+    width: 100%; }
+  .scrollbar .scrollbar-dateSelect-between {
+    width: 30px;
+    height: 2px;
+    margin: 14px 5px;
+    background: rgba(255, 255, 255, 0.2); }
+  .scrollbar .quickTime {
+    padding: 0 4px;
+    margin: 0 4px;
+    color: #e5e5e5;
+    line-height: 30px;
+    cursor: pointer; }
+  .scrollbar .scrollbar-date-select {
+    display: flex;
     width: 160px;
     height: 16px;
     padding: 6px 0;
@@ -2405,16 +2404,6 @@ body .differ-tip .layui-layer-content {
         background-color: rgba(255, 153, 0, 0.5);
         color: #fff;
         transition: .2s; }
-  .scrollbar .scrollbar-min-startdate {
-    left: 0; }
-  .scrollbar:before {
-    content: "";
-    position: absolute;
-    top: calc(204px - 100vh);
-    left: 170px;
-    width: 30px;
-    height: 0;
-    border-top: 2px solid rgba(255, 255, 255, 0.2); }
   .scrollbar:after {
     content: "";
     position: absolute;
@@ -2497,7 +2486,6 @@ body .differ-tip .layui-layer-content {
     padding: 0 10px;
     text-align: right; }
   .search-item-with-id .search-input {
-    margin-left: 4px;
     height: 22px;
     width: 100px;
     padding: 3px 28px 3px 10px;

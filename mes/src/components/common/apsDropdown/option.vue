@@ -57,7 +57,7 @@ export default{
 			if(this.parent.multiple){
 				return this.parent.value.indexOf(this.value) > -1;
 			}else{
-				return this.value === this.parent.value || this.parent.value.indexOf(this.value) > -1;
+				return this.value == this.parent.value;
 			}
 		}
 	},
@@ -69,7 +69,7 @@ export default{
 			}
 		},
 		queryChange(query){
-			this.visible = this.label.toLowerCase().indexOf(query) > -1;
+			this.visible = (this.label + '').toLowerCase().indexOf(query) > -1;
 			//当前节点显示，且未被选中
 			if(this.visible && !this.itemSelected){
 				this.dispatch('apsDropdown', 'visibleNotSelected', false);
@@ -85,10 +85,10 @@ export default{
 	created() {
 		//将这一项推入下拉框组件
 		this.parent.options.push(this);
-		if(this.checked){
-			this.parent.initialValue.push(this.value)
-			this.parent.initialLabel.push(this.label)
-		}
+//		if(this.checked){
+//			this.parent.initialValue.push(this.value)
+//			this.parent.initialLabel.push(this.label)
+//		}
 		
 		this.$on('queryChange', this.queryChange);
 		this.$on('selectAll', this.selectAll);

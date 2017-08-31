@@ -20,7 +20,8 @@
                 <nav>
                     <ul>
                         <li><router-link to="/predictionOEE">预测设备利用率</router-link></li>
-                      <!--<li><router-link to="/reScheduleReason">排程原因分析</router-link></li>-->
+                        <li><router-link to="/reScheduleReason">排程原因分析</router-link></li>
+<<<<<<< HEAD
 				  </ul>
 			  </nav>
 		  </div>
@@ -29,6 +30,18 @@
 		</div>
 	  </div>
   </div>
+=======
+                        <li><router-link to="/planRate">计划执行进度</router-link></li>
+                        <li><router-link to="/deliveryReply">交期答复</router-link></li>
+                    </ul>
+                </nav>
+            </div>
+          <div class="right-content">
+              <router-view></router-view>
+          </div>
+        </div>
+    </div>
+>>>>>>> new_wanfeng
 </template>
 
 <script>

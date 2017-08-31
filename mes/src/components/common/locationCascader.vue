@@ -20,7 +20,7 @@ export default {
 
 	props: [
 		'writelocation',
-    'selectLocationList'
+    	'selectLocationList'
 	],
 
 	data () {
@@ -34,7 +34,7 @@ export default {
 	watch: {
 		'writelocation' :{
 			handler: function (val, oldVal) {
-				let thisSchemeId = val[0];
+				let thisSchemeId = t.typeObject(val) === 'Array' ? val[0] : val;
 
 				//构造数据
 				this.dataProcess(thisSchemeId);
@@ -131,6 +131,9 @@ export default {
 //		let thisSchemeId = this.writelocation[0];
 //		//初始
 //		this.dataProcess(thisSchemeId)
+		if(this.writelocation === undefined || this.writelocation.length === 0){
+			this.dataProcess()
+		}
 	}
 }
 </script>

@@ -10,12 +10,12 @@
                           预测设备利用率
                       </router-link>
                   </li>
-                  <!--<li class="page-select-li re-schedule">
+                  <li class="page-select-li re-schedule">
                       <router-link to="../reScheduleReason">
                           <img src="../assets/re-schedule.png" alt="">
                           排程原因分析
                       </router-link>
-                  </li>-->
+                  </li>
                   <li class="page-select-li add">
                       <a href="javascript:void (0);">+</a>
                   </li>

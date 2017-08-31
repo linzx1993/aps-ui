@@ -3,7 +3,8 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    vendor: [path.join(__dirname,'vendor.js')],
+    vendor: ['vue','vuex','vue-router','element-ui','axios','echarts/lib/echarts','echarts/lib/chart/bar','echarts/lib/chart/line','echarts/lib/chart/pie',
+      'echarts/lib/component/tooltip','echarts/lib/component/title','echarts/lib/component/legend','echarts/lib/component/dataZoom','echarts/lib/component/toolbox'],
   },
 
   output: {

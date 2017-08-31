@@ -7,8 +7,8 @@ module.exports = {
         index: path.resolve(__dirname, '../../source/mesdist/index.html'),
         assetsRoot: path.resolve(__dirname, '../../source/mesdist'),
         assetsSubDirectory: 'static',
-        // assetsImgDirectory: '../../static',//linzx-2017-7-26 将图片的生成位置与文件的生成位置区分开来
-        assetsPublicPath: './',//linzx-2017-7-8 将绝对路径改（/）为相对路径(./)
+        assetsImgDirectory: '../../static',//linzx-2017-7-26 将图片的生成位置与文件的生成位置区分开来
+        assetsPublicPath: './',//linzx-2017-7-8 将绝对路径改（/）为相对路径(./),原因在于mes项目不是处于服务器的根路径，使用绝对路径许多文件位置定位不对
         productionSourceMap: true,
         // Gzip off by default as many popular static hosts such as
         // Surge or Netlify already gzip all static assets for you.

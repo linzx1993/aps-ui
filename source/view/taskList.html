@@ -390,7 +390,7 @@
 			
 			//查询设备
 			http.get({
-				url: $rootScope.restful_api.get_location + "?startTime=" + thisStartTime 
+				url: $rootScope.restful_api.get_all_equipment + "?startTime=" + thisStartTime
 														 + "&endTime=" + thisEndTime 
 														 + "&searchType=" + (htmlSource === "preview" ? 0 : 1) 
 														 + "&modelIdList=" + modelIdList
@@ -526,7 +526,7 @@
                 thisEndTime = tool.getFromInput_nocode(".jEndTime"),
                 aEquipment = [];
             //已选设备,没有就取全下拉框设备
-			let checkEqupment = $(".equipment-input").attr("idtype") ? $(".equipment-input").attr("idtype").split(",") : $(".equipment-input").attr("allIdType").split(",");
+			let checkEqupment = $(".equipment-input").attr("idtype") ? $(".equipment-input").attr("idtype").split(",") : ($(".equipment-input").attr("allIdType") ? $(".equipment-input").attr("allIdType").split(",") : []);
 			
 			for(let i = 0 , l = checkEqupment.length ; i < l ; i++){
 				if(checkEqupment[i]){

@@ -18,6 +18,5 @@
   "WorkArea" : "Work area",
   "WorkUnit" : "Work unit",
   "WorkMenu" : "Work menu",
-  "100001": "Login",
-  "100002": "Register"
+  "onlineConfig" : "online config"
 }

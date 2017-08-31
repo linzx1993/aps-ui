@@ -7,10 +7,10 @@ let api_domain, daily_test, local_test;
 if (active === "product") {
 	  api_domain = ""; //线上API端口，待配置
 } else if (active === "daily_ued") {
-	  api_domain = "192.168.200.161:8080";
+	   api_domain = "192.168.200.161:8080";
    // api_domain = "192.168.118.157:8080";//王俊明
-   // api_domain = "192.168.31.149:8080";//鲁艳红
-  // api_/domain = "192.168.31.163:8088"; //轩腾飞
+//   api_domain = "192.168.31.149:8080";//鲁艳红
+//   api_domain = "192.168.31.163:8095"; //轩腾飞
   // api_domain = "192.168.31.141:8080"; //陈强
   // api_domain = "192.168.118.93:8083";//李小方
   // api_domain = "192.168.118.106:8080";//徐俊
@@ -60,7 +60,33 @@ const url = {
     get_schedule_detail: 'http://' + api_domain + '/api/history/schedule/list',
     //获取某个排程的某个派工单的详细信息
     get_schedule_task_detail: ['http://' + api_domain + '/api/history/schedule/','/detail'],
-
+	//获取计划调度模式
+	get_play_type: 'http://' + api_domain + '/api/aps/setting/play_type',
+    //获取所有客户信息
+	get_all_customer: 'http://' + api_domain + '/api/aps/customer/find/all/customer',
+	//远程查询物料名称
+	get_material_name: 'http://' + api_domain + '/api/aps/material/find/material/by/name',
+	//远程查询物料编码
+	get_material_code: 'http://' + api_domain + '/api/aps/material/find/material/by/code',
+	//查询四种计划
+	get_plan_code: 'http://' + api_domain + '/api/aps/plan/rate/find/pool/code',
+	//主生产计划完成情况
+	get_order_rate: 'http://' + api_domain + '/api/aps/plan/rate/pool/order/rate',
+	//自制件计划完成情况
+	get_mo_rate: 'http://' + api_domain + '/api/aps/plan/rate/pool/mo/rate',
+	//主生产计划交期答复
+	order_delivery_reply: 'http://' + api_domain + '/api/aps/plan/rate/pool/order/plan/tmp/rate',
+	//自制件计划交期答复
+	mo_delivery_reply: 'http://' + api_domain + '/api/aps/plan/rate/pool/mo/plan/tmp/rate',
+	//交期答复，自制件计划列配置
+	mo_delivery_reply_colconfig: 'http://' + api_domain + '/api/aps/config/data/analysis/user/view/delivery/reply/pool/mo/report-column',
+	//交期答复，主生产计划列配置
+	order_delivery_reply_colconfig: 'http://' + api_domain + '/api/aps/config/data/analysis/user/view/delivery/reply/pool/order/report-column',
+	//交期答复，自制件计划列配置
+	mo_plan_rate_colconfig: 'http://' + api_domain + '/api/aps/config/data/analysis/user/view/plan/rate/pool/mo/report-column',
+	//交期答复，主生产计划列配置
+	order_plan_rate_colconfig: 'http://' + api_domain + '/api/aps/config/data/analysis/user/view/plan/rate/pool/order/report-column',
+	
 };
 
 export default url;

@@ -121,13 +121,13 @@ app.directive("multipleDropDownList",function () {
 					newValue.push(item.value);
 				}
 				item.isActive = !item.isActive;
-				scope.dropDownData.selectText = newText.length > 0 ? newText.join() : "请选择排程原因";
+				scope.dropDownData.selectText = newText.length > 0 ? newText.join() : "请选择";
 				scope.dropDownData.value = newValue.join();
 			};
 			//清除选中的值
 			scope.clearSelectValue = function (e) {
 				scope.dropDownData.value = undefined;//清空值
-				scope.dropDownData.selectText = "请选择排程原因";//清空值
+				scope.dropDownData.selectText = "请选择";//清空值
 				//清空下拉列表的选中状态
 				scope.searchDragList.forEach(function (item) {
 					item.isActive = false;
@@ -136,28 +136,39 @@ app.directive("multipleDropDownList",function () {
 			}
 		}
 	}
-})
+});
 
 //搜索框下面出现的下拉框
+/*
+* searchData = {
+* 	repeatData : []//下拉框遍历的数组
+*   showText : "下拉框名字"，
+*   value : "初始选中值"，
+*   className : "配置自己样式的class"，
+* }
+* */
 app.directive("searchDropDownList",function ($timeout) {
     return {
         restrict : "E",
         replace : true,
         transclude: true,
         scope:{
+        	ngModel : "=",
             searchData: "=",
-            style : "="
+            style : "=",
+			onChange : "&",
+			single: "@"
         },
         template : '' +
-        '<div class="{{searchData.className}} search-item" ng-class="hasDragClass ? \'drag-item\' : \'\'">' +
+        '<div class="{{searchData.className}} search-item " ng-class="hasDragClass ? \'drag-item\' : \'\'">' +
             '<span class="search-item-name">{{searchData.showText}}：</span>' +
 			'<div class="search-input-item" ng-click="showInputDragDownList($event)" ng-mouseleave="hideInputDragDownList($event)">' +
 				'<em class="clear-value cancal-search-value jCancalSearchValue" ng-show="hasValue" ng-click="clearSelectValue($event)"></em>' +
-				'<input type="text" class="search-input" ng-model="searchData.value" ng-style="style" title={{searchData.value}} disabled="disabled"/>' +
+				'<input type="text" class="search-input" ng-model="searchData.value" ng-style="style" title={{searchData.value}} disabled="disabled" placeholder="请选择"/>' +
 				'<div class="drop-down-list">' +
 					'<input type="text" class="mt-10 mb-10 ml-10" ng-keyup="getSearchValue(searchValue)" ng-model="searchValue">' +
 					'<ul>' +
-						'<li class="textover" ng-class="item.isActive ? \'active\' : \'\'" ng-repeat="item in searchDragList track by $index"  title={{item.dragItemText}} ng-click="listLiCheck(item,$event)">{{item.dragItemText}}</li>' +
+						'<li class="textover" ng-class="item.isActive ? \'active\' : \'\'" ng-repeat="item in searchDragList track by $index" id={{item.id}}  title={{item.dragItemText}} ng-click="listLiCheck(item,$event)">{{item.dragItemText}}</li>' +
 					'</ul>' +
 				'</div>' +
             '</div>' +
@@ -165,7 +176,8 @@ app.directive("searchDropDownList",function ($timeout) {
         link: function(scope){
             scope.hasValue = false;//第一个input框内是否有值
             scope.hasDragClass = true;//初始drag-item的class是否出现
-			
+			 scope.ngModel = scope.ngModel ?　scope.ngModel : [];
+
 			//监测是为了获得数据进行初始化
             scope.$watch("searchData.repeatData",function (newValue,oldValue) {
                 if(scope.searchData === undefined) return;
@@ -188,6 +200,22 @@ app.directive("searchDropDownList",function ($timeout) {
                 scope.hasValue = !!newValue;
                 scope.hasDragClass = !scope.hasValue;
             });
+			
+			scope.$watch("ngModel",function (val){
+				if(!Array.isArray(scope.searchDragList)){return};
+				let checkId = Array.isArray(val) ? val : [val],
+					newText = [];
+				scope.searchDragList.every(item =>{
+					if(checkId.indexOf(item.id) > -1){
+						item.isActive = true;
+						newText.push(item.dragItemText);
+					}else{
+						item.isActive = false;
+					}
+					return true;
+				});
+				scope.searchData.value = newText.length ? newText.join(",") : '';
+			});
 
             //根据下拉输入框里的值进行筛选下拉框的内容
             scope.getSearchValue = function (searchValue) {
@@ -208,6 +236,23 @@ app.directive("searchDropDownList",function ($timeout) {
 
             //点击下拉的li，搜索框出现选中的内容
             scope.listLiCheck = function (item,e) {
+				//单选
+				if(scope.single){
+					scope.searchDragList.every(item =>{
+						item.isActive = false;
+						return true;
+					});
+					item.isActive = true;
+					scope.ngModel = [item.id];
+					scope.searchData.value = item.dragItemText;
+					//执行外面引入点击的回调
+					if(scope.onChange && typeof scope.onChange === "function"){
+						$timeout(function(){
+							scope.onChange();
+						},0);
+					}
+					return;
+				}
                 let newText = [];
                 let inputValue = $(e.target).parents(".drop-down-list").siblings("input").val();
                 //加上判断为了处理初始没有值的情况下，使用join会出现一个逗号
@@ -218,23 +263,174 @@ app.directive("searchDropDownList",function ($timeout) {
                 if(item.isActive){
                     const index = newText.indexOf(item.dragItemText);
                     newText.splice(index,1);
+					 scope.ngModel.splice(index,1);
                 }else{
                     newText.push(item.dragItemText);
+					 scope.ngModel.push(item.id)
                 }
                 item.isActive = !item.isActive;
                 scope.searchData.value = newText.join();
+				//执行外面引入点击的回调
+				if(scope.onChange && typeof scope.onChange === "function"){
+					$timeout(function(){
+						scope.onChange();
+					},0);
+				}
             };
+
             //清除选中的值
             scope.clearSelectValue = function (e) {
-                scope.searchData.value = [].join("");//清空值
+				scope.ngModel = [];
+				scope.searchData.value = "";//清空值
                 //清空下拉列表的选中状态
                 scope.searchDragList.forEach(function (item) {
                     item.isActive = false;
                 });
                 $(e.target).parents(".search-item").addClass("drag-item");
+                //执行外面引入点击的回调
+				if(scope.onChange && typeof scope.onChange === "function"){
+					$timeout(function(){
+						scope.onChange();
+					},0);
+				}
             }
         }
     }
+});
+
+app.directive("apsSelect",function () {
+	return {
+		restrict : "E",
+		replace : true,
+		transclude: true,
+		template : '' +
+		'<div class="search-item " ng-class="hasDragClass ? \'drag-item\' : \'\'">' +
+			'<div class="search-input-item" ng-click="showInputDragDownList($event)" ng-mouseleave="hideInputDragDownList($event)">' +
+				'<em class="clear-value cancal-search-value jCancalSearchValue" ng-show="hasValue" ng-click="clearSelectValue($event)"></em>' +
+				'<input type="text" class="search-input" ng-model="value" ng-style="style" title={{value}} disabled="disabled"/>' +
+				'<div class="drop-down-list">' +
+					'<input type="text" class="mt-10 mb-10 ml-10" ng-model="searchValue" ng-show="isShowSearchInput">' +
+					'<ul>' +
+						'<li class="textover"  ng-repeat="item in searchDragList track by $index" key={{item.key}}  title={{item.dragItemText}} ng-click="listLiCheck(item,$event)">{{item.text}}</li>' +
+					'</ul>' +
+				'</div>' +
+			'</div>' +
+		'</div>',
+		scope:{
+			label : "=",
+			key : "=",
+			ngModel : "=",
+			repeatData: "=",
+			style : "=",	//
+			multiple : "=",	//是否多选
+			onChange : "&",	//点击下拉列表执行的事件
+			filterable : "@",	//是否提供搜索框功能
+			query : "=",	//是否采用远程搜索，提供就采用远程查询
+		},
+		link : function (scope) {
+			scope.hasValue = false;//显示input框内是否有值
+			scope.hasDragClass = true;//初始drag-item的class是否出现
+			scope.isShowSearchInput = scope.filterable === "";	//提供搜索功能才展现模糊搜索的input框
+
+			//监测是为了获得数据进行初始化
+			scope.$watch("repeatData",function (newValue,oldValue) {
+				if(scope.repeatData === undefined) return;
+				scope.searchDragList = scope.repeatData;
+				//只有初始进来的情况下执行赋值功能
+				if(oldValue === undefined && newValue !== undefined){
+					//如果是多选，传入了一个数组的值
+					if(scope.multiple && Array.isArray(scope.ngModel)){
+						scope.value = scope.ngModel.join(",");
+					}else{
+						scope.value = scope.ngModel
+					}
+				}
+			});
+
+			scope.$watch("ngModel",function (n,o) {
+				if(scope.multiple){
+					scope.value = scope.ngModel.join()
+				}else{
+					scope.value = scope.ngModel;
+				}
+			});
+
+			//根据是否提供远程查询的方法来决定是否调用远程查询
+			scope.$watch("searchValue", function(n, o) {
+				if (n === o) return;
+				//如果传入了参数，表示是采用远程搜索功能,否则执行本地过滤
+				if(scope.query){
+					scope.$emit(scope.query, n)
+				}else{
+					scope.repeatData.filter((item) => {
+						return item.text.indexOf(n);
+					})
+				}
+			});
+
+
+			//点击input出现搜索下拉框
+			scope.showInputDragDownList = (e) => {
+				$(e.target).parents(".search-item").addClass("active");
+			};
+
+			//离开input搜索下拉框消失
+			scope.hideInputDragDownList = (e) => {
+				$(e.target).parents(".search-item").removeClass("active");
+			};
+
+			//清除选中的值
+			scope.clearSelectValue = function (e) {
+				if(scope.multiple){
+					scope.ngModel = [];
+				}else{
+					scope.ngModel = "";
+				}
+				scope.value = "";//清空值
+				//清空下拉列表的选中状态
+				scope.searchDragList.forEach(function (item) {
+					item.isActive = false;
+				});
+				$(e.target).parents(".search-item").addClass("drag-item");
+
+				//执行外面引入点击的回调
+				if(scope.onChange && typeof scope.onChange === "function"){
+					scope.onChange(item);
+				}
+			};
+
+			//点击下拉的li，搜索框出现选中的内容
+			scope.listLiCheck = function (item,e) {
+				//多选执行下面代码
+				if(scope.multiple){
+					let newText = [];
+					let inputValue = $(e.target).parents(".drop-down-list").siblings("input").val();
+					//加上判断为了处理初始没有值的情况下，使用join会出现一个逗号
+					if(!!inputValue){
+						newText = newText.concat(inputValue.split(","));
+					}
+					//如果是已经选中的，则取消选中
+					if(item.isActive){
+						const index = newText.indexOf(item.dragItemText);
+						newText.splice(index,1);
+						scope.ngModel.splice(index,1);
+					}else{
+						newText.push(item.dragItemText);
+						scope.ngModel.push(item.key)
+					}
+					item.isActive = !item.isActive;
+					scope.value = newText.join();
+				}else{
+					scope.value = item.text;
+					scope.ngModel = item[scope.key];
+				}
+				//执行外面引入点击的回调
+				if(scope.onChange && typeof scope.onChange === "function"){
+					scope.onChange(item);
+				}
+			};
+		}
+	}
 });
 
 //搜索框下面出现的下拉框(带ID)
@@ -245,6 +441,7 @@ app.directive("searchDropDownListWithId",function () {
         transclude: true,
         scope:{
             searchData: "=",
+			style : "="
         },
         template : '' +
         '<span class="{{searchData.className}} search-item-with-id">' +
@@ -263,7 +460,7 @@ app.directive("searchDropDownListWithId",function () {
             //监测是为了获得数据进行初始化
             scope.$watch("searchData.repeatData",function () {
 				if(scope.searchData){
-					scope.searchDragList = scope.searchData.repeatData;	
+					scope.searchDragList = scope.searchData.repeatData;
 				}
             });
             //根据下拉输入框里的值进行筛选下拉框的内容
@@ -315,15 +512,22 @@ app.directive("dateController",function(tool,$timeout){
 			'<div class="scrollbar-thumb" ng-style="isSmall ? {width:controllerDate.smallScrollbarThumbWidth,marginLeft:smallMarginLeft} : {width:controllerDate.bigScrollbarThumbWidth,marginLeft:bigMarginLeft}" ng-mousedown="start_move($event)"  >' +
 				/*'<div style="width:20%;height:100%;background:red" ng-click="changeModel()"></div>' +*/
 			'</div>' +
-			'<div class="scrollbar-date-select scrollbar-min-startdate">' +
-				'<span class="scrollbar-span" ng-click="changeMinStartDate(-1)"></span>' +
-				'<input type="text" class="Wdate minStartDate" onclick="WdatePicker({isShowClear:false})" ng-model="controllerDate.minStartDate" readonly>' +
-				'<span class="scrollbar-span scrollbar-right-span" ng-click="changeMinStartDate(1)"></span>' +
-			'</div>' +
-			'<div class="scrollbar-date-select">' +
-				'<span class="scrollbar-span" ng-click="changeMaxEndDateOneDay(-1)"></span>' +
-				'<input type="text" class="Wdate maxEndDate" onclick="WdatePicker({isShowClear:false})" ng-model="controllerDate.maxEndDate" readonly>' +
-				'<span class="scrollbar-span scrollbar-right-span" ng-click="changeMaxEndDateOneDay(1)"></span>' +
+			'<div class="scrollbar-dateSelect">' +
+				'<div class="scrollbar-date-select scrollbar-min-startdate">' +
+					'<span class="scrollbar-span" ng-click="changeMinStartDate(-1)" title="向前一天"></span>' +
+					'<input type="text" class="Wdate minStartDate" onclick="WdatePicker({isShowClear:false})" ng-model="controllerDate.minStartDate" readonly>' +
+					'<span class="scrollbar-span scrollbar-right-span" ng-click="changeMinStartDate(1)" title="向后一天"></span>' +
+				'</div>' +
+				'<span class="scrollbar-dateSelect-between"></span>' +
+				'<div class="scrollbar-date-select">' +
+					'<span class="scrollbar-span" ng-click="changeMaxEndDateOneDay(-1)" title="向前一天"></span>' +
+					'<input type="text" class="Wdate maxEndDate" onclick="WdatePicker({isShowClear:false})" ng-model="controllerDate.maxEndDate" readonly>' +
+					'<span class="scrollbar-span scrollbar-right-span" ng-click="changeMaxEndDateOneDay(1)" title="向后一天"></span>' +
+				'</div>' +
+				'<span class="quickTime" ng-click="setQuickTime(\'thisWeek\')">本周</span>' +
+				'<span class="quickTime" ng-click="setQuickTime(\'nextWeek\')">下周</span>' +
+				'<span class="quickTime" ng-click="setQuickTime(\'thisMonth\')">本月</span>' +
+				'<span class="quickTime" ng-click="setQuickTime(\'nextMonth\')">下月</span>' +
 			'</div>' +
 		'</div>',
 		link: function(scope){
@@ -420,6 +624,30 @@ app.directive("dateController",function(tool,$timeout){
 					}
 				}
 			}
+			//快捷时间
+			scope.setQuickTime = function(quickType){
+				const time = new Date();
+			
+				//判断方案列表是否有方案，如果有方案的话为true，则选择开始时间最小为今天,没有为false,则为本周第一天
+				if (quickType === "thisWeek") {
+					//本周，+1是为了从周一开始
+					scope.controllerDate.minStartDate = tool.dateToString(time.setDate(time.getDate() - time.getDay() + 1));
+					scope.controllerDate.maxEndDate = tool.dateToString(time.setDate(time.getDate() - time.getDay() + 7));
+				} else if (quickType === "nextWeek") {
+					//下周
+					scope.controllerDate.minStartDate = tool.dateToString(time.setDate(time.getDate() - time.getDay() + 8));
+					scope.controllerDate.maxEndDate = tool.dateToString(time.setDate(time.getDate() - time.getDay() + 7));
+				} else if (quickType === "thisMonth") {
+					//最后一天计算，本月第一天加上本月天数
+					scope.controllerDate.minStartDate = tool.dateToString(time.setDate(1));
+					scope.controllerDate.maxEndDate = tool.dateToString(new Date(time.setMonth(time.getMonth() + 1)).setDate(0));
+				} else {
+					//来源本个月的最后一天加一天
+					scope.controllerDate.minStartDate = tool.dateToString(new Date(time.setMonth(time.getMonth() + 1)).setDate(1));
+					scope.controllerDate.maxEndDate = tool.dateToString(new Date(time.setMonth(time.getMonth() + 1)).setDate(0));
+				}
+
+			}
 			//此处为兼容my97时间插件(使用focus是因为my97在改变时间时，会让input获取焦点)
 			$("input").on("focus",function(){
 				$timeout(function(){
@@ -429,7 +657,7 @@ app.directive("dateController",function(tool,$timeout){
 			})
 		}
 	}
-})
+});
 
 //级联下拉框
 app.directive("cascader",function(){
@@ -506,7 +734,6 @@ app.directive("cascader",function(){
 					//推入所有信息
 					scope.AllData[thisLocation["locationId"]] = thisLocation;
 				}
-				console.log(scope.AllData);
 			}
 			
 			//构造渲染数据
@@ -681,7 +908,7 @@ app.directive("cascader",function(){
 			}
 		}
 	}
-})
+});
 
 //渲染结束后执行的回调
 app.directive("onFinishRender",['$timeout', '$parse', function ($timeout, $parse) {

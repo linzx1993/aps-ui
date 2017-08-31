@@ -188,7 +188,7 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 			//校验时对多方案排程进行校验
 			"result_version_validate" : "http://" + $rootScope.api_domain + "/api/schedule/result-version-validate?schemeId=",
 			//全部设备查询
-			"get_location" : "http://" + $rootScope.api_domain + "/api/production/getProductionUnit",
+			"get_all_equipment" : "http://" + $rootScope.api_domain + "/api/production/getProductionUnit",
 			//获取所有的设备类型
 			"get_equipment_type" : "http://" + $rootScope.api_domain + "/api/equipmentType/getAllEquipmentType",
 			//微调修改开始时间
@@ -212,7 +212,15 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 			//任务清单，换模，三级页面（结果表）
 			"tasklist_change_preview" : "http://"+$rootScope.api_domain+"/api/schedule/retool/result/detail/",
 			//任务清单，换模，三级页面（临时表）
-			"tasklist_change_result" : "http://"+$rootScope.api_domain+"/api/schedule/retool/temp/detail/"
+			"tasklist_change_result" : "http://"+$rootScope.api_domain+"/api/schedule/retool/temp/detail/",
+			//查询上线配置
+			"search_online_config" : "http://"+$rootScope.api_domain+"/api/aps/config/admin/default/launching/get/launch/config",
+			//保存上线配置
+			"save_online_config" : "http://"+$rootScope.api_domain+"/api/aps/config/admin/default/launching/update/launch/config",
+			//上线配置-模糊查询物料编码
+			"search_material_code" : "http://"+$rootScope.api_domain+"/api/aps/material/find/material/by/code?materialCode=",
+			//上线配置-模糊查询物料名称
+			"search_material_name" : "http://"+$rootScope.api_domain+"/api/aps/material/find/material/by/name?materialName=",
 		};
 	};
 	$rootScope.getsessionStorage();

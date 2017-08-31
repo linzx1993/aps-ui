@@ -33,7 +33,7 @@
             </div>
             <a class="mt-20 default-btn" href="javascript:void(0);" @click="getHistoryList">查看</a>
         </div>
-        <hr>
+        <hr class="mt-20 mb-20">
         <p v-show="!showEChartAndTable" class="c-theme-color">{{showTips}}</p>
         <div>
             <div class="re-schedule-canvas-box mb-40">
@@ -156,14 +156,14 @@
                     return;
                 }
                 const obj = {
-                    startTime : getCorrectDate(this.startTime),
-                    endTime : getCorrectDate(this.endTime),
+                    startTime : t.getMonthDays(this.startTime),
+                    endTime : t.getMonthDays(this.endTime),
                     userId : this.schedulePerson
                 };
                 this.$http.post(this.url.get_history_list,obj).then((res) => {
                     //获得表格渲染的数据如果没有数据，则图表不显示
                 	  if(!res.data.reasonDtoList || res.data.reasonDtoList.length === 0){
-                	  	  this.showTips = "本次查询数据为空"
+                	  	  this.showTips = "本次查询数据为空";
                         this.showEChartAndTable = false;//表格消失
                         //图形消失
                         this.myChartsHistoryCount.clear();
@@ -178,46 +178,11 @@
                     this.packageECharts();
                 },(res) => {
                     res.data = {
-                        "caclReasonData": {
-                          "假数据主生产计划变更": 0.5,
-                          "假数据采购计划延期": 0.5
-                        },
-                        "caclLocationData": {
-                          "假数据铸造车间": 0.25,
-                          "假数据检包车间": 0.25,
-                          "假数据金工车间": 0.5
-                        },
-                        "reasonDtoList": [
-                        {
-                          "id": 5,
-                          "scheduleTime": "2017-01-02 19:20:35",
-                          "schemeName": "s1",
-                          "location": "01 万丰集团",
-                          "reason": "主生产计划变更",
-                          "detail": "详情1"
-                        },
-                        {
-                          "id": 6,
-                          "scheduleTime": "2017-01-04 19:20:35",
-                          "schemeName": "s1",
-                          "location": "01 万丰集团",
-                          "reason": "采购计划延期",
-                          "detail": "详情2"
-                        },
-                        {
-                          "id": 7,
-                          "scheduleTime": "2017-01-04 19:20:35",
-                          "schemeName": "s1",
-                          "location": "01 万丰集团",
-                          "reason": "采购计划延期",
-                          "detail": "fdsfsdfsdfds"
-                        }
-                      ]
+                        "caclReasonData": {},
+                        "caclLocationData": {},
+                        "reasonDtoList": []
                     };
-                    this.historyScheduleData = res.data;
-                    this.historyScheduleTableList = this.historyScheduleData.reasonDtoList;
-                    this.showEChartAndTable = true;
-                    this.packageECharts();
+                    this.$alert('请检查服务器', '提示')
                 });
             },
             packageECharts(){
@@ -250,13 +215,36 @@
         let option = {
             title : {
                 text: optionData.title || '历史重排查询',
+                x : 'center',
+                y : '0%'
             },
             tooltip : {
                 trigger: 'axis'
             },
-//            legend: {
-//                data:[]
-//            },
+            legend: {
+                data:[]
+            },
+            toolbox: { //可视化的工具箱
+                right : '10%',
+                show: true,
+                feature: {
+                    dataView: { //数据视图
+                        show: false
+                    },
+                    restore: { //重置
+                        show: false
+                    },
+                    dataZoom: { //数据缩放视图
+                        show: false
+                    },
+                    saveAsImage: { //保存图片
+                        show: true
+                    },
+                    magicType: { //动态类型切换
+                        type: ['bar', 'line']
+                    }
+                }
+            },
             grid : {
                 left: '0%',
                 right: '0%',
@@ -334,34 +322,5 @@
         }
         return option;
     }
-    /**
-     * 传入任何时间格式，将时间输出为2017-07-01的时间格式
-     * @param date
-     * @returns 2017-07-01
-     */
-    function getCorrectDate(date) {
-        const currentTime = date ? new Date(date) : new Date();
-        //如果月份小于10，则加个0
-        const month = (currentTime.getMonth() + 1) < 10 ? "0" + (currentTime.getMonth() + 1) : (currentTime.getMonth() + 1);
-        //如果时间小于10，则加个0
-        const day = currentTime.getDate() < 10 ? "0" + currentTime.getDate() : currentTime.getDate();
-        return currentTime.getFullYear() + "-" + month + "-" + day;
-    }
 
-    /**
-     * desc:查询某个月有几天
-     * time:2017-06-21
-     * last : linzx
-     * @param: month ：查询的年月份
-     * @return: 查询那个月的天数
-     **/
-    function getMonthDays(date) {
-      const curDate = new Date(date || new Date());
-      const curMonth = curDate.getMonth();
-      curDate.setMonth(curMonth + 1);
-      /* 将日期设置为0, 这里为什么要这样设置, 我不知道原因, 这是从网上学来的 */
-      curDate.setDate(0);
-      /* 返回当月的天数 */
-      return curDate.getDate();
-    }
 </script>

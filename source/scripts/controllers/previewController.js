@@ -15,7 +15,8 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
     //查询条件
     //通过json查询的对象声明
     let minStartTime, maxEndTime, queryObject, tableHeadViewModel, tableBodyViewModel;
-
+	
+	$scope.placeholderaaa = [];
     //设备
     let goEquipment = {};
     let goInfo = {};
@@ -1165,6 +1166,14 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 				}
 				sessionStorage.setItem("cancel_data", JSON.stringify(data_body));
 
+				//如果开始排程时，返回数据有给出提示启用上线配置的话，则直接赋值
+				if(res.data.loadLaunchConfigMessage){
+				    $scope.isOnLineConfig = true;
+				    $scope.onlineWords = res.data.loadLaunchConfigMessage;
+                }else{
+					$scope.isOnLineConfig = false;
+                }
+
 				//成功赋值
 				$(".case-content").removeClass("select-li");//下拉框消失
 				//点击已经选中的方案，提示出现，出现直接跳往排程后的那个按钮
@@ -1252,28 +1261,35 @@ app.controller('previewCtrl', function ($scope, $rootScope, $http, $window, $loc
 			thisPath = "/result";
 			thisText = "再编辑";
 		}
-		// //用户必须选择一个重排原因，用于分析
-        // let selectReasonValue = $(".jChooseReason").find("input[type=hidden]").val();
-		// if(!selectReasonValue){
-		 //    layer.msg("请选择一个排程原因");
-		 //    return;
-        // }
-		// //用户必须填写详情描述
-		// if(!$("#reScheduleDescription").val()){
-		 //    layer.msg("请填写详情描述");
-		 //    return;
-        // }
+		//用户必须选择一个重排原因，用于分析
+        let selectReasonValue = $(".jChooseReason").find("input[type=hidden]").val();
+		if(!selectReasonValue){
+		    layer.msg("请选择一个排程原因");
+		    return;
+        }
+		//用户必须填写详情描述
+		if(!$("#reScheduleDescription").val()){
+		    layer.msg("请填写详情描述");
+		    return;
+        }
 		let index = layer.confirm('确定' + thisText + '?', {
 			btn: ['确定', '取消'] //按钮
 		}, function () {
-			//开始排程按钮
+			//如果处于再编辑一个新的排程，则加一个loading状态提示，同时避免用户乱点
+            if(startApsType === "editAgain"){
+				let loadingEditAgain = layer.msg('正在重新编辑中', {
+					icon: 16,
+                    shade: 0.01,
+                    time : 100000000
+				});
+            }
 			http.post({
 				url: thisUrl,
 				data: {
 					schemeId : $scope.schemeId,
 					locationDtoList : [],
-                    // reasonType : selectReasonValue,
-                    // reasonDesr : $("#reScheduleDescription").val(),
+                    reasonType : selectReasonValue,
+                    reasonDesr : $("#reScheduleDescription").val(),
                 },
 				successFn: function (response) {
 					$location.path(thisPath).replace();

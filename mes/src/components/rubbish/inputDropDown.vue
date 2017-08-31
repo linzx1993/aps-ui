@@ -12,7 +12,7 @@
 
 <script type="text/ecmascript-6">
     'use strict';
-    import dropDown from "../common/dropDown/dropDown.vue";
+    import dropDown from "./dropDown/dropDown.vue";
     export default {
       name : "inputDropDown",
       props : ["dropDownList"],

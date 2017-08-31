@@ -50,12 +50,17 @@ var webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
+  // //需提前引入cdn文件
+  externals: {
+    jquery: 'jQuery',
+  },
   plugins: [
     new webpack.ProvidePlugin({
       JQuery : "jquery",
       $:"jquery",
     }),
     new webpack.DllReferencePlugin({
+      context: __dirname,
       manifest,
     }),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
@@ -63,12 +68,14 @@ var webpackConfig = merge(baseWebpackConfig, {
       'process.env': env
     }),
     //======生产环境压缩优化,构建时间大头   ---2017-07-29
-    // new webpack.optimize.UglifyJsPlugin({
-    //   compress: {
-    //     warnings: false
-    //   },
-    //   sourceMap: true
-    // }),
+    //  再添加了DllReferencePlugin的预编译之后，这部分时间被极大压缩，猜测是因为原来已经被压缩过过了
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      },
+      sourceMap: true
+    }),
+    new webpack.HashedModuleIdsPlugin(),// 2017-08-12,使用标识符而不是模块名称来压缩输出,实现持久化缓存
     // new UglifyJsParallelPlugin({
     //   workers: os.cpus().length,
     //   sourceMap: true,
@@ -146,15 +153,8 @@ var webpackConfig = merge(baseWebpackConfig, {
       threads: 4,
       // threadPool: happyThreadPool,
     }),
-    // new HappyPack({
-    //   id: 'scss',
-    //   threads: 8,
-    //   loaders: [
-    //     'style-loader',
-    //     'css-loader',
-    //     'sass-loader',
-    //   ],
-    // })
+    //  2017-08-13配合最新升级的webpack3提供的新功能，可以使压缩的代码更
+    new webpack.optimize.ModuleConcatenationPlugin()
   ]
 })
 // console.log(JSON.stringify(webpackConfig));

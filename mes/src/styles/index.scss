@@ -8,7 +8,7 @@
     height: calc(100% - 68px);
 }
 .right-content{
-    //flex: 0 1 calc(100% - 280px);
+    //flex: 1 1 calc(100% - 180px);
     flex : auto;
     padding: 20px;
     background-color: #eaedf1;
@@ -18,7 +18,7 @@
 }
 .right-content-box{
     padding: 20px;
-    min-height: calc(100% - 40px);
+    height: calc(100% - 40px);
     background-color: #fff;
     border: 1px solid $borderColor;
 }
@@ -70,6 +70,11 @@
             }
         }
     }
+    .predict-table{
+        width: calc(100vw - 260px);
+        max-height:200px;
+        overflow: auto
+    }
 }
 .re-schedule-reason{
     .re-schedule-canvas-box{
@@ -85,9 +90,8 @@
     #countAll{
         flex: 1 0 900px;
     }
-  }
+}
 hr{
-    margin: 20px 0;
     height:1px;
     border:0;
     background-color:$borderColor;

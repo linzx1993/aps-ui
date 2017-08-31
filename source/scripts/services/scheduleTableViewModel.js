@@ -1467,7 +1467,26 @@ app
 		};
 
 		/**
-		* desc: 检验出现异常是，渲染二级页面数据
+		 * desc: 用于新版的排程前检验，检验出现异常，用二级页面数据给出提示,
+		 * time:2017-04-20
+		 * @param: scheduleValidateMap：传入所有的校验结果
+		 * @return: checkItemList:返回遍历渲染的数组
+		 **/
+		this.displayCheckBeforeSchedule = function (detailInfoObject) {
+			let obj = {};
+			obj.checkItemTableHeadData = [];//头部文字渲染数组
+			obj.checkItemTableBodyData = [];//主体内容渲染数组
+			let HeadDataOrderArray = detailInfoObject.column;
+			HeadDataOrderArray.forEach((englishKey)=>{
+				obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
+			});
+			obj.checkItemTableBodyData = detailInfoObject.row;
+			return obj;
+		};
+
+		/**
+		* desc: 检验出现异常是，渲染二级页面数据,用于新版的排程后检验，
+		 * 判断是否为老类型，如果是，则直接展示checkInfo，如果不是则根据不同的错误类型，去执行各自的方法
 		* time:2017-04-20
 		* @param: scheduleValidateMap：传入所有的校验结果
 		* @return: checkItemList:返回遍历渲染的数组
@@ -1479,7 +1498,7 @@ app
 				let checkErrorData = scheduleValidateMap[checkItem];
                 obj.checkErrorType = checkErrorData.type;
                 obj.checkItemChineseName = checkItem;
-                //=========此段代码为了兼容老版检验而存在==========//
+                //=========此段代码为了兼容老版检验而存在，如果不是这几个排程后校验，则直接使用给出的提示==========//
                 if((checkErrorData.type !== 5) || (checkErrorData.type !== 4) || (checkErrorData.type !== 3)){
                 	obj.checkInfo = checkErrorData.checkInfo;
                 	// return;
@@ -1490,11 +1509,11 @@ app
                     obj.checkResult = false;
                     // 根据type类别判断处于哪个检验，5=生产时间校验,4，超产校验，3组合件校验
 					// 全部写完再封成函数式吧，封不动了（读liao）
+					obj.checkItemTableHeadData = [];//头部文字渲染数组
+					obj.checkItemTableBodyData = [];//主体内容渲染数组
                     if(checkErrorData.type === 5){
                         //	前台设置列信息的展现顺序
                         let HeadDataOrderArray = ["saleOrderCode","materialName","equipmentName","taskNum","startTime","endTime","poolTaskStartTime","poolTaskEndTime","materialMnem"];
-                        obj.checkItemTableHeadData = [];//头部文字渲染数组
-                        obj.checkItemTableBodyData = [];//主体内容渲染数组
                         HeadDataOrderArray.forEach((englishKey)=>{
                             obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
                         });
@@ -1505,7 +1524,7 @@ app
                                     let startTime = tableCellItem[englishKey];
                                     let endTime = tableCellItem["endTime"];
                                     let timeObj = {"showText" : tableCellItem[englishKey].substr(5,11),};
-                                    //开始时间不对,小于计划开始时间，大于计划结束时间，大于结束时间
+                                    //开始时间不对,1.小于计划开始时间，2.大于计划结束时间，3.大于结束时间
                                     if(startTime < tableCellItem["poolTaskStartTime"] || startTime > tableCellItem["poolTaskEndTime"] || startTime > endTime){
                                         timeObj["errorClass"] = true;
 									}
@@ -1513,7 +1532,7 @@ app
 								}else if(englishKey === "endTime"){
                                     let endTime = tableCellItem[englishKey];
                                     let timeObj = {"showText" : tableCellItem[englishKey].substr(5,11),};
-                                    //结束时间不对
+                                    //结束时间不对,1.大于计划结束时间，2.大于计划开始时间
                                     if(endTime > tableCellItem["poolTaskEndTime"] || endTime < tableCellItem["poolTaskStartTime"]){
                                         timeObj["errorClass"] = true;
                                     }
@@ -1531,8 +1550,6 @@ app
                         })
                     }else if(checkErrorData.type === 4){
                         let HeadDataOrderArray = ["workDate","punitName","punitCode","taskNum","actualPUnitWorkTime","workTime","remarks"];
-                        obj.checkItemTableHeadData = [];//头部文字渲染数组
-                        obj.checkItemTableBodyData = [];//主体内容渲染数组
                         HeadDataOrderArray.forEach((englishKey)=>{
                             obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
                         });
@@ -1557,7 +1574,7 @@ app
                                         });
 									}
 								}else if(englishKey === "workTime"){
-									//如果传过来的时间为空，则设施为0
+									//如果传过来的时间为空，则设施为默认为0
 									if(tableCellItem[englishKey]){
 										let jWorkTime = tableCellItem[englishKey];
                                         checkItemTableRow.push({"showText" : parseInt(jWorkTime) + "时" + parseInt((jWorkTime - parseInt(jWorkTime))*60) + "分"});
@@ -1572,8 +1589,6 @@ app
                         })
 					}else if(checkErrorData.type === 3){
                         let HeadDataOrderArray = ["saleOrderCode","assemblingUnitInfoList","taskCodeList"];
-                        obj.checkItemTableHeadData = [];//头部文字渲染数组
-                        obj.checkItemTableBodyData = [];//主体内容渲染数组
                         HeadDataOrderArray.forEach((englishKey)=>{
                             obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
                         });
@@ -1599,7 +1614,6 @@ app
 									}
                                 });
                                 obj.checkItemTableBodyData.push(checkItemTableRow);
-                                console.log(obj.checkItemTableBodyData);
 							}
                         })
 					}
@@ -1636,7 +1650,11 @@ app
 				"workTime" : "设备有效时间",
 				"remarks" : "备注",
 				"taskCodeList" : "车间计划号",
-				"assemblingUnitInfoList" : "组合件"
+				"assemblingUnitInfoList" : "组合件",
+				"materialId" : "物料ID",
+				"processId" : "工序ID",
+				"pUnitType" : "设备类型",
+				"pUnitId" : "设备ID",
 			};
 			return chineseNameObj[englishKey];
         }

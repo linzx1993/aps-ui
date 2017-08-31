@@ -24,7 +24,9 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
     //暂存间选中信息
     var cacheCheckInfo = {};
 	
+	let shitfSearchData = {};
 	
+	$scope.placeholderaaa = [];
 	$scope.isByPk = true;
     //用户名
     // $scope.userName = $rootScope.userName;
@@ -60,7 +62,6 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 			smallTableMarginLeft = $scope.controllerDate.smallTableMarginLeft;
 			bigTableMarginLeft = $scope.controllerDate.bigTableMarginLeft;
 		}
-		
 		let	tableWidth = $(".wrap-content").width(),
 			smallTableWidth = tableWidth - 82,
 			bigTableWidth = tableWidth - 160,
@@ -287,7 +288,22 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
     $scope.saleOrder = {showText : "订单号", className : "sale-order",value:""};
     $scope.productLineName = {showText : "产线", className : "product-line",value:""};
     $scope.searchDataList = [$scope.materialCode,$scope.materialName,$scope.processCode,$scope.processName,$scope.punitCode,$scope.punitName,$scope.saleOrder,$scope.productLineName];
-
+	
+	$scope.refreshEquipment = function(){
+		let repeatData = [];
+		for(let i = 0, l = goInfo.punitId.length; i < l; i++){
+			repeatData.push({
+				dragItemText: goInfo.punit[goInfo.punitId[i]].punitName,
+				id:  goInfo.punitId[i]
+			})
+		}
+		$scope.equipmentsList = {
+			showText : "设备名称",
+			value : "",
+			repeatData : repeatData,
+		}
+	};
+	
     /**
      * 显示临时派工单表的排程计划
      **/
@@ -395,6 +411,9 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 				//微调提示
 				$scope.getTipFromService();
 				//清除选中信息
+				
+				//更新设备下拉框
+				$scope.refreshEquipment();
             },
             errorFn: function () {
                 layer.alert('获取数据失败，请联系技术人员处理', {
@@ -2328,8 +2347,18 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 //            window.open("./view/secondChangePage.html");
             window.open("./view/taskList.html");
             return;
-        }
-        http.post({
+        };
+		$scope.equipment_check_list = aEquipment;
+		shitfSearchData.startTime = startTime;
+		shitfSearchData.endTime = endTime;
+		$scope.refreshShift();
+		
+		let shiftInfo = $(".jShiftName .search-input").val();
+		if(shiftInfo){
+			body_data.shiftNames = shiftInfo.split(",");
+		}
+		
+		http.post({
             url: $rootScope.restful_api.res_sourceUrl,
             data: body_data,
             successFn: function (response) {
@@ -2375,12 +2404,11 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
                     //=========为了二级页面头部固定而写的sb代码2017-05-03-end=========
                     //更新查询条件
                     let windowSearchBox = $(".jPunitDetail").find(".window-search-box");
-                    windowSearchBox.eq(0).find("input").val(thisStartTime);
-                    windowSearchBox.eq(1).find("input").val(thisEndTime);
-                    windowSearchBox.eq(2).find("input").val(thisEquipmentName.join(","));
-                    windowSearchBox.eq(3).find("input").val(decodeURIComponent(saleOrder));
-                    windowSearchBox.eq(4).find("input").val(decodeURIComponent(materialName));
-                    windowSearchBox.eq(5).find("input").val(decodeURIComponent(materialCode));
+					$(".jPunitDetail .jStartTime").find("input").val(thisStartTime);
+//                    windowSearchBox.eq(1).find("input").val(thisEndTime);
+					$(".jPunitDetail .jSaleOrder").find("input").val(decodeURIComponent(saleOrder));
+					$(".jPunitDetail .jMaterialName").find("input").val(decodeURIComponent(materialName));
+					$(".jPunitDetail .jMaterialCode").find("input").val(decodeURIComponent(materialCode));
 
                     //初始化复选框
                     $("input[name='single'],input[name='all']").prop("checked", false);
@@ -2622,12 +2650,11 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 						}
 					}
 				});
-				console.log(newTime);
 			}else{
 				layer.msg("请输入时间!");
 			}
 		});
-	}
+	};
 	
 //	$scope.order_new_start_time_sure = function(){
 //		let newTime = $(".jOrderNewStartTime").val();
@@ -2635,17 +2662,17 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
 //	}
 
     /**
-     * 点击二级页面查询按钮，
+     * 点击二级页面查询按钮，设备详情
      **/
     var windowSearch = false;
     $scope.change_window_table = function (showSuccess) {
         //获取查询条件
         let thisStartTime = tool.getFromInput_nocode(".jPunitDetail .jStartTime"),
             thisEndTime = thisStartTime,//单天，结束时间同开始时间
-            thisEquipmentName = decodeURIComponent(tool.getFromInput_nocode(".jPunitDetail .jPunitName")),
-            saleOrder = tool.getFromInput_nocode(".jPunitDetail .jSaleOrder"),
-            materialName = tool.getFromInput_nocode(".jPunitDetail .jMaterialName"),
-            materialCode = tool.getFromInput_nocode(".jPunitDetail .jMaterialCode"),
+            thisEquipmentName = $scope.equipment_check_list,
+            saleOrder = tool.getFromInput(".jPunitDetail .jSaleOrder"),
+            materialName = tool.getFromInput(".jPunitDetail .jMaterialName"),
+            materialCode = tool.getFromInput(".jPunitDetail .jMaterialCode"),
             aEquipmentId = [];
         // var mouseType = 2;//本地二级页面新增确定鼠标点击类型
         //输入检测
@@ -2659,40 +2686,73 @@ app.controller('resultCtrl', function ($scope, $rootScope, $http, $window, $loca
                 skin: 'layer-alert-themecolor' //样式类名
             });
             return;
-        } else if (!thisEquipmentName) {
+        } else if (!thisEquipmentName || thisEquipmentName.length === 0) {
             layer.alert('请输入设备', {
                 skin: 'layer-alert-themecolor' //样式类名
             });
             return;
         }
 
-        //根据设备名获取设备ID
-        let aEquipmentName = thisEquipmentName.split(",");
-        // let allEquipmentId = goInfo.punitId;
-        let allEquipmentInfo = goInfo.punit;
-
-        for (var i in allEquipmentInfo) {
-            var thisName = allEquipmentInfo[i].punitName;
-            for (var j in aEquipmentName) {
-                if (aEquipmentName[j] == thisName) {
-                    aEquipmentId.push(i);
-                }
-            }
-        }
-        if (aEquipmentId.length < 1) {
-            layer.alert('请输入正确的设备名称!', {
-                skin: 'layer-alert-themecolor' //样式类名
-            });
-            return;
-        }
-        if (!showSuccess && (thisStartTime || thisEndTime || aEquipmentId.length || saleOrder || materialName || materialCode)) {
+        if (!showSuccess && (thisStartTime || thisEndTime || thisEquipmentName.length || saleOrder || materialName || materialCode)) {
             windowSearch = true;
         } else {
             windowSearch = false;
         }
 
-        $scope.click_creat_window(thisStartTime, thisEndTime, aEquipmentId.join(","), saleOrder, materialName, materialCode);
+        $scope.click_creat_window(thisStartTime, thisEndTime, thisEquipmentName.join(","), saleOrder, materialName, materialCode);
     };
+	
+	//设备详情班次联动
+	$scope.shiftData = {
+		showText: "查询班次",
+		className: "jShiftName",
+		value: ""
+	};
+	$scope.refreshShift = function(){
+		//设备
+		let equipments = [],
+			allEquipments = $scope.equipment_check_list.length ? $scope.equipment_check_list : $scope.searchData.repeatData;
+		if($scope.equipment_check_list.length){
+			for(let i = 0, l = $scope.equipment_check_list.length; i < l; i++){
+				let idType = $scope.equipment_check_list[i].split("_");
+				equipments.push({
+					equipmentId: idType[0],
+					equipmentType: idType[1]
+				})
+			}
+		}else{
+			for(let i = 0, l = $scope.searchData.repeatData.length; i < l; i++){
+				let idType = $scope.searchData.repeatData[i].id.split("_");
+				equipments.push({
+					equipmentId: idType[0],
+					equipmentType: idType[1]
+				})
+			}
+		}
+		shitfSearchData.equipments = equipments;
+		http.post({
+			url: $rootScope.restful_api.get_shift,
+			data: shitfSearchData,
+			successFn: function(res){
+				let shiftData = res.data,
+					repeatData = [];
+
+				//循环构造下拉框数据
+				for(let i = 0, l = shiftData.length ; i < l ; i++){
+					let thisData = shiftData[i];
+					repeatData.push({
+						dragItemText: thisData
+					})
+				}
+				//传入组件
+				$scope.shiftData.repeatData = repeatData;
+
+				//清空已选信息
+				$(".jShiftName .search-input").val("");
+				$(".jShiftName .active").removeClass("active");
+			}
+		});
+	}
 
     /**
      * 点击确定，向后台传选中数据

@@ -4,12 +4,17 @@ import apsDropdown from "./components/common/apsDropdown/apsDropdown.vue";
 import apsOptionGroup from "./components/common/apsDropdown/optionGroup.vue";
 import apsOption from "./components/common/apsDropdown/option.vue";
 
+import dateSelect from "./components/common/dateSelect.vue";
+import colConfig from "./components/common/colConfig.vue";
+
 const components = [
 	apsCascader,
 	apsDropdown,
 	apsTable,
 	apsOptionGroup,
-	apsOption
+	apsOption,
+	dateSelect,
+	colConfig
 ];
 
 const install = function (Vue, opts = {}) {

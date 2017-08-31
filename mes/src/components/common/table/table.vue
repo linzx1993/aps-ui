@@ -24,7 +24,8 @@
 								:style="{
 									transform:'translateX(' + scrollX + 'px)'
 								}"
-								class="aps-table-details">
+								class="aps-table-details"
+								v-if="operation">
 								<i 
 									class="aps-table-details"
 									@click="detailsRowInfo(index,$event)">
@@ -57,7 +58,8 @@
 							<th
 								:style="{
 									transform:'translateX('+ scrollX +'px)'
-								}">
+								}"
+								v-if="operation">
 								查看
 							</th>
 							<th 
@@ -107,7 +109,10 @@ export default{
 	props:{
 		headerData: Array,
 		bodyData: Array,
-		allNumber: Number
+		allNumber: Number,
+		operation: {
+			default: true
+		}
 	},
 	
 	methods: {
@@ -200,6 +205,7 @@ export default{
 					border: 1px solid #ccc;
 					border-left: 0;
 					border-top: 0;
+					text-align: left;
 					
 					.aps-table-details{
 						width: 12px;

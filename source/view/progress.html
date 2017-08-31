@@ -1,13 +1,13 @@
-<!--右上角按钮区-->
-<div class="top-right-button">
-	<span class="user-info">
-		<ul class="user-info-box">
-			<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>
-			<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>
-			<li class="out-login" ng-click="loginOut()">退出</li>
-		</ul>
-		{{userName||"用户"}}</span>
-</div>
+<!--&lt;!&ndash;右上角按钮区&ndash;&gt;-->
+<!--<div class="top-right-button">-->
+	<!--<span class="user-info">-->
+		<!--<ul class="user-info-box">-->
+			<!--<li><a href="#/config" ng-click="refreshHistoryUrl()">参数配置</a></li>-->
+			<!--<li><a href="#/help" ng-click="refreshHistoryUrl()">帮助</a></li>-->
+			<!--<li class="out-login" ng-click="loginOut()">退出</li>-->
+		<!--</ul>-->
+		<!--{{userName||"用户"}}</span>-->
+<!--</div>-->
 
 <div class="pbody-wrap">
 	<!-- 页面表格相关部分 -->
@@ -25,7 +25,7 @@
 		<div class="wrap-info">
 			<!--提示信息-->
 			<div class="current-info">当前提示信息：
-				<i title="返回" ng-click="wrap_back()" ng-show="btnShow"></i>
+				<!--<i title="返回" ng-click="wrap_back()" ng-show="btnShow"></i>-->
 			</div>
 
 			<ul>
@@ -52,6 +52,41 @@
 	<div class="meg_content" style="max-height: 200px;overflow: auto;margin-top: 20px;">
 		<p class="in-alert" ng-repeat="text in in_alert_data">{{text}}</p>
 	</div>
-</div>	
+</div>
 
+<!--校验错误新版二级页面-->
+<div style="width: 80%;margin-left: 10%;" class="table-dialog-window table-window jcheckError check-error" ng-show="checkSchedule">
+	<div class="dialog-window-head">
+		异常情况
+		<i class="close-dialog-window" ng-click="checkSchedule = false;"></i>
+	</div>
+	<div class="dialog-window-body">
+		<div class="show-table">
+			<div class="table-space">
+				<table ng-style="{width : (checkItemTableHeadData.length * 100) + 'px'}">
+					<thead>
+					<tr>
+						<th>序号</th>
+						<th ng-repeat="title in checkItemTableHeadData track by $index" >{{title.showText}}</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr ng-repeat="checkItemTableRow in checkItemTableBodyData track by $index">
+						<td>{{$index + 1}}</td>
+						<td>{{checkItemTableRow.processId}}</td>
+						<td>{{checkItemTableRow.pUnitType}}</td>
+						<td>{{checkItemTableRow.pUnitId}}</td>
+						<td>{{checkItemTableRow.materialId}}</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="cover-head">
+				<div>序号</div>
+				<div ng-repeat="title in checkItemTableHeadData track by $index">{{title.showText}}</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--校验错误弹窗-->
 <!-- .pbody-wrap END -->

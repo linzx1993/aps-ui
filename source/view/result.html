@@ -25,10 +25,10 @@
 		</div>
 		<div class="search-btn search-btn-normal right-menu-button change-one">
 			<i class="search-btn-icon"></i>
-			<div class="search-box tl">
+			<div class="search-box tl" ng-mousedown="$event.stopPropagation()">
 				<h6 class="search-box-title">查询</h6>
 				<div class="search-content">
-					<search-drop-down-list ng-repeat="searchData in searchDataList" search-data="searchData"></search-drop-down-list>
+					<search-drop-down-list ng-repeat="searchData in searchDataList" ng-model="placeholderaaa" search-data="searchData"></search-drop-down-list>
 					<div class="start-search" ng-click="search()">查询</div>
 				</div>
 			</div>
@@ -476,8 +476,8 @@
 	</div>
 
 	<!--二级页面-->
-	<div class="table-dialog-window table-window jPunitDetail jMovable" ng-show="table_dialog_window_show" ng-mousedown="priorityDisplay($event)" ng-mouseup="stopWindowMove()" >
-		<div class="dialog-window-head" ng-mousemove="isMove && windowMove($event)" ng-mouseleave="stopWindowMove()">
+	<div class="table-dialog-window table-window jPunitDetail jMovable" ng-show="table_dialog_window_show" ng-mousedown="priorityDisplay($event)">
+		<div class="dialog-window-head">
 			设备详情
 			<i class="close-dialog-window" ng-click="close_dialog_window()"></i>
 		</div>
@@ -491,10 +491,8 @@
 					<span>结束时间：</span>
 				<input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">
 				</span>
-				<span class="window-search-box jPunitName">
-					<span>设备名称：</span>
-				<input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
-				</span>
+				<search-drop-down-list single="true" ng-model="equipment_check_list" search-data="equipmentsList" style="{'width' : '104px'}" class="window-search-box jPunitName" on-change="refreshShift()"></search-drop-down-list>
+				<search-drop-down-list ng-model="shift_check_list" search-data="shiftData" style="{'width' : '104px'}" class="window-search-box jShiftName"></search-drop-down-list>
 <!--				<search-drop-down-list-with-id search-data="shiftData" style="{'width' : '104px'}" class="jShiftName"></search-drop-down-list-with-id>-->
 				<span class="window-search-box jSaleOrder">
 					<span>订单编号：</span>
@@ -529,7 +527,7 @@
 								</td>
 								<td>
 									<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
-									<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" title="修改开始时间"></span>
+									<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="修改开始时间"></span>
 									<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
 								</td>
 								<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>
@@ -556,7 +554,7 @@
 							</td>
 							<td>
 								<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
-								<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" title="修改开始时间"></span>
+								<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="修改开始时间"></span>
 								<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
 							</td>
 						</tr>
@@ -723,8 +721,8 @@
 	<!--二级页面差异化结束-->
 
 	<!--暂存间-->
-	<div class="cache-window table-window jMovable" ng-mousedown="priorityDisplay($event)" ng-mouseup="stopWindowMove()">
-		<div class="dialog-window-head" ng-mousemove="isMove && windowMove($event)" ng-mouseleave="stopWindowMove()">暂存区
+	<div class="cache-window table-window jMovable" ng-mousedown="priorityDisplay($event)">
+		<div class="dialog-window-head">暂存区
 			<i class="close-window"></i>
 		</div>
 		<div class="dialog-window-body">
@@ -782,7 +780,7 @@
 					<div class="fixed-column" ng-if="isByPk">操作</div>
 					<div ng-repeat="title in cacheHeadDataView track by $index">{{title}}</div>
 				</div>
-				<div class="fix-table-column" ng-if="isByPk">
+				<div ng-style="{height : cacheTableDataView.length * 30 + 36 + 'px'}" class="fix-table-column" ng-if="isByPk">
 					<table class="fix-table" style="width: 92px;">
 						<thead>
 							<tr>

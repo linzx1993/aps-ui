@@ -389,7 +389,24 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 		
 		//如果点击的是头部
 		if(thisTarget.hasClass("dialog-window-head") || thisTarget.parents(".dialog-window-head").length){
-			$scope.isMove = true;
+			//位移
+			$(document).on("mousemove.windowmove",function(event){
+				let moveX = event.originalEvent.movementX,
+					moveY = event.originalEvent.movementY,
+					oldPosition = parentWindow.css('transform').replace(/[^0-9\-,]/g,'');//获取的初始格式为matrix(1, 0, 0, 1, 0, -44)，后两个为translateX和translateY
+				if(oldPosition){
+					moveX = (parentWindow.offset().left + moveX > 0 && parentWindow.offset().left + parentWindow.outerWidth() + moveX < $(window).width()) ? oldPosition.split(",")[4] - 0 + moveX : oldPosition.split(",")[4];
+					moveY = (parentWindow.offset().top + moveY > 0 && parentWindow.offset().top + parentWindow.outerHeight() + moveY < $(window).height()) ? oldPosition.split(",")[5] - 0 + moveY : oldPosition.split(",")[5];
+				}
+				//限制不可移出可视区
+				
+				parentWindow.css("transform","translate(" + moveX + "px," + moveY + "px)");
+			});
+			//结束位移
+			$(document).on("mouseup.windowmove",function(event){
+				$(document).off("mousemove.windowmove");
+				$(document).off("mouseup.windowmove");
+			});
 		}
 		$event.stopPropagation();
 	};
@@ -399,25 +416,26 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	 **/
 	$scope.stopWindowMove = function(){
 		$scope.isMove = false;
+		$(document).off("mousemove.windowmove");
 	};
 
 	/**
 	 *desc:位移中
 	 *time:2017-07-17
 	 **/
-	$scope.windowMove = function($event){
-		let thisTarget = $($event.target),
-			parentWindow = thisTarget.parents(".table-window") || thisTarget,
-			moveX = $event.movementX,
-			moveY = $event.movementY,
-			oldPosition = parentWindow.css('transform').replace(/[^0-9\-,]/g,'');//获取的初始格式为matrix(1, 0, 0, 1, 0, -44)，后两个为translateX和translateY
-		if(oldPosition){
-			moveX = oldPosition.split(",")[4] - 0 + moveX;
-			moveY = oldPosition.split(",")[5] - 0 + moveY;
-		}
-		parentWindow.css("transform","translate(" + moveX + "px," + moveY + "px)");
-		$event.stopPropagation();
-	};
+//	$scope.windowMove = function($event){
+//		let thisTarget = $($event.target),
+//			parentWindow = thisTarget.parents(".table-window") || thisTarget,
+//			moveX = $event.movementX,
+//			moveY = $event.movementY,
+//			oldPosition = parentWindow.css('transform').replace(/[^0-9\-,]/g,'');//获取的初始格式为matrix(1, 0, 0, 1, 0, -44)，后两个为translateX和translateY
+//		if(oldPosition){
+//			moveX = oldPosition.split(",")[4] - 0 + moveX;
+//			moveY = oldPosition.split(",")[5] - 0 + moveY;
+//		}
+//		parentWindow.css("transform","translate(" + moveX + "px," + moveY + "px)");
+//		$event.stopPropagation();
+//	};
 
     //获得查询框中产线数据
     $scope.getProductLineSelectedData = (event) => {

@@ -1,8 +1,7 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
-// var HappyPack = require('happypack');
+const path = require('path');
+const utils = require('./utils');
+const config = require('../config');
+const vueLoaderConfig = require('./vue-loader.conf');
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -11,7 +10,6 @@ function resolve (dir) {
 module.exports = {
   entry: {
     // 'babel-polyfill' : "babel-polyfill",
-    reset : ['./src/styles/reset.scss','./src/styles/common.scss','element-ui/lib/theme-default/index.css'],
     vendor : ['vue','vue-router','axios','element-ui','./src/scripts/ajaxInterceptors.js'],
     echarts : ['echarts/lib/echarts','echarts/lib/chart/bar','echarts/lib/chart/line','echarts/lib/chart/pie','echarts/lib/component/tooltip',
       'echarts/lib/component/title','echarts/lib/component/legend','echarts/lib/component/dataZoom','echarts/lib/component/toolbox'],
@@ -19,11 +17,6 @@ module.exports = {
     app: './src/main.js',
     // app: ['core-js/fn/promise','./src/main.js']
   },
-  //需提前引入cdn文件
-  // externals: {
-  //   jquery: 'jQuery',
-  //   url : "./src/scripts/url.js"
-  // },
   output: {
       path: config.build.assetsRoot,
       filename: '[name].js',
@@ -82,4 +75,4 @@ module.exports = {
       }
     ]
   }
-}
+};

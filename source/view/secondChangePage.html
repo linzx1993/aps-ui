@@ -100,9 +100,9 @@
 			body_data = JSON.parse(sessionStorage.getItem("hrefPrameter")),
 			thisStartTime = body_data.startTime,
             thisEndTime = body_data.endTime,
-            materialName = body_data.materialName,
-            materialCode = body_data.materialCode,
-            saleOrder = body_data.saleOrderCode,
+//            materialName = body_data.materialName,
+//            materialCode = body_data.materialCode,
+//            saleOrder = body_data.saleOrderCode,
             thisEquipmentId = body_data.equipments,
             htmlSource = body_data.from,
             thisEquipmentName = [],
@@ -116,23 +116,23 @@
 			locationId;
 		
 		//根据不同来源，定义不同的接口
-        if(htmlSource == "preview"){
+        if(htmlSource === "preview"){
 			//更新接口
 			$rootScope.getsessionStorage(sessionStorage.locationId_pre, sessionStorage.locationId_res, true);
-            locationId = sessionStorage.locationId_pre;
+//            locationId = sessionStorage.locationId_pre;
             sourceUrl=$rootScope.restful_api.pre_sourceUrl_retool;
             //导出excel接口
-            excelAPI=$rootScope.restful_api.excel_pre;
+//            excelAPI=$rootScope.restful_api.excel_pre;
             //左键正常信息接口，右键换装接口
-            get_url=$rootScope.restful_api.preview_show_table+"?locationFilterList="+sessionStorage.locationFilterList_pre+ + "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
+//            get_url=$rootScope.restful_api.preview_show_table+"?locationFilterList="+sessionStorage.locationFilterList_pre+ + "&startTime="+ thisStartTime + "&endTime="+ thisEndTime;
         }else{
 			//更新接口
 			$rootScope.getsessionStorage(sessionStorage.locationId_pre, sessionStorage.locationId_res, false);
-            locationId = sessionStorage.locationId_res;
+//            locationId = sessionStorage.locationId_res;
             sourceUrl=$rootScope.restful_api.res_sourceUrl_retool;
             //导出excel接口
-            excelAPI=$rootScope.restful_api.excel_res;
-            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;
+//            excelAPI=$rootScope.restful_api.excel_res;
+//            get_url=$rootScope.restful_api.result_show_table+"?locationFilterList="+sessionStorage.locationFilterList_res+ "&startTime="+ thisStartTime + "&endTime="+ thisEndTime + "&schemeId=" +sessionStorage.schemeId;
         }
 		
         /**
@@ -149,9 +149,9 @@
 				successFn: function(response) {
 					
 					$(".equipment-list").remove();
-					var resData = response.data;
+					let resData = response.data;
 					//数据转换
-					var windowTableData = scheduleTableViewModelService.jsonToSecondChange(resData);
+					let windowTableData = scheduleTableViewModelService.jsonToSecondChange(resData);
 					//表头
 					$scope.headDataView = windowTableData.headInfo;
 					//表格数据
@@ -182,7 +182,7 @@
                     });
                 }
 			})
-		}
+		};
 		
 		/**
 		 *desc:构造设备类型下拉框，两种
@@ -213,13 +213,13 @@
 				repeatData: equipment_type_list_type_one,
 				showText: "生产单元",
 				className: "equipment_type_list_one"
-			}
+			};
 			$scope.equipment_type_list_type_zero = {
 				repeatData: equipment_type_list_type_zero,
 				showText: "离散设备",
 				className: "equipment_type_list_zero"
 			}
-		}
+		};
 		
 		/**
 		 *desc:查询设备信息
@@ -246,7 +246,7 @@
 			
 			//查询设备
 			http.get({
-				url: $rootScope.restful_api.get_location + "?startTime=" + thisStartTime 
+				url: $rootScope.restful_api.get_all_equipment + "?startTime=" + thisStartTime
 														 + "&endTime=" + thisEndTime 
 														 + "&searchType=" + (htmlSource === "preview" ? 0 : 1) 
 														 + "&modelIdList=" + modelIdList
@@ -277,7 +277,7 @@
 					$(".equipment-input").attr("idtype",thisIdTyList.join(","));
 					
 					//刷新查询参数
-					var windowSearchBox = $(".info-show").find(".window-search-box");
+					let windowSearchBox = $(".info-show").find(".window-search-box");
 					windowSearchBox.eq(0).find("input").val(thisStartTime);
 					windowSearchBox.eq(1).find("input").val(thisEndTime);
 					windowSearchBox.eq(2).find("input")
@@ -285,7 +285,7 @@
 						.attr("title",thisEquipmentName.join());
 				}
 			});
-		}
+		};
 		
 		/**
 		 *desc:初次加载执行的方法
@@ -295,7 +295,7 @@
 		 *@return:
 		 **/
 		$scope.render = (function(){
-			let location_data = {}
+			let location_data = {};
 			
 			//构造地点级联下拉框
 			http.get({
@@ -347,7 +347,7 @@
 			//构造设备下拉框
 			$timeout(function(){
 				$scope.getEquipment(thisEquipmentId);
-			},500)
+			},500);
 			
 			//根据传入数据查询一次数据
 			$scope.getChangeData(body_data);
@@ -380,7 +380,7 @@
             //获取查询条件
             var thisStartTime = tool.getFromInput_nocode(".jStartTime"),
                 thisEndTime = tool.getFromInput_nocode(".jEndTime"),
-                materialName = tool.getFromInput_nocode(".jMaterialName"),
+                materialName = tool.getFromInput(".jMaterialName"),
                 aEquipment = [];
             //已选设备,没有就取全下拉框设备
 			let checkEqupment = $(".equipment-input").attr("idtype") ? $(".equipment-input").attr("idtype").split(",") : $(".equipment-input").attr("allIdType").split(",");

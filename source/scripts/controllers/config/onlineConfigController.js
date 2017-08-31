@@ -40,7 +40,6 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 
 	//获取所有设备
 	//设备下拉列表数据
-	$scope.equipmentList = {};
 	$scope.equipmentSelectList = [];
 	$scope.equipmentData = {
 		showText : "设备",
@@ -74,6 +73,11 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 	$scope.getMaterialCodeBySearch = function (params = '') {
 		return $http.get($rootScope.restful_api.search_material_code + params).then((function (res) {
 			$scope.materialCodeList = res.data.slice(0,100);
+			$scope.materialCodeList.unshift({
+				materialCode : "请选择",
+				materialName : "请选择",
+				materialId : "",
+			});
 			$scope.materialCodeList.forEach((item) => {
 				item.text = item.materialCode;
 			});
@@ -85,6 +89,11 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 	$scope.getMaterialNameBySearch = function (params = '') {
 		$http.get($rootScope.restful_api.search_material_name + params).then((function (res) {
 			$scope.materialNameList = res.data.slice(0,100);
+			$scope.materialNameList.unshift({
+				materialCode : "请选择",
+				materialName : "请选择",
+				materialId : "",
+			});
 			$scope.materialNameList.forEach((item) => {
 				item.text = item.materialName;
 			});
@@ -99,7 +108,6 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 
 	//根据改动条件，获得equipment设备列表
 	$scope.getEquipment = function () {
-		console.log($scope.equipmentSelectTypeList);
 		http.get({
 			url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
 			+ "&endTime=" + tool.getCorrectDate(new Date)
@@ -107,12 +115,13 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 			+ "&modelIdList=" + $scope.equipmentSelectTypeList.join(",")
 			+ "&locationFilterList=" + $scope.get_selected_location().join(","),
 			successFn : function (res) {
+				$scope.equipmentList = res.data;
 				let productUnit = res.data;
 				let equipmentList = [];
 				for(let i in productUnit){
 					equipmentList.push({
 						dragItemText : productUnit[i].productUnitName,
-						id : productUnit[i].productUnitId + "_" + (productUnit[i].type === "PRODUCTION_UNIT" ? 1 : 0)
+						id : productUnit[i].productUnitId + "_" + productUnit[i].type
 					});
 				}
 				$scope.equipmentData.repeatData = equipmentList;
@@ -124,7 +133,11 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 		let postData = [];
 		//创建好待会需要渲染表格的数组
 		$scope.onlineConfigList = [];
-		//坑爹的后台数据，前台加个判断，如果设备不选，默认全部全选
+		/*因为坑爹的后台数据没法一次提供所有需要的，
+		 所以要先从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
+		 然后再去到请求获得数据里面根据设备id_type去获取对应的物料信息，将获得到的信息合并到$scope.onlineConfigList
+		 */
+		//	前台加个判断，如果设备不选，默认全部全选
 		if($scope.equipmentSelectList.length === 0){
 			for(let i in $scope.equipmentList){
 				postData.push({
@@ -132,43 +145,30 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 					"produceUnitType":$scope.equipmentList[i].type
 				})
 			}
-			//坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
-			postData.forEach((selectItem) => {
-				$scope.equipmentData.repeatData.some((item) => {
-					if(item.id === (selectItem.equipmentId + "_" + selectItem.produceUnitType)){
-						$scope.onlineConfigList.push({
-							equipmentName : item.dragItemText,
-							equipmentCode : item.equipmentCode,
-							equipmentId:selectItem.equipmentId,
-							equipmentType:selectItem.produceUnitType,
-						});
-						return true;
-					}
-				});
-			});
 		}else{
 			$scope.equipmentSelectList.forEach((item) => {
 				let arr = item.split("_");
 				postData.push({
 					"equipmentId":arr[0],
-					"produceUnitType":arr[1]
+					"produceUnitType":item.replace(arr[0] + "_","")
 				})
 			});
-			//坑爹的后台数据，又要从设备列表列表里面再去获得一次设备名
-			$scope.equipmentSelectList.forEach((selectItem) => {
-				$scope.equipmentData.repeatData.some((item) => {
-					if(item.id === selectItem){
-						$scope.onlineConfigList.push({
-							equipmentName : item.dragItemText,
-							equipmentCode : item.equipmentCode,
-							equipmentId:selectItem.equipmentId,
-							equipmentType:selectItem.produceUnitType,
-						});
-						return true;
-					}
-				});
-			});
 		}
+		//从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
+		postData.forEach((selectItem) => {
+			$scope.equipmentData.repeatData.some((item) => {
+				if(item.id === (selectItem.equipmentId + "_" + selectItem.produceUnitType)){
+					$scope.onlineConfigList.push({
+						equipmentName : item.dragItemText,
+						equipmentCode : item.equipmentCode,
+						equipmentId : selectItem.equipmentId,
+						equipmentType : selectItem.produceUnitType,
+					});
+					return true;
+				}
+			});
+		});
+		// 请求获得数据里面根据设备id_type去获取对应的物料信息，将获得到的信息合并到$scope.onlineConfigList
 		http.post({
 			url : $rootScope.restful_api.search_online_config,
 			data : postData,
@@ -177,24 +177,21 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 					//获得渲染表格所需要的数据
 					$scope.onlineConfigList.forEach((onlineItem) => {
 						if(resItem.equipmentId + "_" + resItem.produceUnitType  === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
-							// ({
-							// 	materialCode:onlineItem.materialCode,
-							// 	materialId:onlineItem.materialId,
-							// 	materialName:onlineItem.materialName
-							// } = resItem);
-							onlineItem.materialCode = resItem.materialCode;
-							onlineItem.materialId = resItem.materialId;
-							onlineItem.materialName = resItem.materialName;
+							({
+								materialCode:onlineItem.materialCode,
+								materialId:onlineItem.materialId,
+								materialName:onlineItem.materialName
+							} = resItem);
 						}
-						// //获得生产物料模糊搜索需要的下拉列表数据
-						// onlineItem.materialCodeList = $scope.materialCodeList;
-						// onlineItem.materialNameList = $scope.materialNameList;
 					});
 				});
-
 				//出现table表格和按钮
 				$scope.isShowSearchConfig = true;
 			},
+			errorFn : function (res) {
+				//table表格和按钮消失
+				$scope.isShowSearchConfig = false;
+			}
 		})
 	};
 
@@ -238,13 +235,13 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 	$scope.saveOnlineConfig = function () {
 		let postData = [];
 		$scope.onlineConfigList.forEach((item) => {
-			if(item.materialId){
+			// if(item.materialId){
 				postData.push({
 					equipmentId : Number(item.equipmentId),
 					produceUnitType : item.equipmentType,
 					materialId : item.materialId,
 				})
-			}
+			// }
 		});
 		http.post({
 			url :$rootScope.restful_api.save_online_config,

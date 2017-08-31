@@ -7,6 +7,10 @@
   width: 450px;
   transform: translate(-50%, 0);
   font-size: 13px; }
+  .pbody-wrap .wrap-info .check-error {
+    width: 80%;
+    margin-left: 10%;
+    z-index: 100; }
   .pbody-wrap .wrap-info .wrap-btn {
     position: absolute;
     width: 450px;
@@ -47,7 +51,7 @@
         background: url(../images/back.png) -20px 0px no-repeat; }
   .pbody-wrap .wrap-info ul {
     height: 145px;
-    padding: 10px 0px;
+    padding: 10px 20px;
     overflow-y: auto;
     background-color: #fff; }
     .pbody-wrap .wrap-info ul li {
@@ -58,20 +62,15 @@
       .pbody-wrap .wrap-info ul li .click-detail {
         color: #1e7cd9; }
       .pbody-wrap .wrap-info ul li span {
-        position: absolute;
-        width: auto;
-        height: auto;
+        margin-right: 50px;
         text-align: left;
         font-size: 14px;
         color: #444; }
       .pbody-wrap .wrap-info ul li b {
         display: none;
-        position: absolute;
-        top: 30%;
-        right: 20px;
-        height: 16px;
+        float: right;
         font-size: 14px;
-        line-height: 16px;
+        line-height: 36px;
         color: #444;
         font-weight: normal;
         cursor: pointer; }
@@ -79,11 +78,9 @@
           color: #1e7cd9; }
       .pbody-wrap .wrap-info ul li i {
         display: none;
-        position: absolute;
-        top: 30%;
-        left: 35%;
         width: 16px;
-        height: 16px; }
+        height: 16px;
+        vertical-align: -4px; }
       .pbody-wrap .wrap-info ul li .in-state-icon-success {
         background: url(../images/finished.png) no-repeat; }
       .pbody-wrap .wrap-info ul li .in-state-icon-fail {

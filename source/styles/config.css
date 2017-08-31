@@ -672,6 +672,11 @@ input.disabled {
 .checkR-rule-line {
   border-top: 1px solid #ccc; }
 
+.look-online-config {
+  text-decoration: underline; }
+  .look-online-config:hover {
+    color: #1E7CD9; }
+
 /*排程方案*/
 .planContent {
   height: 650px;
@@ -894,9 +899,7 @@ input.disabled {
 
 .config-box .info-mask.active .info-box {
   animation: show 2s;
-  -ms-animation: show 2s;
-  transform-origin: 50% 50%;
-  -ms-transform-origin: 50% 50%; }
+  transform-origin: 50% 50%; }
 
 .config-box .info-box span {
   width: 24px;
@@ -955,5 +958,27 @@ input.disabled {
   width: 180px;
   height: 30px;
   border: 1px solid #ccc; }
+
+/*=========上线配置==========*/
+.online-content {
+  padding: 20px; }
+  .online-content .online-table-box {
+    height: 500px;
+    overflow: auto; }
+  .online-content .cascader-select-box input {
+    display: inline-block; }
+  .online-content table {
+    width: 100%;
+    background-color: #fff; }
+    .online-content table th, .online-content table td {
+      text-align: center;
+      border: 1px solid #ccc; }
+    .online-content table tr {
+      height: 30px;
+      line-height: 30px; }
+      .online-content table tr:nth-child(even) {
+        background-color: #EDEEED; }
+    .online-content table td {
+      padding: 5px 0; }
 
 /*# sourceMappingURL=config.css.map */

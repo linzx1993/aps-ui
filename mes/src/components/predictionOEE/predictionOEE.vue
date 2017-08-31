@@ -61,7 +61,7 @@
               </label>
         </div>
         <p class="mt-5 mb-10 flex">
-            查看维度 ：
+            查看类型 ：
             <label class="input-radio" for="equipment">
               <input
                 id="equipment"
@@ -70,12 +70,8 @@
                 value="equipment"
                 v-model="lookDimension">
               <span></span>
-              设备
+              设备类型
             </label>
-            <aps-radio class="radio" v-model="radio" label="1">备选项1</aps-radio>
-            <aps-radio class="radio" v-model="radio" label="2">备选项2</aps-radio>
-            <el-radio class="radio" v-model="radio" label="1">备选项</el-radio>
-            <el-radio class="radio" v-model="radio" label="2">备选项</el-radio>
         </p>
         <p class="time-condition">
             <span>时&#12288;&#12288;间 ：</span>
@@ -98,11 +94,11 @@
             <a class="quick-time-condition" href="javascript:void(0);" :class="{active : quickTime === 'nextMonth'}" @click="quickSelectTime('nextMonth')">下月</a>
         </p>
         <div class="query-conditions-list">
-            <location-cascader class="mt-20"
+            <location-cascader class="mt-20 mr-10"
                 :writelocation="schemeIdList"
                 v-model="selectLocationList">
             </location-cascader>
-            <div class="query-conditions mt-20 ml-10">
+            <div class="query-conditions mt-20 mr-10">
                 <span>设备类型 ： </span>
                 <aps-dropdown
                   v-model="equipmentTypeValue"
@@ -114,7 +110,7 @@
                   </aps-option>
                 </aps-dropdown>
             </div>
-            <div class="query-conditions mt-20 ml-10">
+            <div class="query-conditions mt-20">
                 <span>设&#12288;&#12288;备 ： </span>
                 <aps-dropdown
                     v-model="equipmentValue"
@@ -137,13 +133,13 @@
             <a
                 v-show="isShowReturnFirst"
                 @click="returnFirstPageFromSecond"
-                class="default-btn"
+                class="default-btn mt-20"
                 href="javascript:void(0);">
                 返回
             </a>
         </div>
         <div id="canvas" class="canavs"></div>
-        <div style="width: 100%;overflow: hidden">
+        <div class="predict-table jPredictTable" >
             <table
                 class="compare-equipment"
                 v-show="showTable">
@@ -175,16 +171,13 @@
 	/*type="text/ecmascript-6"*/
 	import inputDropDown from "../Rubbish/inputDropDown.vue"
 	import locationCascader from "../common/locationCascader.vue"
-	import apsRadion from "../rubbish/apsRadio.vue"
 	export default {
       components: {
           "input-drop-down": inputDropDown,
-          "location-cascader": locationCascader,
-          "aps-radio": apsRadion,
+          "location-cascader": locationCascader
       },
       data() {
           return {
-              radio : "1",
               myCharts: '',
               hadSavedScheduleResult: false, //已保存排程结果
               lookDimension: 'equipment', //选择从哪个维度查看（现在默认是设备维度）
@@ -237,9 +230,10 @@
                           this.packageECharts();
                       })
                   }else{
-                      this.$http.get(this.url.temp_equipmentList_by_equipmentType + `?schemeIdList=${this.schemeIdList.join()}&startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${equipmentType}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`).then((res) => {
+                      this.$http.get(this.url.temp_equipmentList_by_equipmentType + `?schemeIdList=${this.schemeIdList.join()}&startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue.join()}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`).then((res) => {
                           this.allSchemeCompareData.longitudinalAxisData.pop();
                           this.packageECharts();
+                          this.showTable = this.allSchemeCompareData.longitudinalAxisData.length !== 0;
                       })
                   }
               }else{
@@ -286,7 +280,7 @@
           this.$http.get(this.url.test_writable).then((res) => {
               this.allSchemeList = res.data;
               //从排程后页面进入，判断url里面是否带有方案参数，如果带有方案的话，则页面初始显示该方案
-              let schemeId = this.tool.getUrlParams('schemeId');
+              let schemeId = t.getUrlParams('schemeId');
               this.showSchemeList = this.allSchemeList.filter((item) => {
                   return item.schemeId === schemeId;
               });
@@ -361,15 +355,21 @@
               this.showSchemeList.push(selectSchemeObj);
               this.dialogVisible = false;
               this.getSchemeIdList();
+              //如果选择了方案，根据方案确定最小时间
+              if (this.showSchemeList.length !== 0) {
+                  this.$http.get(this.url.min_scheme_time).then((res) => {
+                      this.startTime = res.data;
+                  })
+              }
           },
           //获取已保存方案预测的数据
           getHadSavedSchedule(){
-              const url = this.url.result_equipment_oee + `?startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
+              const url = this.url.result_equipment_oee + `?startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
               this.$http.get(url).then((res) => {
                   //修改为已保存的名字
                   res.data.longitudinalAxisData[0].schemeName = '已保存';
                   //如果之前没有任何查询，则直接是用户，如果有数据，则将y轴的值合进去
-                  if (this.tool.isEmptyObject(this.allSchemeCompareData.horizontalAxisData)) {
+                  if (t.isEmptyObject(this.allSchemeCompareData.horizontalAxisData)) {
                       this.allSchemeCompareData = res.data;
                   } else {
                       this.allSchemeCompareData.longitudinalAxisData = this.allSchemeCompareData.longitudinalAxisData.concat(res.data.longitudinalAxisData);
@@ -398,11 +398,11 @@
               }   else if (timeName === "currentMonth") {
                   //最后一天计算，本月第一天加上本月天数
                   this.startTime = this.minTime;
-                  this.endTime = new Date(year + "-" + month + "-" + getMonthDays(year + "-" + month)).getTime();
+                  this.endTime = new Date(year + "-" + month + "-" + t.getMonthDays(year + "-" + month)).getTime();
               } else {
                   //来源本个月的最后一天加一天
-                  this.startTime = new Date(year + "-" + month + "-01").getTime() + getMonthDays(year + "-" + month) * 86400000;
-                  this.endTime = this.startTime + (getMonthDays(this.startTime) - 1) * 86400000;
+                  this.startTime = new Date(year + "-" + month + "-01").getTime() + t.getMonthDays(year + "-" + month) * 86400000;
+                  this.endTime = this.startTime + (t.getMonthDays(this.startTime) - 1) * 86400000;
               }
           },
           //获得所有的设备类型
@@ -429,7 +429,7 @@
                       cacheTypeStr.push(item.split("_")[0]);
                   });
           	  }
-              const url = this.url.get_all_equipment + `?startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&searchType=1&modelIdList=${cacheTypeStr.join(",")}&locationFilterList=${this.selectLocationList.join()}`;
+              const url = this.url.get_all_equipment + `?startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&searchType=1&modelIdList=${cacheTypeStr.join(",")}&locationFilterList=${this.selectLocationList.join()}`;
               this.$http.get(url).then((res) => {
                 //将equipmentList处理成所需要的数据格式
                   this.equipmentList = this.dataProcess.processEquipmentList(res.data);
@@ -460,7 +460,7 @@
                   //把key 0:001 获取成需要equipmentTypeValue的格式 001_1(id_type)
                   this.equipmentTypeValue = [equipmentType.split(":").reverse().join("_")];
                   //记录一级页面跳转到二级页面的参数（后期用于返回一级页面时用到，现在还没做2017-7-8）
-                  this.goSecondPageParams = `?startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue.join(",")}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
+                  this.goSecondPageParams = `?startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue.join(",")}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
                   this.searchEquipmentOee(this.equipmentTypeValue,clickEChartsType);
               });
           },
@@ -502,7 +502,7 @@
                       return;
                   }
               }
-              const PageUrlParams = `schemeIdList=${this.schemeIdList.join()}&startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
+              const PageUrlParams = `schemeIdList=${this.schemeIdList.join()}&startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${this.equipmentTypeValue}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
               const firstPageUrl = this.url.temp_equipment_oee + '?' + PageUrlParams;
               this.$http.get(firstPageUrl).then((res) => {
                   this.allSchemeCompareData = res.data;
@@ -522,8 +522,8 @@
            * @params :clickEChartsType 当前图标展示形式，线形图还是柱状图
            **/
           searchEquipmentOee(equipmentType = this.equipmentTypeValue,clickEChartsType = 'bar'){
-              let secondPageUrl = this.url.temp_equipmentList_by_equipmentType + `?schemeIdList=${this.schemeIdList.join()}&startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${equipmentType}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
-              let secondPageCacheUrl = this.url.result_equipmentList_by_equipmentType + `?startTime=${getCorrectDate(this.startTime)}&endTime=${getCorrectDate(this.endTime)}&equipmentTypeIdList=${equipmentType}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
+              let secondPageUrl = this.url.temp_equipmentList_by_equipmentType + `?schemeIdList=${this.schemeIdList.join()}&startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${equipmentType}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
+              let secondPageCacheUrl = this.url.result_equipmentList_by_equipmentType + `?startTime=${t.getCorrectDate(this.startTime)}&endTime=${t.getCorrectDate(this.endTime)}&equipmentTypeIdList=${equipmentType}&equipmentIdAndTypeList=${this.equipmentValue}&dimensionTypeEnum=EQUIPMENTTYPE&isCalculateUnusedEquip=1&locationIdList=${this.selectLocationList.join()}`;
               //记录跳转过来的一级页面所带url的带参数，保证返回一级页面时是进入二级页面的数据（因为用户可能在查看二级页面时，修改条件）
               if(this.schemeIdList.length > 0){
                   this.$http.get(secondPageUrl).then((res) => {
@@ -583,6 +583,7 @@
           }
       }
 	}
+
 
 	/**
 	 * desc :  返回一个图表x，y轴所需的数据
@@ -682,17 +683,18 @@
           ],
           xAxis: [{
               type: 'category',
-              axisLabel: {
+//              axisLabel: {
 //                  interval:0,//横轴信息全部显示
 //                  rotate: 40,//60度角倾斜显示
 //                  formatter:function(val) {
 //                      return val.split("").join("\n"); //横轴信息文字竖直显示
 //                  }
-              },
+//              },
               data: []
           }],
           yAxis: [{
-            type: 'value'
+              type: 'value',
+              interval : optionData.interval
           }],
           series: []
       };
@@ -705,7 +707,7 @@
       //设置y轴坐标
       optionData.yAxisList.forEach((item) => {
           //设置图表toolbox,提示小格子
-          option.legend.data.push(item.schemeName);
+          option.legend.data.push(item.name);
           //设置x轴各项在y轴对应的值
           const obj = {
               name: item.name,
@@ -732,34 +734,4 @@
       });
       return option;
 	}
-
-	/**
-	 * desc: 根据传入时间，返回一个包含年，月，日，时，分，秒的key-value值的对象
-	 * time:2017-06-21
-	 * @param: date : 传入的时间 2017-06-45
-	 * @return: string 返回正确的时间 2017-07-15
-	 **/
-	function getCorrectDate(date) {
-      const currentTime = date ? new Date(date) : new Date();
-      return currentTime.getFullYear() + "-" + (currentTime.getMonth() + 1) + "-" + currentTime.getDate();
-	}
-
-
-	/**
-	 * desc:查询某个月有几天
-	 * time:2017-06-21
-	 * last : linzx
-	 * @param: month ：查询的年月份
-	 * @return: number 查询那个月的天数
-	 **/
-	function getMonthDays(date) {
-		const curDate = new Date(date || new Date());
-		const curMonth = curDate.getMonth();
-		curDate.setMonth(curMonth + 1);
-		/* 将日期设置为0, 这里为什么要这样设置, 我不知道原因, 这是从网上学来的 */
-		curDate.setDate(0);
-		/* 返回当月的天数 */
-		return curDate.getDate();
-	}
-
 </script>

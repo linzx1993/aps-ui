@@ -21,7 +21,7 @@
 		<div class="search-box tl">
 			<h6 class="search-box-title">查询</h6>
 			<div class="search-content">
-				<search-drop-down-list ng-repeat="searchData in searchDataList" search-data="searchData"></search-drop-down-list>
+				<search-drop-down-list ng-repeat="searchData in searchDataList" ng-model="placeholderaaa" search-data="searchData"></search-drop-down-list>
 				<div class="start-search" ng-click="search()">查询</div>
 			</div>
 		</div>
@@ -355,7 +355,7 @@
 		<div class="case-header">
 			<p class="select-name jChooseScheme">{{chooseScheme.schemeName}}<span ng-show="isHadScheduleShow" style='color:#f00;'>*</span></p>
 			<ul class="case-content">
-				<li ng-repeat="scheme in schemeNameList track by $index" ng-click="selectLiScheme(scheme)" data-scheme-id={{scheme.schemeId}} title={{scheme.schemeName}}>
+				<li ng-repeat="scheme in allSchedulePlan track by $index" ng-click="selectLiScheme(scheme)" data-scheme-id={{scheme.schemeId}} title={{scheme.schemeName}}>
 					{{scheme.schemeName}}
 					<span ng-show="scheme.isSelected" style='color:#f00;'>*</span>
 				</li>
@@ -363,6 +363,7 @@
 		</div>
 	</div>
 	<p ng-show="isHadScheduleShow" style='margin:10px 0;color:#f00;text-align:center;font-size:12px;'>您有未保存的工单信息,点击确定查看!</p>
+	<p ng-show="isOnLineConfig" style='margin:10px 0;color:#f00;text-align:center;font-size:12px;'>{{onlineWords}}</p>
 	<div class="wrap-box mt-10">
 		<table class="wrap-contents">
 			<tr ng-repeat="locationRule in locationRuleList track by $index">
@@ -372,12 +373,12 @@
 		</table>
 	</div>
 	<hr style="margin:20px auto;width:85%;border: 1px solid #e1e1e1;">
-	<!--<div class="mt-10 aps-case-choose jChooseReason">-->
-		<!--<multiple-drop-down-list drop-down-data="scheduleReason" drop-style='{width : "235px"}'></multiple-drop-down-list>-->
-	<!--</div>-->
-	<!--<div class="mt-10 aps-case-choose">-->
-		<!--<span class="case-name"><span style='color:#f00;'>*</span>详情描述：</span><textarea id="reScheduleDescription" placeholder="请输入排程原因详情" class="schedule-detail" style="resize: none;" name="reasonDetail"></textarea>-->
-	<!--</div>-->
+	<div class="mt-10 aps-case-choose jChooseReason">
+		<multiple-drop-down-list drop-down-data="scheduleReason" drop-style='{width : "235px"}'></multiple-drop-down-list>
+	</div>
+	<div class="mt-10 aps-case-choose">
+		<span class="case-name"><span style='color:#f00;'>*</span>详情描述：</span><textarea id="reScheduleDescription" placeholder="请输入排程原因详情" class="schedule-detail" style="resize: none;" name="reasonDetail"></textarea>
+	</div>
 	<div class="tc">
 		<span ng-show="!isHadScheduleShow" class="aps-confirm aps-btn" ng-click="sureGoStartSchedule()">确定</span>
 		<span ng-show="isHadScheduleShow" class="aps-continue aps-btn" ng-click="aps_continue()">确定</span>

@@ -15,24 +15,17 @@
         z-index: 30;
         
         .external-diff-tab {
-            position: absolute;
             width: 125px;
-            height: calc(100% - 41px);
-            left: 0px;
-            top: 40px;
             border-bottom: 1px solid #dedede;
-            background: #d4dfef;
+            background-color: #d4dfef;
             
             li {
                 display: block;
                 position: relative;
-                width: 125px;
-                background: #d4dfef;
+                background-color: #d4dfef;
                 font-size: 14px;
                 line-height: 45px;
                 color: #333333;
-                float: left;
-                margin-right: 30px;
                 cursor: pointer;
                 
                 .each-diff-num{
@@ -83,7 +76,6 @@
             height: 36px;
             line-height: 36px;
             border: 1px solid #ccc;
-            
             div {
                 float: left;
                 height: 100%;
@@ -104,10 +96,8 @@
         
         .dialog-window-body {
             flex: 1 1;
-            padding: 0px 20px 20px 145px;
             display: flex;
-            flex-direction: column;
-            
+
             .window-tr-onlook {
                 background-color: #fcefa1;
             }
@@ -140,12 +130,12 @@
             flex: 1 1;
             position: relative;
             width: 100%;
-            margin-top: 20px;
-            
+            padding: 20px;
+
             .table-space {
                 position: absolute;
-                max-height: 100%;
-                width: 100%;
+                max-height: calc(100% - 40px);
+                width: calc(100% - 40px);
                 overflow: auto;
             }
             
@@ -244,7 +234,6 @@
                         border-left: 8px solid transparent;
                         border-right: 8px solid transparent;
                         border-top: 8px solid #fff;
-                        
                     }
                     
                     p{
@@ -263,7 +252,6 @@
 				font-size: 14px;
 				color: #888;
 				cursor: pointer;
-				
 				&:hover {
 					background-color: #e8e8e8;
 					color: #3e7ec3;
@@ -307,7 +295,6 @@
     }
 }
 
-
 body {
     .differ-tip {
         .layui-layer-content{
@@ -324,20 +311,3 @@ body {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-//.dialog-window-body .show-table input:checked + span,
-//.dialog-window-body .cover-head input:checked + span{
-//background:url(../images/selected.png) center #FFF;
-//border:1px solid #1e7cd9;
-//}
-
-
-

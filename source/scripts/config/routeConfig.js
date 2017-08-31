@@ -146,5 +146,11 @@ app.config(['$stateProvider','$urlRouterProvider', function($stateProvider,$urlR
              url:'/defaultDisplay',
              templateUrl:'view/template/adminDisplay.html',
              controller: 'adminConfigController'
-         });
+         })
+		.state('config.onlineConfig',{
+			url:'/onlineConfig',
+			templateUrl:'view/template/onlineConfig.html',
+			controller: "onlineConfigController"
+		})
+    ;
 }]);

@@ -11,23 +11,16 @@
   opacity: 0;
   z-index: 30; }
   .pbody .exDiffer-window .external-diff-tab {
-    position: absolute;
     width: 125px;
-    height: calc(100% - 41px);
-    left: 0px;
-    top: 40px;
     border-bottom: 1px solid #dedede;
-    background: #d4dfef; }
+    background-color: #d4dfef; }
     .pbody .exDiffer-window .external-diff-tab li {
       display: block;
       position: relative;
-      width: 125px;
-      background: #d4dfef;
+      background-color: #d4dfef;
       font-size: 14px;
       line-height: 45px;
       color: #333333;
-      float: left;
-      margin-right: 30px;
       cursor: pointer; }
       .pbody .exDiffer-window .external-diff-tab li .each-diff-num {
         position: absolute;
@@ -78,9 +71,7 @@
       border: 1px solid #1e7cd9; }
   .pbody .exDiffer-window .dialog-window-body {
     flex: 1 1;
-    padding: 0px 20px 20px 145px;
-    display: flex;
-    flex-direction: column; }
+    display: flex; }
     .pbody .exDiffer-window .dialog-window-body .window-tr-onlook {
       background-color: #fcefa1; }
     .pbody .exDiffer-window .dialog-window-body .move-to-cache {
@@ -102,11 +93,11 @@
     flex: 1 1;
     position: relative;
     width: 100%;
-    margin-top: 20px; }
+    padding: 20px; }
     .pbody .exDiffer-window .show-table .table-space {
       position: absolute;
-      max-height: 100%;
-      width: 100%;
+      max-height: calc(100% - 40px);
+      width: calc(100% - 40px);
       overflow: auto; }
     .pbody .exDiffer-window .show-table table {
       border-collapse: collapse;

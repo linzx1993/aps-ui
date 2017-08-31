@@ -478,6 +478,13 @@ input.disabled{
     border-top: 1px solid #ccc;
 }
 
+.look-online-config{
+    text-decoration: underline;
+    &:hover{
+        color: $themeColor;
+    }
+}
+
 /*排程方案*/
 .planContent {
     height: 650px;
@@ -725,9 +732,7 @@ input.disabled{
 
 .config-box .info-mask.active .info-box {
     animation: show 2s;
-    -ms-animation: show 2s;
     transform-origin: 50% 50%;
-    -ms-transform-origin: 50% 50%;
 }
 
 .config-box .info-box span {
@@ -791,4 +796,34 @@ input.disabled{
     width: 180px;
     height: 30px;
     border: 1px solid #ccc;
+}
+
+/*=========上线配置==========*/
+.online-content{
+    padding: 20px;
+    .online-table-box{
+        height: 500px;
+        overflow: auto;
+    }
+    .cascader-select-box input{
+        display: inline-block;
+    }
+    table{
+        width: 100%;
+        background-color: #fff;
+        th,td{
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+        tr{
+            height: 30px;
+            line-height: 30px;
+            &:nth-child(even){
+                background-color: #EDEEED;
+            }
+        }
+        td{
+            padding: 5px 0;
+        }
+    }
 }

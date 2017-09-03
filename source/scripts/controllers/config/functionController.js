@@ -1,7 +1,13 @@
 /**
- * Created by yiend on 2017/2/15.
+ * Created by linzx on 2017/2/15.
+ * desc : 工作菜单
  */
 "use strict";
+/*
+ * desc :　functionModuleController　： 工作菜单（右侧菜单栏模块）
+ * desc :　taskColumnController　： 任务池显示项
+ * desc :　cacheRoomController　： 暂存间显示项
+ */
 app
     .controller("functionModuleController",["$rootScope","$scope","$http","$state","http", function($rootScope,$scope,$http,$state,http){
         //默认显示第一个tab---start

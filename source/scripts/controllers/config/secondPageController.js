@@ -1,7 +1,13 @@
 /**
  * Created by yiend on 2017/1/14.
+ * desc : 工作单元
  */
 'use strict';
+/*
+ * desc :　secondPageController　： 工作单元（俗称二级页面）
+ * desc :　columnController　： 显示项配置
+ * desc :　sortController　： 多列排序项配置
+ */
 app
     .controller("secondPageController",["$rootScope","$scope","$state",function($rootScope,$scope,$state){
         //显示正确的目录class-active
@@ -13,18 +19,18 @@ app
             title : "",//面包屑导航三级目录文字
         };
     }])
-    .controller("columnController",["$rootScope","$scope","$http","http",function($rootScope,$scope,$http,http){
+    .controller("columnController",["$rootScope","$scope","http",function($rootScope,$scope,http){
         //设置面包屑导航
         $scope.secondPage.showPageConfig = "显示项";
 
         /**
-         *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
+         *根据配置页面获取的车间地点,显示对应排序表的数据
          */
         let getColumnData = () =>{
 			http.get({
 				url: $rootScope.restful_api.column_content_config + $scope.locationId,
 				successFn: (res) => {
-                    //获得get到的数据，渲染页面
+                    //获得get到的数据，渲染两个拖拽框
                     $scope.setDisplayGetData(res);
                     $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
                 },
@@ -78,7 +84,7 @@ app
 			});
         };
     }])
-    .controller("sortController",["$rootScope","$scope","$http", "$window", "$location","$timeout","$q","$templateCache","scheduleTableViewModelService","http",function($rootScope,$scope,$http, $window, $location,$timeout,$q,$templateCache,scheduleTableViewModelService,http) {
+    .controller("sortController",["$rootScope","$scope","scheduleTableViewModelService","http",function($rootScope,$scope,scheduleTableViewModelService,http) {
         //设置面包屑导航
         $scope.secondPage.showPageConfig = "多列排序项";
         $scope.displayData = {leftDisplay : "可用配置项",rightDisplay : "已排序配置项"};
@@ -119,8 +125,6 @@ app
                 }
 			});	
         }
-        // //创建车间树
-        // $scope.createWorkshop(true,getSortConfig);
 
         //渲染数据
         getSortConfig();
@@ -272,7 +276,5 @@ app
         };
         $scope.deleteDragItem = (data,$event) =>{
             data.show = false;
-            //$event.target.parentNode.parentNode;
-            //console.log($event.target.parentNode.parentNode.nextElementSibling);
         };
     }]);

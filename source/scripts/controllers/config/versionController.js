@@ -4,7 +4,8 @@
 app.controller("versionController",["$rootScope","$scope","$http","$state","tool","http", function($rootScope,$scope,$http,$state,tool,http){
     //显示正确的目录class-active
     $scope.configNav.activeNav = ".version";
-	
+
+    //获取系统版本
 	http.get({
 		url: $rootScope.restful_api.public_version_number,
 		successFn: (res) => {

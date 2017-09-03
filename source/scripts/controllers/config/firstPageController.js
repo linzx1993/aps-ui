@@ -1,18 +1,24 @@
 /**
  * Created by yiend on 2017/1/23.
+ * desc : 工作区域
  */
 'use strict';
+/*
+ * desc :　firstPageController　： 工作区域（俗称一级页面）
+ * desc :　displayCombineController　： 显示合并项
+ * desc :　displayFlipController　： 显示翻转
+ */
 app
     .controller("firstPageController",["$rootScope","$scope","$http","$state", function($rootScope,$scope,$http,$state){
-        //默认显示第一个tab---start
+        //点击工作区域时，路由默认跳转显示第一个tab---显示合并项
         $state.go('config.workArea.displayCombine');
         //显示正确的目录class-active
         $scope.configNav.activeNav = ".workArea";
         //默认显示第一个tab---end
         $scope.firstPage = {
             title : "",//面包屑导航三级目录文字
-            showItemLists : [],//显示天数
             combineItemList : [],//显示合并项数组
+			flipList : [],//显示翻转项数组
         };
     }])
     .controller("displayCombineController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
@@ -20,7 +26,7 @@ app
         $scope.firstPage.title = "显示合并项";
 
         /**
-         *根据点击的车间树获得相应的车间ID,显示对应显示合并项的数据
+         *desc : 根据配置页面获取的车间地点，获取对应显示合并项的数据
          */
         let getDisplayCombineData = () =>{
 			http.get({
@@ -37,8 +43,6 @@ app
         };
         getDisplayCombineData();
 
-        // //创建车间树
-        // $scope.createWorkshop(true,getDisplayCombineData);
 
         //保存数据
         $scope.saveDisplayCombine = () =>{
@@ -75,7 +79,7 @@ app
     .controller("displayFlipController",["$rootScope","$scope","$http","http", function($rootScope,$scope,$http,http){
         $scope.firstPage.title = "显示翻转";
         /**
-         *根据点击的车间树获得相应的车间ID,显示对应一级页面是否翻转
+         *根据配置页面获取的车间地点,显示对应一级页面是否翻转
          */
         let getDisplayFlipData = () =>{
 			http.get({
@@ -94,7 +98,6 @@ app
 
         //保存数据
         $scope.saveDisplayFlip = () =>{
-            console.log($scope.selectValue);
             let selectObj = $scope.firstPage.flipList.filter((item)=>{
                 return item.valueContent === $scope.selectValue;
             })[0];
@@ -115,11 +118,9 @@ app
                     }
                 },
 				errorFn: ()=>{
-                    layer.alert("数据保存失败，请检查服务器");
+					$scope.info.fail("数据保存失败，请检查服务器");
                 }
 			})
         }
 
-        // //创建车间树
-        // $scope.createWorkshop(true,getDisplayFlipData);
-    }]);
+}]);

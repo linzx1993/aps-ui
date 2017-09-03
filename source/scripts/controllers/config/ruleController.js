@@ -567,67 +567,58 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
     };
     //显示隐藏高级规则---end
 
-    //取消绑定，执行unbindWatchPap()
-    let unbindWatchPap = $scope.$watch("scheduleFrontData[8].select",function (newValue,oldValue) {
-        //设置为true，启用默认规则
-        if(newValue === true){
-            $scope.disable.schedulePointSelected = false;
-            $scope.notEdit.schedulePointSelected = true;
-            $(".pap-type .scheduleDrag li").eq(2).trigger("click");
-        }else {
-            //设置为false，下拉选项设置为不启用
-            $scope.disable.schedulePointSelected = true;
-            $scope.notEdit.schedulePointSelected = true;
-            $(".pap-type .scheduleDrag li").eq(0).trigger("click");
-        }
-    });
-    $("body")
-    //点击pap类型决定起排工序,和影响排程前校验中的pap检验项
-        .on("click",".pap-type li",function(){
-            //获得pap在数组中的位置下标
-			let papIndex;
-            $scope.scheduleFrontData.some((item,i)=>{
-                if (item.name === 'PAP_INFO_CHECKING'){
-					papIndex = i;
-                    return true;
-                }
-                return false;
-            });
-            if($(this).attr("data-value")=="PAP_DISABLE"){
-                //不启用
-                $timeout(function(){
-                    $scope.disable.schedulePointSelected = true;
-                    $scope.notEdit.schedulePointSelected = true;
-                    $scope.scheduleFrontData[papIndex].select = false;//联动排程前校验的pap
-                    $(".schedule-point li").eq(0).trigger("click");
-                })
-            }else if($(this).attr("data-value")=="PAP_SCHEDULE_RULE"){
-                $timeout(function(){
-                    $scope.disable.schedulePointSelected = false;
-                    $scope.notEdit.schedulePointSelected = true;
-                    $scope.scheduleFrontData[papIndex].select = true;//联动排程前校验的pap
-                    $(".schedule-point li").eq(2).trigger("click");
-                })
-            }else{
-                $timeout(function(){
-                    $scope.disable.schedulePointSelected = false;
-                    $scope.notEdit.schedulePointSelected = false;
-                    $scope.scheduleFrontData[papIndex].select = true;//联动排程前校验的pap
-                })
-            }
-        })
-        //排程周期决定排程间隔
-        .on("click",".schedulePeriod li",function(){
-            if($(this).attr("data-value")=="BY_DAY"){
-                $timeout(function(){
-                    $scope.disable.scheduleInterval = false;
-                    $scope.notEdit.scheduleInterval = false;
-                })
-            }else{
-                $timeout(function(){
-                    $scope.disable.scheduleInterval = true;
-                    $scope.notEdit.scheduleInterval = true;
-                })
-            }
-        })
+    // //取消绑定，执行unbindWatchPap()
+    // let unbindWatchPap = $scope.$watch("scheduleFrontData[5].select",function (newValue,oldValue) {
+    //     //设置为true，启用默认规则
+    //     if(newValue === true){
+    //         $scope.disable.schedulePointSelected = false;
+    //         $scope.notEdit.schedulePointSelected = true;
+    //         $(".pap-type .scheduleDrag li").eq(2).trigger("click");
+    //     }else {
+    //         //设置为false，下拉选项设置为不启用
+    //         $scope.disable.schedulePointSelected = true;
+    //         $scope.notEdit.schedulePointSelected = true;
+    //         $(".pap-type .scheduleDrag li").eq(0).trigger("click");
+    //     }
+    // });
+    // $("body")
+    // //点击pap类型决定起排工序,和影响排程前校验中的pap检验项
+    //     .on("click",".pap-type li",function(){
+    //         if($(this).attr("data-value")=="PAP_DISABLE"){
+    //             //不启用
+    //             $timeout(function(){
+    //                 $scope.disable.schedulePointSelected = true;
+    //                 $scope.notEdit.schedulePointSelected = true;
+    //                 $scope.scheduleFrontData[5].select = false;//联动排程前校验的pap
+    //                 $(".schedule-point li").eq(0).trigger("click");
+    //             })
+    //         }else if($(this).attr("data-value")=="PAP_SCHEDULE_RULE"){
+    //             $timeout(function(){
+    //                 $scope.disable.schedulePointSelected = false;
+    //                 $scope.notEdit.schedulePointSelected = true;
+    //                 $scope.scheduleFrontData[5].select = true;//联动排程前校验的pap
+    //                 $(".schedule-point li").eq(2).trigger("click");
+    //             })
+    //         }else{
+    //             $timeout(function(){
+    //                 $scope.disable.schedulePointSelected = false;
+    //                 $scope.notEdit.schedulePointSelected = false;
+    //                 $scope.scheduleFrontData[5].select = true;//联动排程前校验的pap
+    //             })
+    //         }
+    //     })
+    //     //排程周期决定排程间隔
+    //     .on("click",".schedulePeriod li",function(){
+    //         if($(this).attr("data-value")=="BY_DAY"){
+    //             $timeout(function(){
+    //                 $scope.disable.scheduleInterval = false;
+    //                 $scope.notEdit.scheduleInterval = false;
+    //             })
+    //         }else{
+    //             $timeout(function(){
+    //                 $scope.disable.scheduleInterval = true;
+    //                 $scope.notEdit.scheduleInterval = true;
+    //             })
+    //         }
+    //     })
 }]);

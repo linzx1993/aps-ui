@@ -1,1 +1,11 @@
-{"version":3,"file":"resetStyle.css","sources":["resetStyle.scss"],"sourcesContent":["@charset \"utf-8\";\r\n\r\n/*常用颜色*/\r\n$themeColor : #1E7CD9;/*主题色*/\r\n$borderColor : #b3b3b3;/*表格灰框颜色*/\r\n$titleBgColor : #f0f0f0;/*标题栏背景灰色*/\r\n$orange : #ee8f00;//橘色\r\n$scrollbar : rgba(255,153,0,0.5);//一级界面时间控件用色\r\n.c-theme-color{color: $themeColor;}\r\n@mixin scale($n) {\r\n  -webkit-transform: scale($n);\r\n  -ms-transform: scale($n);\r\n  transform: scale($n);\r\n}\r\n\r\n@mixin transform-origin($x,$y) {\r\n  -webkit-transform-origin: $x $y;\r\n  -ms-transform-origin: $x $y;\r\n  transform-origin: $x $y;\r\n}\r\n\r\n@mixin transition($prop,$time) {\r\n  -webkit-transition: $prop $time;\r\n  -ms-transition: $prop $time;\r\n  transition: $prop $time;\r\n}\r\n\r\n@mixin rotate($deg) {\r\n  -webkit-transform: rotate($deg);\r\n  -ms-transform: rotate($deg);\r\n  transform: rotate($deg);\r\n  @include transition(transform , 0.5s)\r\n}"],"names":[],"mappings":";AAEA,gBAAgB;AACM,aAAa;AACZ,sBAAsB;AACrB,yBAAyB;AAGjD,AAAA,cAAc,CAAA;EAAC,KAAK,EALN,OAAO,GAKe"}
+{
+"version": 3,
+<<<<<<< HEAD
+"mappings": ";;;;;;AAWA,cAAc;EAAC,KAAK,EARN,OAAO",
+=======
+"mappings": ";;;;;AASA,cAAc;EAAC,KAAK,EANN,OAAO",
+>>>>>>> rc
+"sources": ["resetStyle.scss"],
+"names": [],
+"file": "resetStyle.css"
+}

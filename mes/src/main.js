@@ -4,12 +4,12 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import Vuex from 'vuex'
-import store from './vuex/store'
+// import Vuex from 'vuex'
+// import store from './vuex/store'
 import App from './App'
 import router from './router/routerConfig'
 
-Vue.use(Vuex);
+// Vue.use(Vuex);
 
 	//路由配置
 import axios from 'axios'
@@ -19,6 +19,7 @@ Vue.prototype.$http = axios;
 //引入接口
 import url from './scripts/url';
 Vue.prototype.url = url;
+Vue.prototype.schedule = window.schedule;
 
 //引入小方法js
 import tool from "./scripts/tool";
@@ -47,7 +48,7 @@ Vue.prototype.echarts = echarts;
 //================****引入相关scss文件****===================//
 import "./styles/reset.scss";
 import "./styles/common.scss";
-import "./styles/index.scss";
+import "./styles/component.scss";
 import 'element-ui/lib/theme-default/index.css'
 //================****引入自定义插件****===================//
 import apsUI from "./install.js"
@@ -55,11 +56,17 @@ Vue.use(apsUI);
 
 Vue.config.productionTip = false; //阻止 vue 在启动时生成生产提示。
 
+//是否是开发状态（是否显示所有的功能）
+//上线用这行
+Vue.prototype.devEnvironment = window.devEnvironment;
+//开发用这行(ture显示所有)
+Vue.prototype.devEnvironment = true;
+
 /* eslint-disable no-new */
 new Vue({
 	el: '#app',
 	router,
-	store,
+	// store,
 	template: '<App/>',
 	components: {
 		App

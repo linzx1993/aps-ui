@@ -1,8 +1,11 @@
 <ul class="location-tree-ul">
-    <b class="column-border"></b>
+    <!--<b class="column-border"></b>-->
     <li ng-repeat="subfolder in currentFolder.children" class="location-tree-li">
-        <i class="select-status" ng-class="{'disabled' : !subfolder.chooseAble}" data-location-id={{subfolder.locationId}} data-merge-location={{subfolder.chooseAble}}></i>
-        <span ng-class="{'title-open' : subfolder.children}" class="ml-10"><s ng-show="subfolder.children" class="open-btn mr-10"></s>{{subfolder.name}}</span>
+<!--        <b style="display: none" class="column-border"></b>-->
+        <i class="select-status unselect" ng-class="{'disabled' : !subfolder.chooseAble}" data-location-id={{subfolder.locationId}} data-merge-location={{subfolder.chooseAble}}></i>
+        <!--第二个透明的i元素是为了兼容一体机点击不到的情况-->
+        <i style="opacity:0;" class="jSchedulePlanEle select-status unselect" ng-class="{'disabled' : !subfolder.chooseAble}" data-location-id={{subfolder.locationId}} data-merge-location={{subfolder.chooseAble}}></i>
+        <span  ng-class="{'title-open' : subfolder.children}" class="tree-item ml-10"><s ng-show="subfolder.children" class="open-btn mr-10"></s>{{subfolder.name}}</span>
         <folder-tree current-folder="subfolder"></folder-tree>
     </li>
 </ul>

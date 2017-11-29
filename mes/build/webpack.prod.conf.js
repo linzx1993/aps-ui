@@ -22,21 +22,7 @@ var env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : config.build.env;
 
-// console.log(JSON.stringify(utils.styleLoaders()));
-//针对happypackcss的优化
-// const arr = [
-//   {
-//     "test": {},
-//     "use": ["vue-style-loader", {"loader": "css-loader", "options": {"minimize": true}}]
-//   },
-//   {
-//     "test": {},
-//     "use": ["vue-style-loader", {"loader": "css-loader", "options": {"minimize": true}}, {"loader": "sass-loader", "options": {"indentedSyntax": true}}]
-//   },
-//   {
-//     "test": {},
-//     "use": ["vue-style-loader", {"loader": "css-loader", "options": {"minimize": true}}, {"loader": "sass-loader", "options": {}}]
-//   }];
+
 var webpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({
@@ -68,13 +54,13 @@ var webpackConfig = merge(baseWebpackConfig, {
       'process.env': env
     }),
     //======生产环境压缩优化,构建时间大头   ---2017-07-29
-    //  再添加了DllReferencePlugin的预编译之后，这部分时间被极大压缩，猜测是因为原来已经被压缩过过了
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      },
-      sourceMap: true
-    }),
+    // //  再添加了DllReferencePlugin的预编译之后，这部分时间被极大压缩，猜测是因为原来已经被压缩过过了
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress: {
+    //     warnings: false
+    //   },
+    //   sourceMap: true
+    // }),
     new webpack.HashedModuleIdsPlugin(),// 2017-08-12,使用标识符而不是模块名称来压缩输出,实现持久化缓存
     // new UglifyJsParallelPlugin({
     //   workers: os.cpus().length,
@@ -93,11 +79,12 @@ var webpackConfig = merge(baseWebpackConfig, {
     }),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
-    new OptimizeCSSPlugin({
-      cssProcessorOptions: {
-        safe: true
-      }
-    }),
+    // //压缩css代码
+    // new OptimizeCSSPlugin({
+    //   cssProcessorOptions: {
+    //     safe: true
+    //   }
+    // }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
@@ -138,7 +125,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       chunks: ['vendor']
     }),
     // new webpack.optimize.CommonsChunkPlugin(["common"]),
-    // copy custom static assets
+    // copy custom static asserts
     new CopyWebpackPlugin([
       {
         from: path.resolve(__dirname, '../static'),

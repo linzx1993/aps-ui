@@ -1,11 +1,10 @@
 @charset "utf-8";
 //引入相关组件样式
-@import 'progressBar.scss';
 @import 'resetStyle.scss';
-@import 'exterDifference.scss';
-@import 'secondDifference.scss';
-@import 'locationTree.scss';
-@import 'layer.scss';
+@import 'index/progressBar.scss';
+@import 'index/exterDifference.scss';
+@import 'index/secondDifference.scss';
+@import 'index/layer.scss';
 
 /*
  * 页面表格内容样式文件。
@@ -240,9 +239,10 @@
 	}
 	.search-content{
 		padding: 20px 30px;
-		&>.search-item{
-			margin: 0 15px 20px 0;
-		}
+	}
+	.search-item{
+		display: inline-block;
+		margin: 0 15px 20px 0;
 	}
 	.hide_search_empty{
 		display: block;
@@ -252,43 +252,46 @@
 	}
 }
 /*下拉框样式独立抽离出来*/
-.drop-down-list{
-	display: none;
-	position: absolute;
-	left: 73px;
-	top: 29px;
-	z-index: 10;
-	width: 180px;
-	border: 1px solid #ccc;
-	box-sizing: border-box;
-	background-color: #fff;
-	input{
-		width: 150px;
-		border: 1px solid #ccc;
-		padding-left: 5px;
-	}
-	ul{
-		max-height: 120px;
-		overflow: auto;
-	}
-	li{
-		width: calc(100% - 20px);
-		padding: 0 10px;
-		min-width: 88px;
-		line-height: 30px;
-		//border-bottom: 1px solid #ccc;
-		cursor: pointer;
-		&:hover,&.active{
-			color: $themeColor
-		};
-		&:last-child{
-			border-bottom: none;
-		}
-	}
-	.active{
-		color: $themeColor;
-	}
-}
+//.drop-down-list{
+//	//display: none;
+//	position: absolute;
+//	left: 73px;
+//	top: 29px;
+//	z-index: 10;
+//	width: 180px;
+//	border: 1px solid #ccc;
+//	box-sizing: border-box;
+//	background-color: #fff;
+//	input{
+//		width: 150px;
+//		border: 1px solid #ccc;
+//		padding-left: 5px;
+//	}
+//	ul{
+//		max-height: 120px;
+//		overflow: auto;
+//	}
+//	li{
+//		width: calc(100% - 20px);
+//		padding: 0 10px;
+//		min-width: 88px;
+//		line-height: 30px;
+//		//border-bottom: 1px solid #ccc;
+//		cursor: pointer;
+//		&:hover{
+//			//color: $themeColor
+//		}
+//		&.active{
+//			color: $themeColor
+//		};
+//		&:last-child{
+//			border-bottom: none;
+//		}
+//	}
+//	.active{
+//		color: $themeColor;
+//	}
+//}
 /* 预排转实际   */
 .to-fact {
 	.to-fact-box {
@@ -1119,10 +1122,10 @@
 	width: calc(40% - 110px);
 	height: calc(100vh - 150px);
 	min-width: 360px;
+	min-height: 500px;
 	right: 68px;
 	top: 30px;
 	background-color: #fff;
-	opacity: 0;
 	.info-show {
 		//width: 480px;2017-4-1
 		text-align: left;

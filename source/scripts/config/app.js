@@ -6,7 +6,7 @@
  * Created by xujun on 2016/6/30.
  */
 let loginOutUrl = "";
-var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(function($rootScope,$http,http){
+var app = angular.module('myApp', ['ui.router','pascalprecht.translate','ngTouch']).run(function($rootScope,$http,http){
 	//全局配置
 
 	//与mes项目协调配合一个全局的配置文件,用于测试，后台，实施人员配置调试
@@ -22,16 +22,16 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 
 	//错误码对象
 	$rootScope.errorCode = {
-		0 : "未知错误！",
-		50 : "参数为空！",
-		51 : "参数格式错误！",
-		52 : "参数范围错误！",
-		101 : "无效资源！",
-		102 : "无资源访问权限！",
-		103 : "待删除资源正在使用中！",
-		1004 : "该方案正在排程中！",
-		1005 : "该方案下的地点正在排程中！",
-		2001 : "该设备不允许加工此物料!"
+		0 : "系统异常：未知错误",
+		50 : "系统异常：参数为空",
+		51 : "系统异常：参数格式错误",
+		52 : "系统异常：参数范围错误",
+		101 : "系统异常：资源请求无效",
+		102 : "系统异常：无资源访问权限",
+		103 : "系统异常：资源已被占用，无法删除",
+		1004 : "该方案正在排程中",
+		1005 : "该方案下的地点正在排程中",
+		2001 : "该设备不允许加工此物料"
 	};
 
 	$rootScope.getsessionStorage = function(locationID_pre,locationID_res,fromPre){
@@ -123,18 +123,18 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 			"column_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column?locationId=",
 			//多列排序信息配置
 			"sort_content_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column-order?locationId=",
-			// //合并项配置
-			// "sort_combine_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column_merge?locationId=",
-			// //汇总项配置
-			// "sort_summary_config" : "http://" + $rootScope.api_domain + "/api/aps/config/aps-view-report_column_summary?locationId=",
 			//合并项配置
 			"sort_combine_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column-merge?locationId=",
 			//汇总项配置
 			"sort_summary_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/report-column-summary?locationId=",
-			//任务池列信息
-			"task_column_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/pool-task-change/view/column?locationId=",
+			//任务池计划进度列信息
+			"task_column_plan_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/pool-task-change/view/column?locationId=",
+			//任务池订单维度列信息
+			"task_column_order_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/pool-task-change/view/order/column?locationId=",
 			//暂存间显示项
-			"cache_room_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/storage/report-column?locationId=",
+			"cache_room_plan_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/storage/report-column?locationId=",
+			//暂存间订单维度显示项
+			"cache_room_order_config" : "http://" + $rootScope.api_domain + "/api/aps/config/user/report/view/storage/by/order/report-column?locationId=",
 			//管理员配置页面
 			"admin_content_config" : "http://" + $rootScope.api_domain + "/api/admin/aps/config/aps-system-workshop_type?locationId=",
 			//获取所有规则ID
@@ -221,6 +221,8 @@ var app = angular.module('myApp', ['ui.router','pascalprecht.translate']).run(fu
 			"search_material_code" : "http://"+$rootScope.api_domain+"/api/aps/material/find/material/by/code?materialCode=",
 			//上线配置-模糊查询物料名称
 			"search_material_name" : "http://"+$rootScope.api_domain+"/api/aps/material/find/material/by/name?materialName=",
+			//排程规则
+			"get_all_Algorithm" : "http://"+$rootScope.api_domain+"/api/aps/rule/availableAlgorithm",
 		};
 	};
 	$rootScope.getsessionStorage();

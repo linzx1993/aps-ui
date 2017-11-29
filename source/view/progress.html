@@ -67,23 +67,20 @@
 					<thead>
 					<tr>
 						<th>序号</th>
-						<th ng-repeat="title in checkItemTableHeadData track by $index" >{{title.showText}}</th>
+						<th ng-repeat="data in checkItemTableOrder track by $index" >{{checkItemTableHeadData[data]}}</th>
 					</tr>
 					</thead>
 					<tbody>
 					<tr ng-repeat="checkItemTableRow in checkItemTableBodyData track by $index">
 						<td>{{$index + 1}}</td>
-						<td>{{checkItemTableRow.processId}}</td>
-						<td>{{checkItemTableRow.pUnitType}}</td>
-						<td>{{checkItemTableRow.pUnitId}}</td>
-						<td>{{checkItemTableRow.materialId}}</td>
+						<td ng-repeat="title in checkItemTableOrder">{{checkItemTableRow[title]}}</td>
 					</tr>
 					</tbody>
 				</table>
 			</div>
 			<div class="cover-head">
 				<div>序号</div>
-				<div ng-repeat="title in checkItemTableHeadData track by $index">{{title.showText}}</div>
+				<div ng-repeat="data in checkItemTableOrder track by $index">{{checkItemTableHeadData[data]}}</div>
 			</div>
 		</div>
 	</div>

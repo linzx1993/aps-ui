@@ -2,8 +2,9 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
 		<title>浙江力太-自动排程</title>
-		<!--<link rel="stylesheet" href="styles/reset.css"/>-->
+		<link rel="stylesheet" href="styles/reset.css"/>
 		<link rel="stylesheet" href="styles/common.css" />
 		<link rel="stylesheet" href="styles/index.css" />
 		<link rel="stylesheet" href="styles/help.css" />
@@ -51,10 +52,9 @@
 		<script src="scripts/lib/angular1.5.js"></script>
 		<!--<script src="scripts/lib/angular-route.js"></script>-->
 		<script src="scripts/lib/ui-router.js"></script>
-		<script src="scripts/lib/angular-translate.js"></script>
-		<script src="scripts/lib/angular-translate-loader-static-files.min.js"></script>
-		<script src="scripts/lib/My97DatePicker/WdatePicker.js"></script>
 		<script src="scripts/lib/jquery.js"></script>
+		<script type="text/javascript" src="scripts/lib/zepto.min.js"></script>
+		<script>var isMobile = "ontouchend" in document</script>
 		<script src="scripts/lib/layer/layer.js"></script>
 		<!-- 加载配置 -->
 		<script src="scripts/app.js"></script>
@@ -72,11 +72,16 @@
 		<script src="scripts/controllers/progressController.js"></script>
 		<script src="scripts/controllers/resultController.js"></script>
 		<script src="scripts/controllers/configController.js"></script>
+		<script src="scripts/controllers/config/ruleController.js"></script>
 		<script src="scripts/controllers/helpController.js"></script>
 		<!-- 相关jquery第三方插件-->
-		<script src="scripts/lib/jquery.dragsort-0.5.1.js"></script>
-		 <!--加载本地测试数据，部署前删除 -->
-		<script src="test/data/test-json-v1.1.js"></script>
+		<script src="scripts/lib/angular-translate.js"></script>
+		<script src="scripts/lib/angular-translate-loader-static-files.min.js"></script>
+		<script src="scripts/lib/ngTouch.js"></script>
+		<script src="scripts/lib/dragsort.js"></script>
+		<script src="scripts/lib/My97DatePicker/WdatePicker.js"></script>
+		 <!--&lt;!&ndash;加载本地测试数据，部署前删除 &ndash;&gt;-->
+		<!--<script src="test/data/test-json-v1.1.js"></script>-->
 	</body>
 
 </html>

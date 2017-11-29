@@ -1,6 +1,6 @@
 <template>
 	<div class="right-content-box plan-rate">
-		<div class="query-area">
+    <aps-query-condition-box>
 			<!--选时间-->
 			<date-select
 				v-model='date'
@@ -85,22 +85,24 @@
 					查看
 				</a>
 			</div>
-		</div>
-		<hr>
+    </aps-query-condition-box>
 		<div class="plan-rate-main" v-show="headerData.length">
 			<aps-table
 				:headerData='headerData'
 				:bodyData='bodyData'
 				:allNumber='allNumber'
-				:operation=false
+				:printTitle='printTitle'
+				excel
+				print
+				page
 				@detailsRowInfo='detailsRowInfo'
 				@pageChange='pageChange'>
+				<i
+					class='col-config-icon'
+					title='列信息配置'
+					@click='colConfig'>
+				</i>
 			</aps-table>
-			<i
-				class='col-config-icon'
-				title='列信息配置'
-				@click='colConfig'>
-			</i>
 			<div class="col-config-dialog">
 				<col-config
 					:configUrl='allUrl.colConfigUrl'
@@ -112,23 +114,25 @@
 </template>
 
 <script>
-import locationCascader from "../common/locationCascader.vue"	
+import locationCascader from "../common/locationCascader.vue"
 import Emitter from 'element-ui/src/mixins/emitter';
-	
+
 export default{
 	mixins: [Emitter],
-	
+
 	name: 'planRate',
-	
+
 	components: {
 	  	"location-cascader": locationCascader
   	},
-	
+
 	data(){
 		return{
+			tableDom: {},
 			date: {
-				startTime: +new Date(),	
-				endTime: +new Date() + 86400000
+				startTime: +new Date(),
+				endTime: +new Date() + 86400000,
+        quickSelect : ['currentWeek','nextWeek','currentMonth','nextMonth'],
 			},
 			quickTime: '', //快速选择时间判断
 			selectLocationList: [], //级联下拉地点选中数据
@@ -185,7 +189,7 @@ export default{
 			}
 		}
 	},
-	
+
 	computed: {
 		planCodeBody() {
 			return {
@@ -194,7 +198,7 @@ export default{
 				locationIdList: this.selectLocationList,
 				customerIdList: this.customerValue,
 				materialNameList: this.materialNameValue,
-				materialCodeList: this.materialCodeList,
+				materialCodeList: this.materialCodeValue,
 				searchType: this.planTypeNameValue
 			}
 		},
@@ -205,7 +209,7 @@ export default{
 				locationIdList: this.selectLocationList,
 				customerIdList: this.customerValue,
 				materialNameList: this.materialNameValue,
-				materialCodeList: this.materialCodeList,
+				materialCodeList: this.materialCodeValue,
 				orderCodeList: this.planCodeValue,
 				moCodeList: this.planCodeValue,
 				pageNum: this.currentPage,
@@ -238,11 +242,14 @@ export default{
 					this.tableSearchBody.orderCodeList = [];
 				}
 			};
-			
+
 			return url;
+		},
+		printTitle() {
+			return this.date.startTime + "~" + this.date.endTime + "计划执行进度"
 		}
 	},
-	
+
 	methods: {
 		colConfig(){
 			this.broadcast('colConfig', 'openColConfig');
@@ -284,7 +291,7 @@ export default{
 				this.materialNameList = [];
 				return;
 			}
-			
+
 			const _this = this;
 			this.$http.get(
 				this.url.get_material_name + '?materialName=' + query
@@ -298,7 +305,7 @@ export default{
 				this.materialCodeList = [];
 				return;
 			}
-			
+
 			const _this = this;
 			this.$http.get(
 				this.url.get_material_code + '?materialCode=' + query
@@ -324,10 +331,10 @@ export default{
 				this.tableSearchBody
 			).then(res =>{
 				const resData = res.data;
-				
+
 				//总条数
 				this.allNumber = resData.recordSize;
-				
+
 				//处理处表格数据
 				this.dataProcessing(resData);
 			});
@@ -338,7 +345,7 @@ export default{
 				  resBodyData = resData.dataList,
 				  headerData = [],
 				  bodyData = [];
-			
+
 			//表格数据
 			resBodyData.every(row =>{
 				let rowData = [];
@@ -351,13 +358,21 @@ export default{
 						rowData.push(this.orderStateName[row[cell]]);
 						return true;
 					}
+					if(cell === "poolMoRate" || cell === "poolOrderRate"){
+						rowData.push(t.decimalToPercentage(row[cell],2));
+						return true;
+					}
+					if(cell === "processRate" && row[cell] !== null){
+						rowData.push(t.decimalToPercentage(row[cell],2));
+						return true;
+					}
 					rowData.push(row[cell]);
 					return true;
 				});
 				bodyData.push(rowData);
 				return true;
 			});
-			
+
 			this.headerData = resCnHeaderData;
 			this.bodyData = bodyData;
 		},
@@ -367,57 +382,52 @@ export default{
 			this.searchTable();
 		},
 		detailsRowInfo(){
-			
+
 		},
 		colConfig(){
 			this.broadcast('colConfig', 'openColConfig');
 		}
 	},
-	
+
 	created(){
 		//构造客户下拉框
 		this.getAllCustomer();
-		
+
 	},
 	mounted(){
-		
 		//获取计划调度模式
 		this.getPlayType();
-		
+
 	}
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
+<style rel="stylesheet/scss" lang="scss" scoped>
 	.plan-rate{
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 148px);
-		
+
 		.plan-rate-main{
 			flex: 1 1;
 			display: flex;
 			flex-direction: column;
 			position: relative;
-			width: calc(100vw - 260px);
-			
+
 			.col-config-icon{
-				width: 14px;
-				height: 14px;
-				position: absolute;
-				top: -17px;
-				right: 0;
-				background: url(../../assets/config.png) center center;
+				width: 20px;
+				height: 20px;
+				margin-left: 5px;
+				background: url(../../asserts/config.png) center center;
 				background-size: 100% 100%;
 				cursor: pointer;
 			}
 			.col-config-dialog{
 				position: absolute;
-				top: -28px;
-				right: 28px;
+				top: -8px;
+				right: 30px;
 			}
 		}
-		
+
 		//查询条件筛选
 		.query-conditions-list{
 			display: flex;

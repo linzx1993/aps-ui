@@ -2,6 +2,7 @@
 /*常用颜色*/
 /*主题色*/
 /*表格灰框颜色*/
+/*下拉列表hover灰色*/
 /*标题栏背景灰色*/
 .c-theme-color {
   color: #1E7CD9; }
@@ -13,7 +14,7 @@ body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, fo
 body, button, input, select, textarea, a {
   font: 14px/24px  "Microsoft YaHei",Tahoma,Helvetica,Arial,sans-serif; }
 
-* {
+header, section, article, div, p, span, a, em, s, i, h1, h2, h3, h4, h5, h6, blockquote, dl, dt, dd, ul, ol, li, button, input, textarea, th, td {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, "PingFang SC", "Microsoft Yahei", "WenQuanYi Micro Hei", ui-icon, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
 
 h1, h2, h3, h4, h5, h6 {
@@ -51,207 +52,27 @@ table {
 input::-webkit-input-placeholder {
   color: #4b4b4b; }
 
-/*=========common.js===========*/
-.tl {
-  text-align: left; }
-
-.tc {
-  text-align: center; }
-
-.tr {
-  text-align: right; }
-
-.textover {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap; }
-
-.fl {
-  float: left; }
-
-.fr {
-  float: right; }
-
-.hide {
-  display: none; }
-
-.show {
-  display: block; }
-
-.relative {
-  position: relative; }
-
-.absolute {
-  position: absolute; }
-
-.clearfix:after {
-  content: "";
-  display: block;
-  clear: both;
-  height: 0;
-  overflow: hidden; }
-
-.fs-12 {
-  font-size: 12px; }
-
-.fs-14 {
-  font-size: 14px; }
-
-.fs-16 {
-  font-size: 16px; }
-
-.bold {
-  font-weight: bold; }
-
-.ml--30 {
-  margin-left: -30px; }
-
-.ml--15 {
-  margin-left: -15px; }
-
-.m-0-auto {
-  margin: 0 auto; }
-
-.ml-5 {
-  margin-left: 5px; }
-
-.mr-5 {
-  margin-right: 5px; }
-
-.mt-5 {
-  margin-top: 5px; }
-
-.mb-5 {
-  margin-bottom: 5px; }
-
-.ml-10 {
-  margin-left: 10px; }
-
-.mr-10 {
-  margin-right: 10px; }
-
-.mt-10 {
-  margin-top: 10px; }
-
-.mb-10 {
-  margin-bottom: 10px; }
-
-.ml-15 {
-  margin-left: 15px; }
-
-.mr-15 {
-  margin-right: 15px; }
-
-.mt-15 {
-  margin-top: 15px; }
-
-.mb-15 {
-  margin-bottom: 15px; }
-
-.ml-20 {
-  margin-left: 20px; }
-
-.mr-20 {
-  margin-right: 20px; }
-
-.mt-20 {
-  margin-top: 20px; }
-
-.mb-20 {
-  margin-bottom: 20px; }
-
-.ml-25 {
-  margin-left: 25px; }
-
-.mr-25 {
-  margin-right: 25px; }
-
-.mt-25 {
-  margin-top: 25px; }
-
-.mb-25 {
-  margin-bottom: 25px; }
-
-.ml-30 {
-  margin-left: 30px; }
-
-.mr-30 {
-  margin-right: 30px; }
-
-.mt-30 {
-  margin-top: 30px; }
-
-.mb-30 {
-  margin-bottom: 30px; }
-
-.ml-35 {
-  margin-left: 35px; }
-
-.mr-35 {
-  margin-right: 35px; }
-
-.mt-35 {
-  margin-top: 35px; }
-
-.mb-35 {
-  margin-bottom: 35px; }
-
-.ml-40 {
-  margin-left: 40px; }
-
-.mr-40 {
-  margin-right: 40px; }
-
-.mt-40 {
-  margin-top: 40px; }
-
-.mb-40 {
-  margin-bottom: 40px; }
-
-.ml-45 {
-  margin-left: 45px; }
-
-.mr-45 {
-  margin-right: 45px; }
-
-.mt-45 {
-  margin-top: 45px; }
-
-.mb-45 {
-  margin-bottom: 45px; }
-
-.ml-50 {
-  margin-left: 50px; }
-
-.mr-50 {
-  margin-right: 50px; }
-
-.mt-50 {
-  margin-top: 50px; }
-
-.mb-50 {
-  margin-bottom: 50px; }
-
-.ml-55 {
-  margin-left: 55px; }
-
-.mt-60 {
-  margin-top: 60px; }
-
-.mt-80 {
-  margin-top: 80px; }
-
-/*常用颜色*/
-.c-999 {
-  color: #999; }
-
-.c-ccc {
-  color: #ccc; }
-
-.red {
-  color: #f00; }
-
-.orange {
-  color: #ee8f00; }
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px; }
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+  /*滑道全部*/ }
+
+::-webkit-scrollbar-track-piece {
+  background-color: transparent;
+  /*滑道*/
+  -webkit-border-radius: 10px;
+  /*滑道圆角宽度*/ }
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(191, 191, 191, 0.6);
+  /*滑动条表面*/
+  border-radius: 10px;
+  /*滑动条圆角宽度*/ }
+
+::-webkit-scrollbar-corner {
+  background-color: transparent; }
 
 /*# sourceMappingURL=reset.css.map */

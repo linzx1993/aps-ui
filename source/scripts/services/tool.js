@@ -37,31 +37,34 @@ app.service('tool', function($rootScope) {
 		});
 		//=====首行固定宽度代码,如果需要固定的话
 		if(num > 0){
+			//页面上所有的二级页面遍历
             parentNodes.each(function () {
             	let _this = $(this);
             	//获得table头部栏的宽度，根据table头部栏的宽度来设置div的宽度
                 let td = $(this).find(".show-table thead").children("tr").eq(0).children("th");
+                //每个二级页面中的每个head栏自适应
 				jCoverHead.each(function () {
 					let width = 0;//获取固定两列的宽度
 					for(let index = 0;index < num;index ++){
 						let currentWidth = td.eq(index).width();
-						console.log(width + parentNodes.find(".table-space").scrollLeft());
 						$(this).children().eq(index).css({
-							left:width + parentNodes.find(".table-space").scrollLeft(),
+							left:width + parentNodes.find(".table-space").scrollLeft(),//left的位置是前面所有元素的宽度
 							width : currentWidth + 2
 						});
 						width += currentWidth;
 					}
 					$(this).width($(this).width() - width);//针对可以看见滚动条，却无法移动的bug,因为被透明栏挡住了（还有一个bug数据太多，是看不见滚动条）
 					jCoverHead.css("padding-left",width + num * 2);//设置首部固定栏前面的padding-left
+
+					_this.find(".fix-table-column").width(width + num * 3);//加上num的宽度是因为border
+					_this.find(".fix-table").width(width + num * 3);
 				});
-                $(this).find(".fix-table-column").width(width + num * 3);//加上num的宽度是因为border
-                $(this).find(".fix-table").width(width + num * 3);
             });
 		}else{
 			jCoverHead.css("padding-left",0);
 		}
 	};
+
 
 	/**二级页面地点下拉框（有时间可封装成共有的下拉框组件）
 	 * 
@@ -130,71 +133,6 @@ app.service('tool', function($rootScope) {
 		});
 	}
 	
-	/**二级页面地点下拉框（有时间可封装成共有的下拉框组件）
-	 * 
-	 * @param 所有地点对象
-	 * @param 当前input对象
-	 * @param 是否单选
-	 * 
-	 */
-	this.dialogWindowEquipmentInterim = function(equipmentInfo, thisInput, selectOne) {
-		var jTableDialogWindow = $(".table-dialog-window");
-		var thisTarget = thisInput.target;
-		var x = thisTarget.offsetLeft;
-		var y = thisTarget.offsetTop + thisTarget.offsetHeight;
-		var equipmentList = $("<div class='equipment-list'><ul></ul></div>");
-		var equipmentInputVal = jTableDialogWindow.find(".equipment-input").val().split(",");
-
-		for(var i in equipmentInfo) {
-			var thisText = equipmentInfo[i].punitName || equipmentInfo[i].productUnitName;
-			if(equipmentInputVal.indexOf(thisText) >= 0) {
-				equipmentList.find("ul").append($("<li class='li-selected'></li>").text(thisText).attr("equipment-id", i));
-			} else {
-				equipmentList.find("ul").append($("<li></li>").text(thisText).attr("equipment-id", i));
-			}
-		}
-		jTableDialogWindow.find(".info-show").append(equipmentList);
-		$(".equipment-list").css("left", x);
-		$(".equipment-list").css("top", y);
-
-		$(".equipment-list").on("click", "li", function() {
-			var thisText = $(this).text();
-			var inputVal = $(".equipment-input").val();
-
-			if(selectOne) {
-				if($(this).hasClass("li-selected")) {
-					return;
-				} else {
-					$(".li-selected").removeClass("li-selected");
-					$(this).addClass("li-selected");
-					jTableDialogWindow.find(".equipment-input").val($(this).text());
-				}
-				$(".equipment-list").remove();
-			} else {
-				$(this).toggleClass("li-selected");
-
-				let jAllLi = $(".equipment-list li");
-				var newVal = [];
-				let newIdType = [];
-				let allIdType = [];
-				for(var i = 0, l = jAllLi.length; i < l; i++) {
-					let thisIdType = jAllLi.eq(i).attr("equipment-id");
-					allIdType.push(thisIdType);
-					if(jAllLi.eq(i).hasClass("li-selected")){
-						newVal.push(jAllLi.eq(i).text());
-						newIdType.push(thisIdType)
-					}
-				}
-				jTableDialogWindow.find(".equipment-input")
-					.val(newVal.join(","))
-					.attr("idType",newIdType.join(","))
-					.attr("allIdType",allIdType.join(","))
-					.attr("title",newVal.join(","));
-			}
-
-		});
-	}
-
 	/**string转date
 	 * 
 	 * @param 时间字符串（2016-01-01）
@@ -483,11 +421,11 @@ app.service('tool', function($rootScope) {
 		let result;
 		if(type === "rule") {
 			result = nameList.every((item) => {
-				return item.ruleName != newName;
+				return item.ruleName !== newName;
 			})
 		} else {
 			result = nameList.every((item) => {
-				return item.schemeName != newName;
+				return item.schemeName !== newName;
 			})
 		}
 		return result ? newName : false
@@ -531,14 +469,7 @@ app.service('tool', function($rootScope) {
     this.typeObject = function (obj) {
         return Object.prototype.toString.call(obj).slice(8,-1);
     };
-    // this.class2type = {};
-    // $.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
-    //     this.class2type["[object " + name + "]"] = name.toLowerCase()
-    // })
-    // function type(obj) {
-    //     return obj == null ? String(obj) :
-    //         class2type[toString.call(obj)] || "object"
-    // }
+
 
     /**
      * 一维数组去重
@@ -700,7 +631,7 @@ app.service('tool', function($rootScope) {
 			returnHourMinute = (paramHour < 10 ? "0" + paramHour : paramHour) + ":00";
 		}
 		return returnHourMinute;
-	}
+	};
 	
 	/**
      * desc:根据传入的时间提早或者延后n天返回
@@ -717,7 +648,8 @@ app.service('tool', function($rootScope) {
 		}
 		//返回重置后的时间
 		return new Date(oldDate.setDate(oldDate.getDate() + moveDay));
-	}
+	};
+
 	/**
 	 * 传入任何时间格式或者错误日期（2017-06-45），将时间输出为2017-07-15的时间格式
 	 * time:2017-06-21

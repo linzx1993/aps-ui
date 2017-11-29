@@ -1,0 +1,85 @@
+@import '../resetStyle.scss';
+
+.config-nav {
+    flex: 0 0 15%;
+    height: 100%;
+    color: #fff;
+    background-color: #38434f;
+    box-sizing: border-box;
+}
+
+.configNavTitle {
+    //padding: 14px 0;
+    min-height: $title-height;
+    line-height: $title-height;
+    font-size: 18px;
+    text-align: center;
+    color: #fff;
+    border-bottom: 1px solid #151b26;
+}
+
+.config-nav li li a{
+    font-size: 14px;
+    padding-left: 40px;
+}
+
+/*二级目录样式*/
+.configLi{
+    .nav-angle {
+        position: absolute;
+        right: 20px;
+        top: 16px;
+        width: 9px;
+        height: 9px;
+        border-right: 1px solid #e6e6e6;
+        border-bottom: 1px solid #e6e6e6;
+        @include rotate(45deg);
+        @include transition(all, .5s);
+        &:hover {
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+        }
+    }
+    &.drag .nav-angle {
+        top: 22px;
+        @include rotate(-135deg);
+        @include transition(all, 1s);
+    }
+    ul{
+        max-height: 0;
+        background-color: #2c3642;
+        @include transition(max-height, 1s);
+    }
+    &.drag ul {
+        max-height: 150px;
+        @include transition(max-height, 1s);
+    }
+    &.active > a {
+        color: #fff;
+        background-color: #375373;
+        border-left: 4px solid $themeColor;
+    }
+    li {
+        &.active{
+            pointer-events: none;
+            a{
+                color: #fff;
+                background-color: #375373;
+            }
+        }
+    }
+    a {
+        box-sizing: border-box;
+        padding-left: 20px;
+        width: 100%;
+        line-height: 46px;
+        font-size: 16px;
+        color: #e5e5e5;
+        border-left: 4px solid transparent;
+        cursor: pointer;
+        &:hover{
+            color: #fff;
+            background-color: #375373;
+        }
+    }
+}

@@ -1,0 +1,62 @@
+@import "../resetStyle.scss";
+.aps-checkbox{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    input{display: none;}
+    .aps-input-checkbox{
+        position: relative;
+        display: inline-block;
+        margin-right: 5px;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #bfcbd9;
+        border-radius: 4px;
+        background-color: #fff;
+        box-sizing: border-box;
+        transition: border-color .25s cubic-bezier(.71,-.46,.29,1.46),background-color .25s cubic-bezier(.71,-.46,.29,1.46);
+        &:hover{
+            border: 1px solid $themeColor;
+        }
+        &:after{
+            content: "";
+            position: absolute;
+            top: 1px;
+            left: 5px;
+            width: 3px;
+            height: 7px;
+            border: 2px solid $themeColor;
+            border-left: none;
+            border-top: none;
+            transform: rotate(45deg) scaleY(0);;
+            transition: transform .15s cubic-bezier(.71,-.46,.88,.6) .05s;
+        }
+        &.is-checked{
+            border: 1px solid $themeColor;
+            transition: border-color .25s cubic-bezier(.71,-.46,.29,1.46),background-color .25s cubic-bezier(.71,-.46,.29,1.46);
+            &:after{
+                transform: rotate(45deg) scaleY(1);
+                transition: transform .15s cubic-bezier(.71,-.46,.88,.6) .05s;
+            }
+        }
+        &.is-disabled{
+            background-color: #eef1f6;
+            border-color: #d1dbe5;
+            cursor: not-allowed;
+        }
+        &.is-checked.is-disabled{
+            background-color: #d1dbe5;
+            &:after{
+                border-color: #fff;
+            }
+        }
+    }
+    .is-disabled + .aps-input-text{
+        color: #bbb;
+        cursor: not-allowed;
+    }
+    .aps-input-text{
+        padding-left: 5px;
+        vertical-align: middle;
+    }
+}

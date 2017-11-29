@@ -162,44 +162,31 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
         },0)
     };
 
+    //实时监测
+    $scope.$on("transferChecked",function (e,val) {
+		$scope.selectItem = val;
+	});
     /**
      * 保存显示项发送数据
      * @param str: 错误时提示
      * @return 发送的数据
      */
     $scope.getDisplayPostData = (str) => {
-        let resData = $scope.columnContentData;
-        let selectValue = [];
-        //获得选中的li
-        $("#sort-item").find("li").each(function(){
-            let attr = $(this).attr("data-keyname");
-            selectValue.push(attr);
-        });
-        if(selectValue.length <= 0){
-            $scope.info.fail(str);
+        //必须选择一项配置项
+        if($scope.selectItem.length <= 0){
+			layer.msg(str, {time: 3000, icon: 2});
             return false;
         }
-        //新建一个需要发送的数据
-        let postData = {};
-        postData.optionList = resData.optionList;
-        postData.selectList = [];
-        for(let i = 0,length = selectValue.length;i < length; i++){
-            for(let j = 0,len = resData.optionList.length;j < len; j ++){
-                let compareOptionText = resData.optionList[j].valueContent.replace(":desc","");
-                // console.log(compareOptionText);
-                // console.log(selectValue[i].replace(":desc",""));
-                // console.log(compareOptionText === selectValue[i].replace(":desc",""));
-                if(compareOptionText === selectValue[i].replace(":desc","")){
-                    if($(".sort-item li").eq(i).attr("data-order") === "down"){
-                        compareOptionText += ":desc";
-                        resData.optionList[j].valueContent = compareOptionText;
-                    }
-                    postData.selectList.push(resData.optionList[j]);
-                    break;
-                }
-            }
-        }
-        return postData;
+        const postData = {optionList : $scope.optionList,selectList  : []};
+        //根据选中的数组值，从所有的optionList中筛选出选中的对象
+		$scope.selectItem.forEach(selectItem => {
+			const option = Object.assign({},$scope.optionList.filter(item => {
+				return selectItem.replace(":desc","") === item.valueContent.replace(":desc","")
+			})[0]);
+			option.valueContent = selectItem;
+			postData.selectList.push(option)
+		});
+		return postData;
     };
 
     /**
@@ -208,9 +195,23 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
      * @return 页面渲染时的格式
      */
     $scope.setDisplayGetData = (res) => {
-        $scope.columnContentData = res.data;
-        $scope.userConfigData = scheduleTableViewModelService.sortItem($scope.columnContentData);//获得返回到左边显示的项目
-        $scope.userSelectConfigData = scheduleTableViewModelService.sortSelectItem($scope.columnContentData);//获得返回到右边显示的项目
+        //需要区分有没有配置项
+        if(res.data.optionList === null){
+			$scope.allItemList = [];
+			$scope.selectItem = []
+        }else{
+			//获得所有的展示项
+			$scope.optionList = res.data.optionList;
+			$scope.allItemList = $scope.optionList.map(item => {
+				return {
+					id : item.valueContent,
+					label : item.valueAlias,
+					isSelected : false,
+				}
+			});
+			//获得选中的展示项
+			$scope.selectItem = res.data.selectList.map(item => item.valueContent);
+        }
     };
 
     $("body")
@@ -238,93 +239,58 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
     /**
      * 根据获得的排程规则数据渲染页面
      * 放在configController而不是ruleController是因为排程方案页面也需要展示排程规则
-     * @param res: 获得到的排程规则数据
+     * @param resData: 获得到的排程规则数据
      * @return 页面渲染所需数据
      */
-    $scope.renderRulePage = (res) => {
-        $scope.scheduleCheckData = $.extend({}, res);
-        // $scope.ruleName = $scope.scheduleCheckData.ruleName;
-        //前端设定排程前检验项的显示顺序 === [颜色信息校验,刀具信息校验,夹具信息校验,产能校验,物料信息校验,PAP信息校验,工艺路线信息校验,排程步骤校验,适宜设备校验,系统配置校验]
-        $scope.scheduleFrontData = [];
-        let frontData = scheduleTableViewModelService.validation_rules_from(res);//获得排程前需要的数据
-        //"CT_INFO_CHECKING","FIXTURE_INFO_CHECKING","PAP_INFO_CHECKING",
-        let scheduleFrontData = ["COLOR_INFO_CHECKING","CAPABILITY_INFO_CHECKING","MATERIAL_INFO_CHECKING",
-            "ROUTING_INFO_CHECKING","SUITABLE_PRODUCT_INFO_CHECKING","SYSTEM_CONFIG_CHECKING"];
-        scheduleFrontData.forEach((item,index)=>{
-            $scope.scheduleFrontData.push(frontData[item]);
-        });
+    $scope.renderRulePage = (resData) => {
+        $scope.scheduleCheckDataItemMap = resData.itemMap;
 
-        //前端设定排程后检验项的显示顺序 === [物流疏通校验,齐套性校验,组合件校验,超产能校验,生产时间校验]
-        $scope.scheduleLaterData = [];
-        let laterData = scheduleTableViewModelService.validation_rules_later(res);//获得排程后需要的数据
-        //"PROCESS_SEQ_CHECKING","POMO_SUIT_CHECKING","ASSEMBLING_UNIT",
-        let scheduleLaterData = ["CAPABILITY_OVER_CHECKING","PRODUCTION_TIME_CHECKING"];
-        scheduleLaterData.forEach((item)=>{
-            $scope.scheduleLaterData.push(laterData[item]);
-        });
-
-        //设置选中的option
-        $scope.schedulePointSelected = $scope.scheduleCheckData.schedulePoint;
-        $scope.papTypeSelected = $scope.scheduleCheckData.papType;
-        $scope.schedulePeriodSelected = $scope.scheduleCheckData.schedulePeriod;
-        setTimeout(function () {
-            //控制下拉列表
-            Array.prototype.forEach.call($("dd.relative span"), function (item) {
-                let select = $(item).siblings("select");
-                let ul = $(item).siblings("ul");
-                ul.find("li[data-value=" + $(item).attr("data-value") +"]").trigger("click");
-                let text = $(item).siblings("select").find("option:selected").text();
-                $(item).text(text);
-            });
-            //控制选中状态
-        }, 0);
-    };
-    //根据此模块设置各个排程规则项的是否要展示
-    $scope.scheduleRuleItemShow = {
-        isLoadOverduePoolTask : true,   //当前日期前的车间计划 ：
-        overduePeriod : true,   //拉取当前车间计划天数
-        schedulePeriodSelected : true,  //排程周期
-        scheduleInterval : true,    //排程间隔
-        minScheduleDay : true,  //最早起排日期
-        freezePeriod : true,    //冻结期
-        //排程前校验
-        preScheduleCheckMap : {
-            CAPABILITY_INFO_CHECKING : false,    //产能校验
-            COLOR_INFO_CHECKING : false,         //颜色信息校验
-            CT_INFO_CHECKING : true,            //刀具信息校验
-            FIXTURE_INFO_CHECKING : true,       //夹具信息校验
-            MATERIAL_INFO_CHECKING : false,      //物料信息校验
-            PAP_INFO_CHECKING : true,           //PAP信息校验
-            ROUTING_INFO_CHECKING : false,       //排程步骤校验
-            SUITABLE_PRODUCT_INFO_CHECKING : false,  //适宜设备校验
-            SYSTEM_CONFIG_CHECKING : false,      //系统配置校验
-        },
-        //排程后校验
-        postScheduleCheckMap : {
-            ASSEMBLING_UNIT : true,             //组合件校验
-            CAPABILITY_OVER_CHECKING : false,    //超产能校验
-            POMO_SUIT_CHECKING : true,          //齐套性校验
-            PROCESS_SEQ_CHECKING : true,        //物流疏通校验
-            PRODUCTION_TIME_CHECKING : false,    //生产时间校验
-
-        },
-        papTypeSelected : true,
-        schedulePointSelected : true,   //起排工序
-        isAheadOn: true,   //启用延迟生产
-        isCombinationOn: true, //启用组合件
-        isEconomicOn: true,    //启用经济批量
-        isFrequencyOn: true,   //启用生产频度
-        isUseNotMassEqu: true, //使用非批量设备
-        //排程因子权重
-        scheduleWeightMap : {
-            KEY_EQUIPMENT : true,       //关键设备
-            MOST_USED_EQUIPMENT : true, //高负荷设备
-            SAME_COLOR : true,          //相同颜色
-            SAME_CT : true,             //相同刀具
-            SAME_FIXTURE : true,        //相同物料
-            SAME_MATERIAL : true,       //相似物料
-            SIMILAR_MATERIAL : true,    //相似物料
+        //如果一个属性都没有，则直接消失
+        if(!$scope.scheduleCheckDataItemMap){
+            return;
         }
+        for(let name in $scope.scheduleCheckDataItemMap){
+            delete $scope.scheduleCheckDataItemMap[name].itemName;
+            //转化成布尔值，以便angular状态的选中
+            if($scope.scheduleCheckDataItemMap[name].itemValue === "true"){
+                $scope.scheduleCheckDataItemMap[name].itemValue = true;
+            }else if($scope.scheduleCheckDataItemMap[name].itemValue === "false"){
+                $scope.scheduleCheckDataItemMap[name].itemValue = false;
+            }
+        }
+
+        //排程前校验，排程后校验项，排程因子消失：底下所有校验项和规则全部没有
+        //排程前
+        $scope.preScheduleCheck = !!($scope.scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING'] ||$scope.scheduleCheckDataItemMap['preScheduleCheck.SUITABLE_PRODUCT_INFO_CHECKING'] || $scope.scheduleCheckDataItemMap['preScheduleCheck.CT_INFO_CHECKING']
+            || $scope.scheduleCheckDataItemMap['preScheduleCheck.CAPABILITY_INFO_CHECKING'] || $scope.scheduleCheckDataItemMap['preScheduleCheck.SYSTEM_CONFIG_CHECKING'] || $scope.scheduleCheckDataItemMap['preScheduleCheck.COLOR_INFO_CHECKING']
+            || $scope.scheduleCheckDataItemMap['preScheduleCheck.FIXTURE_INFO_CHECKING'] || $scope.scheduleCheckDataItemMap['preScheduleCheck.ROUTING_INFO_CHECKING'] || $scope.scheduleCheckDataItemMap['preScheduleCheck.MATERIAL_INFO_CHECKING']);
+
+        //排程后
+        $scope.postScheduleCheck = !!($scope.scheduleCheckDataItemMap['postScheduleCheck.PROCESS_SEQ_CHECKING'] ||$scope.scheduleCheckDataItemMap['postScheduleCheck.POMO_SUIT_CHECKING'] || $scope.scheduleCheckDataItemMap['postScheduleCheck.ASSEMBLING_UNIT']
+            || $scope.scheduleCheckDataItemMap['postScheduleCheck.PRODUCTION_TIME_CHECKING'] || $scope.scheduleCheckDataItemMap['postScheduleCheck.CAPABILITY_OVER_CHECKING']);
+		// // 高级设置
+		// $scope.jAdvancedShowByAlgorithm = !!($scope.scheduleCheckDataItemMap.papType || $scope.scheduleCheckDataItemMap.isFrequencyOn || $scope.scheduleCheckDataItemMap.isEconomicOn ||$scope.scheduleCheckDataItemMap.isCombinationOn ||
+		// $scope.scheduleCheckDataItemMap.isAheadOn ||$scope.scheduleCheckDataItemMap.isUseNotMassEqu ||$scope.scheduleCheckDataItemMap.scheduleInterval);
+        //排程因子
+        $scope.scheduleWeight = ($scope.scheduleCheckDataItemMap['scheduleWeight.SAME_COLOR'] ||$scope.scheduleCheckDataItemMap['scheduleWeight.SAME_CT'] ||$scope.scheduleCheckDataItemMap['scheduleWeight.SAME_FIXTURE']
+            ||$scope.scheduleCheckDataItemMap['scheduleWeight.SAME_MATERIAL'] ||$scope.scheduleCheckDataItemMap['scheduleWeight.KEY_EQUIPMENT'] ||$scope.scheduleCheckDataItemMap['scheduleWeight.MOST_USED_EQUIPMENT']
+            ||$scope.scheduleCheckDataItemMap['scheduleWeight.SIMILAR_MATERIAL']);
+        //专家配置
+        // $scope.jExpertConfiguration = $scope.scheduleWeight;
+
+
+		$scope.algorithmName = resData.algorithmName;
+		//设置所有下拉框的选中值
+        setTimeout(function(){
+			//控制下拉列表
+            $("dd.relative span").each(function () {
+                // if($(this).hasClass("algorithm-name"))return;
+				let ul = $(this).siblings("ul");
+				ul.find("li[data-value=" + $(this).attr("data-value") + "]").trigger("click");
+				let text = $(this).siblings("select").find("option:selected").text();
+				$(this).text(text);
+            });
+        },0);
     };
 
 
@@ -366,16 +332,6 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
         outerEle  //改变状态
             .on("click","ul .title-open",function(){
                 $(this).toggleClass("active").next().toggle();
-                //设置前面线的高度
-                let li = $(this).parent(),
-                    index = li.index() + 1,
-                    ul = li.parent(),
-                    height = ul.height() - li.height(); //设置线的高度为ul的高度减去li的高度
-                if (index === ul.children().length) {
-                    ul.children("b").height(height + 50);
-                } else {
-                    ul.children("b").height("auto");
-                }
             });
 
         //根据点击不同的车间选择不同的显示项
@@ -403,19 +359,5 @@ app.controller("configController",["$rootScope","$scope","$http","$location","$t
             thisSelect.parent("li").find("ul i").attr("class","select-status");
         }
     }
-
-    //拖拽区域进行初始化
-    $scope.clickLiGetItem = function () {
-        //每次点击后目录蓝需要重新获取移动的li(配置项)
-        setTimeout(function(){
-            new DragNewItem('all-item','provide-item','sort-item',{});
-            $("#sort-item").find("li").each(function(){
-                let span = $(this).children(".itemOrder");
-                span.addClass(span.attr("ng-class"));
-            });
-        },50);
-        //清除用户移动后未保存的项目
-        $("#all-item").find(".js-move").remove();
-    };
 
 }]);

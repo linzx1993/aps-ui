@@ -4,7 +4,7 @@
  */
 
 /**
- *  现阶段服务分为两块，数据处理(scheduleTableViewModelService)和封装的小方法(tool)
+ *  现阶段服务分为两块，数据处理(scheduleTableViewModelService)
  *  注意:服务名和文件名对应
  *
  */
@@ -15,7 +15,7 @@
  * @param 入参
  * @return 返回值
  */
-
+'use strict';
 app
 	.service('scheduleTableViewModelService', function($rootScope,tool) {
 
@@ -32,9 +32,10 @@ app
 	    /**
 	     * 把json格式转化为页面的ViewModel：排程页面表格头部的显示模型
 	     * @param json_object: schedule_table_json
+	     * @param searchDays: 实际要看的天数
 	     * @return tableHeadViewModel
 	     */
-	    this.jsonToTableHeadViewModel = function (json_object){
+	    this.jsonToTableHeadViewModel = function (json_object, searchDays = 0){
 	    	var dateList = json_object.time,
 	    		equipmentList = json_object.punit,
 	    		returnData = [],
@@ -45,10 +46,11 @@ app
 	    	}
 	    	allEquipment = allEquipment.join(",");
 
-	    	for(var i in dateList){
+	    	for(let i = 0, l = dateList.length; i < l; i++){
 	    		returnData.push({
 	    			thisDate: dateList[i],
-	    			equipment: allEquipment
+	    			equipment: allEquipment,
+					color: i < searchDays ? "#f8c314" : ""
 	    		})
 	    	}
 	        return returnData;
@@ -61,6 +63,60 @@ app
 	     * @return table_object
 	     */
 	    this.jsonToTableBodyViewModelNew = function (json_object){
+			//计算已排方法
+			function getTime(hour,minute){
+				let totalHour = Math.floor(totalWorkTime),
+					totalMinute = ((totalWorkTime-totalHour) * 60).toFixed();
+
+				let returnHour,
+					returnMinute;
+				if(isOver){
+					if(minute + totalMinute >= 60){
+						returnHour = hour + totalHour + 1;
+						returnMinute = minute + totalMinute - 60;
+					}else{
+						returnHour = hour + totalHour;
+						returnMinute = minute + totalMinute;
+					}
+				}else{
+					if(totalMinute - minute < 0){
+						returnHour = totalHour - hour - 1;
+						returnMinute = totalMinute + 60 - minute;
+					}else{
+						returnHour = totalHour - hour;
+						returnMinute = totalMinute - minute;
+					}
+				}
+
+				//超出99小时只显示99
+				return (returnHour > 99 ? 99 : returnHour) + ":" + returnMinute;
+			}
+
+			//补全小数位数
+			function completeDecimal(time){
+				let workTime = time;
+				if(workTime.indexOf(":")<0){
+					workTime += ":00";
+				}else{
+					var aWorkTime = workTime.split(":");
+					if(aWorkTime[1].length < 2){
+						workTime += "0";
+						workTime = aWorkTime[0] + ":0" + aWorkTime[1];
+					}
+				}
+				return workTime;
+			}
+
+			//取色且避免重复
+			function getDifferentColor(){
+				let thisColor = tool.getSpecialColor();
+				if(allColor.indexOf(thisColor) > -1){
+					thisColor = getDifferentColor();
+				}
+
+				return(thisColor);
+
+			}
 	        var tableBodyViewModel = {};//viewModel对象，返回的结果集
 	        var table_object = [];//viewModel对象里具体单元格的信息，用于显示表格
 	        //填充：排程日期
@@ -84,7 +140,8 @@ app
                 punitCodeList : [],//设备编码
                 punitNameList : [],//设备名称
                 saleOrderList : {},//订单号
-                productLineList : {}// 产线
+                productLineList : {},// 产线
+                orderCodeList : {}// 主生产计划
 			};
 			//存储产线信息
 			var productLineList = [],
@@ -103,13 +160,21 @@ app
 	            S_processCode = $(".process-code").find("input").val(),//工序编码
 	            S_punitCode = $(".punit-code").find("input").val(),//设备编码
                 S_punitName  = $(".punit-name").find("input").val(),//设备名称
-                S_productLine  = $(".product-line").find("input").val(),//设备生产线
+                S_orderCode  = $(".order-code").find("input").val(),//设备生产线
 				// S_productLineValue = S_productLine.toString().trim(),
 	            isSearch = false;//初始为未搜索
-	        if(S_saleOrder + S_materialName + S_materialCode + S_processName + S_processCode){
+	        if(S_saleOrder + S_materialName + S_materialCode + S_processName + S_processCode + S_orderCode){
 	            isSearch = true;//有搜索值
 				tableBodyViewModel.searchSuccess = "false_search";
 	        }
+			S_saleOrder = S_saleOrder ? S_saleOrder.split(",") : [];
+			S_materialName = S_materialName ? S_materialName.split(",") : [];
+			S_materialCode = S_materialCode ? S_materialCode.split(",") : [];
+			S_processName = S_processName ? S_processName.split(",") : [];
+			S_processCode = S_processCode ? S_processCode.split(",") : [];
+			S_punitCode = S_punitCode ? S_punitCode.split(",") : [];
+			S_punitName = S_punitName ? S_punitName.split(",") : [];
+			S_orderCode = S_orderCode ? S_orderCode.split(",") : [];
 	        //填充：设备&单元格&派工单
 	        var punitIdList = json_object.punitId;//设备ID列表
 	        var punitList = json_object.punit;//主体部分数据
@@ -142,33 +207,34 @@ app
 				}else{
 					thisDisplayInfo = $rootScope.display_Info.default;	
 					thisGroupBy = thisDisplayInfo["aps-view-schedule_unit_type"][0];
+					thisFrontBack = thisDisplayInfo["aps-view_is_turn_over"][0].valueContent !== "1";
 				}
 				
 				//产线信息去重，保存，生成产线下拉框
-				if(thisProductLineInfo){
-					if(!productLineObj[thisProductLineInfo.productionLineId]){
-						productLineList.push(thisProductLineInfo);
-						productLineNameList.push(thisProductLineInfo.productionLineName)
-						productLineObj[thisProductLineInfo.productionLineId] = true;
-					}
-
-					//如果有做产线筛选,但是不在筛选范围内，跳过这台设备
-					if(S_productLine && S_productLine.indexOf(thisProductLineInfo.productionLineName) < 0){
-						continue;
-					}
-				}else{
-					if(S_productLine){
-						continue;
-					}
-				}
+//				if(thisProductLineInfo){
+//					if(!productLineObj[thisProductLineInfo.productionLineId]){
+//						productLineList.push(thisProductLineInfo);
+//						productLineNameList.push(thisProductLineInfo.productionLineName)
+//						productLineObj[thisProductLineInfo.productionLineId] = true;
+//					}
+//
+//					//如果有做产线筛选,但是不在筛选范围内，跳过这台设备
+//					if(S_productLine && S_productLine.indexOf(thisProductLineInfo.productionLineName) < 0){
+//						continue;
+//					}
+//				}else{
+//					if(S_productLine){
+//						continue;
+//					}
+//				}
 
 				//生成设备下拉框(设备编码暂时拿不到，等改动一级界面接口）
 				punit.punitName ? searchItemDropDownList.punitNameList.push(punit.punitName) : "";
 				punit.punitCode ? searchItemDropDownList.punitCodeList.push(punit.punitCode) : "";
 
 				//如果有做设备筛选,但是不在筛选范围内，跳过这台设备
-				if(S_punitName && S_punitName.indexOf(punit.punitName) < 0 ||
-					S_punitCode && S_punitCode.indexOf(punit.punitCode) < 0){
+				if(S_punitName.length && S_punitName.indexOf(punit.punitName) < 0 ||
+					S_punitCode.length && S_punitCode.indexOf(punit.punitCode) < 0){
 					continue;
 				}
 
@@ -234,6 +300,7 @@ app
 		                        var this_dispatchOrder = dispatchOrderList[i],
 		                        	taskNum = this_dispatchOrder.taskNum,
 		                        	saleOrderCode = this_dispatchOrder.saleOrderCode,//订单号
+		                        	orderCode = this_dispatchOrder.orderCode,//主生产计划号
 		                        	materialName = this_dispatchOrder.materialName,//物料名
 		                        	materialCode = this_dispatchOrder.materialCode,//物料编码
                                     processName = this_dispatchOrder.processName,//工序名称
@@ -251,6 +318,7 @@ app
 								//已在外层取得 searchItemDropDownList.punitCodeList[punitCode] = true;
 								//已在外层取得 searchItemDropDownList.punitNameList[punitName] = true;
 								searchItemDropDownList.saleOrderList[saleOrderCode] = true;
+								searchItemDropDownList.orderCodeList[orderCode] = true;
 
 								//总时间和总数
 		                    	realWorkTime += thisTime;
@@ -258,13 +326,15 @@ app
 
 		                       //查询下，是否高亮
 		                    	if(isSearch){
+		                    		//如果所有搜索条件都符合的话
 		                    		if(
-		                    			!((S_saleOrder && S_saleOrder.indexOf(saleOrderCode) < 0) ||
-		                           		(S_materialName && S_materialName.indexOf(materialName) < 0) ||
-                                            (S_materialCode && S_materialCode.indexOf(materialCode) < 0) ||
-                                            (S_processName && S_processName.indexOf(processName) < 0) ||
-                                            (S_processCode && S_processCode.indexOf(processCode) < 0) ||
-                                            (S_punitCode && S_punitCode.indexOf(punitCode) < 0)
+		                    			!((S_saleOrder.length && S_saleOrder.indexOf(saleOrderCode) < 0) ||
+											(S_orderCode.length && S_orderCode.indexOf(orderCode) < 0) ||
+											(S_materialName.length && S_materialName.indexOf(materialName) < 0) ||
+											(S_materialCode.length && S_materialCode.indexOf(materialCode) < 0) ||
+                                            (S_processName.length && S_processName.indexOf(processName) < 0) ||
+                                            (S_processCode.length && S_processCode.indexOf(processCode) < 0) ||
+                                            (S_punitCode.length && S_punitCode.indexOf(punitCode) < 0)
 										)
 		                    		){
 		                    			isHighLight = true;
@@ -306,20 +376,16 @@ app
 		                    let sWorkTime;
 							//已排时间
 							let sRealWorkTime;
+							var thisH = Math.floor(workTime);
+							var thisM = ((workTime-thisH) * 60).toFixed();
+							sRealWorkTime = getTime(thisH,thisM);
+							thisH = thisH > 99 ? 99 : thisH;
 		                    if(workTime >= 0){
 		                        sWorkTime = "剩余";
-		                        var thisH = Math.floor(workTime);
-								var thisM = ((workTime-thisH) * 60).toFixed()
-								sRealWorkTime = getTime(thisH,thisM);
-								thisH = thisH > 99 ? 99 : thisH;
 		                        workTime = thisH + ":" + thisM;
 		                        isOver = false;
 		                    }else{
 		                        workTime = workTime * (-1);
-		                        var thisH = Math.floor(workTime);
-		                        var thisM = ((workTime-thisH) * 60).toFixed();
-								sRealWorkTime = getTime(thisH,thisM);
-								thisH = thisH > 99 ? 99 : thisH;
 		                        if(thisH == 0 && thisM <= 10){
 		                            sWorkTime = "剩余";
 		                            workTime = "00:00";
@@ -331,53 +397,12 @@ app
 		                        }
 		                    }
 
-							//计算已排方法
-							function getTime(hour,minute){
-								let totalHour = Math.floor(totalWorkTime),
-									totalMinute = ((totalWorkTime-totalHour) * 60).toFixed();
-
-								let returnHour,
-									returnMinute;
-								if(isOver){
-									if(minute + totalMinute >= 60){
-										returnHour = hour + totalHour + 1;
-										returnMinute = minute + totalMinute - 60;
-									}else{
-										returnHour = hour + totalHour;
-										returnMinute = minute + totalMinute;
-									}
-								}else{
-									if(totalMinute - minute < 0){
-										returnHour = totalHour - hour - 1;
-										returnMinute = totalMinute + 60 - minute;
-									}else{
-										returnHour = totalHour - hour;
-										returnMinute = totalMinute - minute;
-									}
-								}
-								
-								//超出99小时只显示99
-								return (returnHour > 99 ? 99 : returnHour) + ":" + returnMinute;
-							}
 		                    //补全小数位数
 
 		                    workTime = completeDecimal(workTime);
 							sRealWorkTime = completeDecimal(sRealWorkTime);
 
-							//补全小数位数
-							function completeDecimal(time){
-								let workTime = time;
-								if(workTime.indexOf(":")<0){
-									workTime += ":00";
-								}else{
-									var aWorkTime = workTime.split(":");
-									if(aWorkTime[1].length < 2){
-										workTime += "0";
-										workTime = aWorkTime[0] + ":0" + aWorkTime[1];
-									}
-								}
-								return workTime;
-							}
+
 
 		                    sWorkTime += workTime;
 							//计算百分比
@@ -478,16 +503,6 @@ app
 //		                        	theMaterialColor = changeColor ? "#a8d6c9" : "#2b64a7";
 		                        }
 
-								//取色且避免重复
-								function getDifferentColor(){
-									let thisColor = tool.getSpecialColor();
-									if(allColor.indexOf(thisColor) > -1){
-										thisColor = getDifferentColor();
-									}
-									
-									return(thisColor);
-									
-								}
 								//改进(dww):这里的+=用的不好，改成数组push
 								if(theMaterialColor.length > 7){
 									backgroundColorText += theMaterialColor;
@@ -617,53 +632,177 @@ app
 	     *
 	     * @return table_object
 	     */
-	    this.jsonToWindowTableView = function (windowTableData){
-	    	var headList = windowTableData.columnAlias;//表头列表
-			var tableList = windowTableData.column;		//表格数据顺序
-			var query = windowTableData.query;	//筛选项
-			var tableData = windowTableData.row; //表格数据
-			var table_object = {};//返回的数据
-			// headList.unshift("操作");
-			table_object.headData = headList;//表头数据
-			var bodyData = [];
-
-			//行
-			for(var i in tableData){
-				//本行数据
-				bodyData[i] = [];
-				var thisRowData = tableData[i];
-
-				//按顺序填充单元格
-				for(var j in tableList){
-					var thisObj = {};
-					//显示的文字
-					if(tableList[j] == "poolTaskStartTime" || tableList[j] == "poolTaskEndTime"){
-						thisObj.showText = thisRowData[tableList[j]] ? thisRowData[tableList[j]].substring(5,16) : "";
-					}else if(tableList[j] == "startTime" || tableList[j] == "endTime"){
-						thisObj.showText = thisRowData[tableList[j]] ? thisRowData[tableList[j]].substring(5,16) : "";
-					}else{
-						thisObj.showText = thisRowData[tableList[j]] == undefined ? "" : thisRowData[tableList[j]];
+	    this.jsonToWindowTableView = function (windowTableData,combineItem,columnSelectList,countInfo){
+	    	let headList = windowTableData.columnAlias,	//表头列表
+				tableList = windowTableData.column,	//表格数据顺序
+				query = windowTableData.query,	//筛选项
+				tableData = windowTableData.row,	//表格数据
+				table_object = {},	//返回的数据
+				combineCondition = [],	//合并条件
+				countCondition = {},	//汇总条件
+				returnCount = [],	//汇总行
+				lastCondition = "",
+				lastIndex = 0,
+				bodyData = [];
+			
+			//表头改造
+			if(combineItem && combineItem.length){
+				for(let i = 0, l = combineItem.length; i < l; i++){
+					const thisCombine = combineItem[i].value,
+						  headIndex = tableList.indexOf(thisCombine);
+					
+					//表头插入这一列
+					if(combineItem[i].show && headIndex > -1){
+						headList.splice(headIndex + 1, 0, "合计数");
+						tableList.splice(headIndex + 1, 0, "j_count");
 					}
-					thisObj.pkId = thisRowData.pkId;
-					thisObj.versionId = thisRowData.versionId;
-					thisObj.processOrder = thisRowData.processOrder;
-					thisObj.index = i;
-					thisObj.startTime = thisRowData.startTime;
-					thisObj.taskNum = thisRowData.taskNum;
-					thisObj.pUnitName = thisRowData.pUnitName
-					if(thisRowData.source == undefined){
-						thisObj.source = "";
-					}else{
-						thisObj.source = thisRowData.source;
-					}
-
-					bodyData[i].push(thisObj);
 				}
 			}
+			
+			//合并条件
+			for(let i = 0, l = columnSelectList.length; i < l; i++){
+				combineCondition.push(columnSelectList[i].replace(":desc",""))
+			}
+			
+			//汇总信息
+			if(countInfo && countInfo.length){
+				for(let i = 0, l = countInfo.length; i < l; i++){
+					const thisCount = countInfo[i];
+					
+					if(thisCount.show){
+						countCondition[thisCount.value] = 0;
+					}
+				}
+			}
+			
+			//构造条件
+			function getCondition(data){
+				const condition = [];
+				
+				for(let i = 0, l = combineCondition.length; i < l; i++){
+					condition.push(data[combineCondition[i]]);
+				}
+				
+				return condition.join(",");
+			}
+			
+			//遍历行数据
+			for(let i = 0, l = tableData.length; i < l; i++){
+				const thisRow = tableData[i],	//本行的原始数据
+					  rowIndex = i,	//行数
+					  thisCondition = getCondition(thisRow),	//本行的合并条件
+					  returnRow = [];	//本行的渲染数据
+				
+				//遍历单元格数据
+				for(let i = 0, l = tableList.length; i < l; i++){
+					const thisCell = tableList[i],
+						  thisObj = {};
 
+					//如果是合计数列
+					if(thisCell === "j_count"){
+						const lastNum = thisRow[tableList[i - 1]];
+						
+						//如果和上一个合并条件相同
+						if(thisCondition === lastCondition){
+							//数量叠加，不加单元格
+							bodyData[lastIndex][i].label += lastNum;
+							bodyData[lastIndex][i].rowspan ++;
+						}else{
+							//新开一个合并单元格
+							returnRow.push({
+								label: lastNum,
+								rowspan: 1
+							});
+							//更新最后的信息
+							lastCondition = thisCondition;
+							lastIndex = rowIndex;
+						}
+						continue;
+					}
+					
+					const cellData = thisRow[thisCell];
+					
+					
+					//如果有汇总
+					if(countCondition[thisCell] !== undefined){
+						countCondition[thisCell] += cellData;
+					}
+					
+					//填充其他信息
+					if(thisCell === "poolTaskStartTime" || thisCell === "poolTaskEndTime"){
+						thisObj.label = cellData ? cellData.substring(5,16) : "";
+					}else if(thisCell === "startTime" || thisCell === "endTime"){
+						thisObj.label = cellData ? cellData.substring(5,16) : "";
+					}else{
+						thisObj.label = cellData === undefined ? "" : cellData;
+					}
+					
+					returnRow.push(thisObj);
+				}
+				
+				bodyData.push(returnRow);
+			}
+			
+			//汇总行
+			returnCount = new Array();
+//			returnCount[0] = "汇总数";
+			for(let item in countCondition){
+				const index = tableList.indexOf(item);
+				
+				returnCount[index] = countCondition[item];
+			}
+			
+			//如果非空，那么填充剩余的长度
+			if(returnCount.length){
+				returnCount.length = tableList.length;
+			}
+			
+			table_object.headData = headList;
 			table_object.bodyData = bodyData;
+			table_object.countData = returnCount;
 			return table_object;
 	    }
+		
+		/**
+	     * 把json格式转化为二级页面的的ViewModel：排程页面表格显示模型
+	     * @param json_object: windowTableData
+	     *
+	     * @return table_object
+	     */
+	    this.jsonToWindowTableViewNew = function (windowTableData){
+			const headList = windowTableData.columnAlias,	//表头列表
+				  tableList = windowTableData.column,		//表格数据顺序
+				  tableData = windowTableData.row,			//表格数据
+				  table_object = {},						//返回的数据
+				  bodyData = [];							//返回的表格内容
+			
+			//行
+			for(let i = 0, l = tableData.length; i < l; i++){
+				const thisRow = tableData[i],
+					  rowData = [];
+				
+				//单元格
+				for(let i = 0, l = tableList.length; i < l; i++){
+					const cellType = tableList[i],
+						  cellText = thisRow[cellType];
+					
+					//显示的文字
+					if(cellType === "poolTaskStartTime" || cellType === "poolTaskEndTime"){
+						rowData.push(cellText ? cellText.substring(5,16) : "");
+					}else if(cellType === "startTime" || cellType === "endTime"){
+						rowData.push(cellText ? cellText.substring(5,16) : "");
+					}else{
+						rowData.push(cellText === undefined ? "" : cellText);
+					}
+				}
+				
+				bodyData.push(rowData);
+			}
+			
+			table_object.headData = headList;
+			table_object.bodyData = bodyData;
+			return table_object;
+		};
 		
 		/**
 	     * 把json格式转化为换装页面的的ViewModel
@@ -752,26 +891,23 @@ app
 			//遍历行信息
 			for(let i = 0, l = rowList.length; i < l; i++){
 				let thisRow = rowList[i],
-					thisRowInfo = {
-						repeatData: [],
-						infoData: {}
-					};
+					thisRowInfo = [];
 				
 				//先构造遍历数据
 				for(let i = 0, l = headList.length; i < l; i++){
 					//类型的特殊处理
 					if(headList[i] === "workTaskType"){
-						thisRowInfo.repeatData.push(cnName[thisRow.workTaskType]);
+						thisRowInfo.push(cnName[thisRow.workTaskType]);
 						continue;
 					}
-					thisRowInfo.repeatData.push(thisRow[headList[i]]);
+					thisRowInfo.push(thisRow[headList[i]]);
 				}
 				
 				//信息数据
-				thisRowInfo.infoData = {
-					isChange: thisRow.workTaskType != 0,
-					id: thisRow.workTaskId
-				}
+//				thisRowInfo.infoData = {
+//					isChange: thisRow.workTaskType != 0,
+//					id: thisRow.workTaskId
+//				}
 				rowInfo.push(thisRowInfo);
 			}
 			
@@ -1040,72 +1176,6 @@ app
 			return oJson;
 	    };
 
-	    /**
-	     * 列信息配置列表
-	     * @param json:可以判断是否选中的列信息配置列表
-	     */
-	    this.columnItem = function(json){
-	        var optionList = json.optionList;
-	        var selectList = json.selectList;
-	        if(!selectList){
-	            selectList = [];
-	        }
-	        for(var i = 0,length = optionList.length;i < length;i++ ){
-	            for(var j = 0,len = selectList.length;j < len;j++) {
-	                if(selectList[j].valueContent.replace(":desc","") == optionList[i].valueContent.replace(":desc","")){
-	                    optionList[i].checked = true;
-	                    break;
-	                }
-	            }
-	        }
-	        return optionList;
-	    };
-
-	    /**
-	     * 排序弹窗数据格式转换
-	     * @param json:排序列表需要接收的对象数据
-	     */
-	    this.sortItem = function(json){
-	        var optionList = json.optionList;
-	        var selectList = json.selectList;
-	        var leftList = [];
-	        if(!selectList){
-	            selectList = [];
-	        }
-	        for(var i = 0,length = optionList.length;i < length;i++ ){
-	            var select = true//无奈加的，优化可去
-	            for(var j = 0,len = selectList.length;j < len;j++) {
-	                if(selectList[j].valueContent.replace(":desc","") == optionList[i].valueContent.replace(":desc","")){
-	                    select = false;
-	                    break;
-	                }
-	            }
-	            if(select){
-	                leftList.push(optionList[i]);
-	            }
-	        }
-	        return leftList;
-	    };
-
-	    /**
-	     * 排序弹窗数据格式转换
-	     * @param 排序列表需要接收的对象数据
-	     * return 排序列表右边需要显示的数据
-	     */
-	    this.sortSelectItem = function(json){
-	        var selectList = json.selectList;
-	        if(!selectList){
-	            selectList = [];
-	        }
-	        for(var i =0 ; i < selectList.length ; i++){
-	            if(selectList[i].valueContent.indexOf("desc") != "-1"){
-	                selectList[i].order = "down";
-	            }else{
-	                selectList[i].order = "up";
-	            }
-	        }
-	        return selectList
-	    }
 
 		/**
 		 * 排序弹窗数据格式转换
@@ -1223,186 +1293,143 @@ app
             return returnObj;
 	    };
 
-	    /**
+		/**
 	     * 任务池数据处理
 	     */
-	    this.jsonToexternalDifferViewModel = function (json_object){
-	    	var headList = json_object.columnAlias,//表头列表(中文)
-				tableList = json_object.column,		//表格数据顺序（key）
-				poolTaskChangeList = json_object.poolTaskChangeList,
-				table_object = {},//返回的数据
-				allTableView = {},
-				tabList = [];
-			//定义原tab顺序
-			var allTabList = ["CREATE_POOL_TASK","ADD_POOL_TASK_NUM","SUBTRACT_POOL_TASK_NUM","POOL_TASK_TIME_CHANGED","DELETE_POOL_TASK"];
+		this.jsonToexternalDifferViewModel = function (json_object){
+			const headData = json_object.columnAlias,	//表头列表(中文)
+				  headDataOrder = json_object.column,	//表格数据顺序（key）
+				  poolTaskChangeList = json_object.poolTaskChangeList,
+				  table_object = {},	//返回的数据
+				  allTableView = [],	//表格体数据
+				  tabList = [],			//左侧页签数据		
+				  tabCnName = {
+					  CREATE_POOL_TASK: "新增加的任务",
+					  ADD_POOL_TASK_NUM: "进行中的任务",
+					  SUBTRACT_POOL_TASK_NUM: "数量减少任务",
+					  POOL_TASK_TIME_CHANGED: "时间变化任务",
+					  DELETE_POOL_TASK: "已删除的任务"
+				  },
+				  defaultTabOrder = [
+					  "CREATE_POOL_TASK",
+					  "ADD_POOL_TASK_NUM",
+					  "SUBTRACT_POOL_TASK_NUM",
+					  "POOL_TASK_TIME_CHANGED",
+					  "DELETE_POOL_TASK"
+				  ]; //tab顺序
+			
+			let allNum = 0;	//总条数
+			//顺序
+			poolTaskChangeList.sort((a,b)=>{
+				return defaultTabOrder.indexOf(a.changeType) - defaultTabOrder.indexOf(b.changeType);
+			});
+			
+			//循环
+			for(let i = 0, l = poolTaskChangeList.length; i < l; i++){
+				const changeTypeData = poolTaskChangeList[i],
+					  changeType = changeTypeData.changeType,
+					  outsideData = changeTypeData.poolTaskListInOutside,
+					  resultData = changeTypeData.poolTaskListInResult,
+					  thisHeadData = headData.slice(),
+					  thisHeadDataOrder = headDataOrder.slice(),
+					  thisTabData = [];
 
-			//表头数据
-			table_object.headData = headList;
-
-			//遍历所有的变化
-			for(var n = 0;n < allTabList.length;n ++){
-				for(var i = 0 ; i < poolTaskChangeList.length ; i ++){
-					var poolTaskChange = poolTaskChangeList[i],
-						changeType = poolTaskChange.changeType;	//变化的类型
-					if(allTabList[n] === changeType){
-						var	poolTaskListInResult = poolTaskChange.poolTaskListInResult,		//结果页的数据
-							poolTaskListInOutside = poolTaskChange.poolTaskListInOutside;		//外部新增的数据
-						//新增任务、数量增加任务、数量减少任务、时间改变任务
-						if(changeType === "CREATE_POOL_TASK" || changeType === "ADD_POOL_TASK_NUM" || changeType === "SUBTRACT_POOL_TASK_NUM"||changeType === "POOL_TASK_TIME_CHANGED"){
-							var each_differ_num = 0,
-								tableRowList = [];//行
-
-							//遍历派工单
-							for(var j in poolTaskListInOutside){
-								var pkInfo = poolTaskListInOutside[j];		//派工单信息
-								var rowList = [];
-								var rowObj = {};
-
-								rowObj.saleOrderCode = pkInfo.saleOrderCode;//销售订单号
-								rowObj.materialName = pkInfo.materialName;//物料名称
-								rowObj.resultTaskNum = isEmptyObject(poolTaskListInResult) ? 0 : poolTaskListInResult[j].resultTaskNum;//已排数
-								rowObj.unDoTaskNum = pkInfo.unDoTaskNum;//未派数
-								rowObj.tempTaskNum = isEmptyObject(poolTaskListInResult) ? 0 : poolTaskListInResult[j].tempTaskNum;//未转实际数
-								rowObj.resultUnDoTaskNum = rowObj.unDoTaskNum - rowObj.tempTaskNum;//未排数
-								rowObj.doTaskNum = pkInfo.doTaskNum;//已派数
-								rowObj.taskNum = pkInfo.taskNum;//车间计划总数
-
-								var startTimes = pkInfo.startTime;
-								startTimes = startTimes ? startTimes.substring(2,11) : "";
-								var endTimes = pkInfo.endTime;
-								endTimes = endTimes ? endTimes.substring(2,11) : "";
-								rowObj.poolTaskTime = startTimes + "~ " + endTimes;
-
-								if(changeType == "POOL_TASK_TIME_CHANGED"){
-									var r_startTimes = poolTaskListInResult[j].startTime;
-									r_startTimes = r_startTimes ? r_startTimes.substring(2,11) : "";
-									var r_endTimes = poolTaskListInResult[j].endTime;
-									r_endTimes = r_endTimes ? r_endTimes.substring(2,11) : "";
-									rowObj.newPoolTaskTime = r_startTimes + "~ " + r_endTimes;
-								}
-
-								for(var k = 0;k < tableList.length;k ++){
-										rowList.push(rowObj[tableList[k]]);
-								}
-
-								if(changeType == "POOL_TASK_TIME_CHANGED"){
-									rowList.push(rowObj.newPoolTaskTime);
-								}
-
-								tableRowList.push(rowList);
-								each_differ_num ++;
-							}
-
-							if(changeType == "CREATE_POOL_TASK"){
-								var changeTypeCode = "add";
-								//给tab标签创建对象
-								var tabList_obj = {
-									changeType : "add",
-									changeTypeName : "新增加的任务",
-									each_differ_num : each_differ_num
-								}
-							}else if(changeType == "ADD_POOL_TASK_NUM"){
-								var changeTypeCode = "numAdd";
-								//给tab标签创建对象
-								var tabList_obj = {
-									changeType : "numAdd",
-									changeTypeName : "进行中的任务",
-									each_differ_num : each_differ_num
-								}
-							}else if(changeType == "SUBTRACT_POOL_TASK_NUM"){
-								var changeTypeCode = "numDes";
-								//给tab标签创建对象
-								var tabList_obj = {
-									changeType : "numDes",
-									changeTypeName : "数量减少任务",
-									each_differ_num : each_differ_num
-								}
-							}else if(changeType == "POOL_TASK_TIME_CHANGED"){
-								var changeTypeCode = "tim";
-								//给tab标签创建对象
-								var tabList_obj = {
-									changeType : "tim",
-									changeTypeName : "时间变化任务",
-									each_differ_num : each_differ_num
-								}
-							}
-
-							allTableView[changeTypeCode] = tableRowList;
-							if(tabList_obj.changeType == "add" || tabList_obj.changeType == "numAdd"){
-								tabList.unshift(tabList_obj);
-							}else{
-								tabList.push(tabList_obj);
-							}
-						}
-
-						if(changeType === "DELETE_POOL_TASK"){
-							var each_differ_num = 0,
-								tableRowList = [];
-
-							var changeTypeCode = "des";
-
-							//遍历派工单
-							for(var j in poolTaskListInResult){
-								var pkInfo = poolTaskListInResult[j];		//派工单信息
-								var rowList = [];
-								var rowObj = {};
-
-								rowObj.saleOrderCode = pkInfo.saleOrderCode;//销售订单号
-								rowObj.materialName = pkInfo.materialName;//物料名称
-								rowObj.resultTaskNum = pkInfo.resultTaskNum;//已排数
-								rowObj.unDoTaskNum = isEmptyObject(poolTaskListInOutside) ? 0 : poolTaskListInOutside[j].unDoTaskNum;//未派数
-								rowObj.tempTaskNum = pkInfo.tempTaskNum;//未转实际数
-								rowObj.resultUnDoTaskNum = rowObj.unDoTaskNum - rowObj.tempTaskNum;//未排数
-								rowObj.doTaskNum = isEmptyObject(poolTaskListInOutside) ? 0 : poolTaskListInOutside[j].doTaskNum;//已派数
-								rowObj.taskNum = isEmptyObject(poolTaskListInOutside) ? 0 : poolTaskListInOutside[j].taskNum;//车间计划总数
-
-								var startTimes = pkInfo.startTime;
-								startTimes = startTimes ? startTimes.substring(2,11) : "";
-								var endTimes = pkInfo.endTime;
-								endTimes = endTimes ? endTimes.substring(2,11) : "";
-								rowObj.poolTaskTime = startTimes + "~ " + endTimes;
-
-								for(var k = 0;k < tableList.length;k ++){
-									rowList.push(rowObj[tableList[k]]);
-								}
-
-								tableRowList.push(rowList);
-								each_differ_num ++;
-							}
-
-							//给tab标签创建对象
-							var tabList_obj = {
-								changeType : "des",
-								changeTypeName : "已删除的任务",
-								each_differ_num : each_differ_num
-							}
-							allTableView[changeTypeCode] = tableRowList;
-							if(tabList_obj.changeType == "add" || tabList_obj.changeType == "numAdd"){
-								tabList.unshift(tabList_obj);
-							}else{
-								tabList.push(tabList_obj);
-							}
-
-						}
-					}
-
-
+				let ergodicData = outsideData;
+				
+				//如果是删除的任务
+				if(changeType === "DELETE_POOL_TASK"){
+					ergodicData = resultData;
 				}
+				
+				//如果是时间改变
+				if(changeType === "POOL_TASK_TIME_CHANGED"){
+					const insertIndex = thisHeadDataOrder.indexOf("poolTaskTime");
+					
+					thisHeadData.splice(insertIndex + 1, 0, "新车间计划时间");
+					thisHeadDataOrder.splice(insertIndex + 1, 0, "newPoolTaskTime");
+				}
+				
+				//构造行数据
+				for(let poolTaskId in ergodicData){
+					const thisOutside = outsideData[poolTaskId],
+						  thisResult = resultData[poolTaskId],
+						  thisData = ergodicData[poolTaskId],
+						  rowData = [],
+						  //获取数据方法
+						  getDataFunction = {
+							  //销售订单号
+							  saleOrderCode: function(){
+								  return thisOutside.saleOrderCode;
+							  },
+							  //物料名称
+							  materialName: function(){
+								  return thisOutside.materialName;
+							  },
+							  //已排数
+							  resultTaskNum: function(){
+								  return thisResult.resultTaskNum;
+							  },
+							  //未派数
+							  unDoTaskNum: function(){
+								  return thisOutside.unDoTaskNum;
+							  },
+							  //未转实际数
+							  tempTaskNum: function(){
+								  return thisResult.tempTaskNum;
+							  },
+							  //未排数
+							  resultUnDoTaskNum: function(){
+								 return thisOutside.unDoTaskNum - thisResult.tempTaskNum; 
+							  },
+							  //已派数
+							  doTaskNum: function(){
+								  return thisOutside.doTaskNum;
+							  },
+							  //车间计划总数
+							  taskNum: function(){
+								  return thisOutside.taskNum;
+							  },
+							  //计划时间
+							  poolTaskTime: function(){
+								  return thisData.startTime.substring(2,11) + "~ " + thisData.endTime.substring(2,11);
+							  },
+							  //新计划时间
+							  newPoolTaskTime: function(){
+								  return thisOutside.startTime.substring(2,11) + "~ " + thisOutside.endTime.substring(2,11);
+							  }
+						  };
+					
+					for(let i = 0, l = thisHeadDataOrder.length; i < l; i++){
+						rowData.push(getDataFunction[thisHeadDataOrder[i]]());
+					};
+					
+					thisTabData.push(rowData);
+				}
+				
+				allTableView.push({
+					bodyData: thisTabData,
+					headData: thisHeadData
+				});
+				
+				//更新总条数
+				allNum += thisTabData.length;
+				
+				//构成左侧目录
+				tabList.push({
+					showText: tabCnName[changeType],
+					num: thisTabData.length
+				});
 			}
-
-			table_object.tabList = tabList;
-			table_object.bodyData = allTableView
-			table_object.tableList = tableList;
-//			console.log(table_object);
+			
+			//构造返回的数据
+			table_object.allTableData = allTableView;	//表体
+			table_object.tabData = tabList	//页签数据
+			table_object.allNum = allNum	//总条数
+			
+			//返回的数据
 			return table_object;
-	    };
-
-	    function isEmptyObject(obj){
-		    for(var i in obj){
-		        return false
-		    }
-		    return true
 		}
+	
         /**
          *desc:获得地点树所有地点的数组
          *time:2017-03-24
@@ -1415,7 +1442,7 @@ app
             let _this = this;
             for(let name in locationData) {
                 allLocationIdArr.push(locationData[name].locationId);
-                if(!isEmptyObject(locationData[name]["nextLevelLocation"])) {
+                if(!tool.isEmptyObject(locationData[name]["nextLevelLocation"])) {
                     allLocationIdArr.push(_this.getAllLocationIdArray(locationData[name]["nextLevelLocation"]));
                 }
             }
@@ -1435,7 +1462,7 @@ app
                     "locationId": locationData[name].locationId,
 					'chooseAble' : locationData[name].chooseAble,
                 };
-                if (!isEmptyObject(locationData[name]["nextLevelLocation"])) {
+                if (!tool.isEmptyObject(locationData[name]["nextLevelLocation"])) {
                     obj.children = this.getData(locationData[name]["nextLevelLocation"]);
                 }
                 arr.push(obj);
@@ -1443,28 +1470,6 @@ app
             return arr;
         };
 
-		/**
-		 * 排程后左侧地点树数据处理
-		 * @param locationData:从后台获取的数据
-		 * @returns 绑定页面的数据
-		 */
-		this.getData__result = function(locationData) {
-		    let arr = [];
-		    let newArr=[];
-		    var obj={
-		    	children : ""
-		    };
-		    for(let i in locationData){
-		    	let newObj = {
-		    		locationId : locationData[i].locationId,
-		    		name : locationData[i].locationName
-		    	};
-		    	newArr.push(newObj);
-		    }
-		    obj.children = newArr;
-		    arr.push(obj);
-		    return arr;
-		};
 
 		/**
 		 * desc: 用于新版的排程前检验，检验出现异常，用二级页面数据给出提示,
@@ -1473,15 +1478,21 @@ app
 		 * @return: checkItemList:返回遍历渲染的数组
 		 **/
 		this.displayCheckBeforeSchedule = function (detailInfoObject) {
-			let obj = {};
-			obj.checkItemTableHeadData = [];//头部文字渲染数组
-			obj.checkItemTableBodyData = [];//主体内容渲染数组
+			let checkItemTableData = {};
+			checkItemTableData.checkItemTableHeadData = {};//头部文字渲染对象，因为只有一行，所以直接用对象
+			checkItemTableData.checkItemTableBodyData = [];//主体内容渲染数组
 			let HeadDataOrderArray = detailInfoObject.column;
-			HeadDataOrderArray.forEach((englishKey)=>{
-				obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
+			HeadDataOrderArray.forEach((key,index)=>{
+				checkItemTableData.checkItemTableHeadData[key] = detailInfoObject.columnAlias[index];	//这么写是因为传进来的column和columnAlias都是数组
 			});
-			obj.checkItemTableBodyData = detailInfoObject.row;
-			return obj;
+			detailInfoObject.row.forEach((item) => {
+				HeadDataOrderArray.forEach((key) => {
+					let obj = {};
+					obj[key] = item[key];
+					checkItemTableData.checkItemTableBodyData.push(obj);
+				});
+			});
+			return checkItemTableData;
 		};
 
 		/**
@@ -1498,24 +1509,23 @@ app
 				let checkErrorData = scheduleValidateMap[checkItem];
                 obj.checkErrorType = checkErrorData.type;
                 obj.checkItemChineseName = checkItem;
-                //=========此段代码为了兼容老版检验而存在，如果不是这几个排程后校验，则直接使用给出的提示==========//
+                //=========此段代码为了兼容老版检验而存在，如果不是这几个排程后校验，则直接使用给出的提示start==========//
                 if((checkErrorData.type !== 5) || (checkErrorData.type !== 4) || (checkErrorData.type !== 3)){
                 	obj.checkInfo = checkErrorData.checkInfo;
-                	// return;
 				}
-                //=========此段代码为了兼容老版检验而存在==========//
+                //=========此段代码为了兼容老版检验而存在end==========//
                 //如果有数据，执行判断，输出报表
-                if(checkErrorData.checkInfo.length){
+                if(checkErrorData.checkInfo && checkErrorData.checkInfo.length){
                     obj.checkResult = false;
                     // 根据type类别判断处于哪个检验，5=生产时间校验,4，超产校验，3组合件校验
-					// 全部写完再封成函数式吧，封不动了（读liao）
+					// 全部写完再封成函数式吧，封不动了(liao,第一声）
 					obj.checkItemTableHeadData = [];//头部文字渲染数组
 					obj.checkItemTableBodyData = [];//主体内容渲染数组
                     if(checkErrorData.type === 5){
                         //	前台设置列信息的展现顺序
                         let HeadDataOrderArray = ["saleOrderCode","materialName","equipmentName","taskNum","startTime","endTime","poolTaskStartTime","poolTaskEndTime","materialMnem"];
                         HeadDataOrderArray.forEach((englishKey)=>{
-                            obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
+                            obj.checkItemTableHeadData.push(getChineseNameByEnglishKey(englishKey));
                         });
                         checkErrorData.validateModes.forEach(function (tableCellItem) {
                             let checkItemTableRow = [];
@@ -1526,7 +1536,7 @@ app
                                     let timeObj = {"showText" : tableCellItem[englishKey].substr(5,11),};
                                     //开始时间不对,1.小于计划开始时间，2.大于计划结束时间，3.大于结束时间
                                     if(startTime < tableCellItem["poolTaskStartTime"] || startTime > tableCellItem["poolTaskEndTime"] || startTime > endTime){
-                                        timeObj["errorClass"] = true;
+                                        timeObj["class"] = 'red';
 									}
                                     checkItemTableRow.push(timeObj);
 								}else if(englishKey === "endTime"){
@@ -1534,7 +1544,7 @@ app
                                     let timeObj = {"showText" : tableCellItem[englishKey].substr(5,11),};
                                     //结束时间不对,1.大于计划结束时间，2.大于计划开始时间
                                     if(endTime > tableCellItem["poolTaskEndTime"] || endTime < tableCellItem["poolTaskStartTime"]){
-                                        timeObj["errorClass"] = true;
+                                        timeObj["class"] = 'red';
                                     }
                                     checkItemTableRow.push(timeObj);
 								}else{
@@ -1551,7 +1561,7 @@ app
                     }else if(checkErrorData.type === 4){
                         let HeadDataOrderArray = ["workDate","punitName","punitCode","taskNum","actualPUnitWorkTime","workTime","remarks"];
                         HeadDataOrderArray.forEach((englishKey)=>{
-                            obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
+                            obj.checkItemTableHeadData.push(getChineseNameByEnglishKey(englishKey));
                         });
                         checkErrorData.validateModes.forEach(function (tableCellItem) {
                             let checkItemTableRow = [];
@@ -1564,7 +1574,7 @@ app
 										//将毫秒数转化为时间【21时26分】这种格式
                                         checkItemTableRow.push({
                                         	"showText" : Math.floor(tableCellItem[englishKey] / 3600) + "时" + Math.floor((tableCellItem[englishKey]%3600) / 60) + "分",
-											"errorClass" : true
+											"class" : 'red'
                                         });
                                         let remarkTime = tableCellItem["actualPUnitWorkTime"] - tableCellItem["workTime"] * 3600;
                                         tableCellItem["remarks"] = "超产" + Math.floor(remarkTime / 3600) + "时" + Math.floor((remarkTime % 3600) / 60) + "分" + Math.ceil((remarkTime % 60)) + "秒";//显示【超产6时6分6秒】
@@ -1590,8 +1600,9 @@ app
 					}else if(checkErrorData.type === 3){
                         let HeadDataOrderArray = ["saleOrderCode","assemblingUnitInfoList","taskCodeList"];
                         HeadDataOrderArray.forEach((englishKey)=>{
-                            obj.checkItemTableHeadData.push({"showText" : getChineseNameByEnglishKey(englishKey)});
+                            obj.checkItemTableHeadData.push(getChineseNameByEnglishKey(englishKey));
                         });
+						obj.checkItemTableHeadData.unshift("序号");
                         checkErrorData.validateModes.forEach(function (tableCellItem,index) {
 							let length = tableCellItem.taskCodeList.length;
                             let firstShow = true;//表格多行合并使用
@@ -1601,10 +1612,10 @@ app
                                 	if(englishKey === "saleOrderCode"){
                                 		if(firstShow){
                                             firstShow = false;
-                                            checkItemTableRow.push({"showText" : index + 1,"rowNum" : length});//组合件专门自带的序号
+                                            checkItemTableRow.push({"showText" : index + 1,"rowspan" : length});//组合件专门自带的序号
                                             checkItemTableRow.push({
                                                 "showText" : tableCellItem[englishKey],
-                                                "rowNum" : length
+                                                "rowspan" : length
                                             })
 										}
 									}else{
@@ -1620,13 +1631,18 @@ app
                 }else{
                     obj.checkResult = true;
 				}
+				//如果没有配置检验项type = -1
+				// 或者没有数据需要校验type = 0,无需校验，
+				if(checkErrorData.type === 0 || checkErrorData.type === -1){
+					obj.checkResult = true;
+				}
                 checkItemArrayList.push(obj);
 			}
 			return checkItemArrayList;
         };
 
         /**
-        * desc:
+        * desc:	一些二级页面表格显示项的中午名，因为后台只传了英文名
         * time:
         * @param: englishKey：传入的英文key值
         * @return: 对应的中文名
@@ -1660,502 +1676,3 @@ app
         }
 	});
 
-
-/*************=========================拖拽项目排序js=========================*************/
-var $id = function (element) {
-	return typeof element == "string" ? document.getElementById(element) : element;
-}
-var $find = function (parent, nodeName) {
-	return parent.getElementsByTagName(nodeName);
-}
-//拖拽项目类
-function DragNewItem() {
-	this.init.apply(this, arguments);
-}
-
-//拖拽项目原型
-DragNewItem.prototype = {
-	_downX: 0,//鼠标按下时的x坐标
-	_downY: 0,//鼠标按下时的y坐标
-	_moveX: 0,//鼠标移动时的x坐标
-	_moveY: 0,//鼠标移动时的y坐标
-	_index: 0,//移动图标的下标
-	//初始化方法
-	init: function (mainDivId, myAppId, otherAppId, config) {
-		this.mainDiv = $id(mainDivId);//获取最外面的div
-		this.myApp = $id(myAppId);//获取第一个div
-		this.otherApp = $id(otherAppId);//获取第二个div
-		this.repeatTransfer()
-		this.addItem().removeItem();
-	},
-	//局部刷新页面时每次需要重复确认操作的区域
-	repeatTransfer : function(){
-		this._OnApp(this.mainDiv);
-		this._moveApp(this.myApp, this.otherApp);
-		this._moveApp(this.otherApp, this.myApp);
-		//
-	},
-	//鼠标移入移出图标
-	_OnApp: function (mainDiv) {
-		var _this = this;
-		//鼠标移入可以移动的li时，加一个出现虚线的class
-		mainDiv.onmouseover = function (event) {
-			var e = event || window.event;//获取鼠标
-			var t = e.target || e.srcElement;//获取鼠标触发源
-			if (t.nodeName.toLowerCase == "li") {
-				_this.addClass(t, "js-liBorderStyle");
-			} else if (t.parentNode.nodeName.toLowerCase() == "li") {
-				_this.addClass(t.parentNode, "js-liBorderStyle")
-			}
-		};
-		//鼠标移出可以移动的li时，移除一个出现虚线的lcas
-		mainDiv.onmouseout = function (event) {
-			var e = event || window.event;//获取鼠标
-			var t = e.target || e.srcElement;//获取鼠标触发源
-			if (t.nodeName.toLowerCase == "li") {
-				_this.removeClass(t, "js-liBorderStyle");
-			} else if (t.parentNode.nodeName.toLowerCase() == "li") {
-				_this.removeClass(t.parentNode, "js-liBorderStyle")
-			}
-		}
-	},
-	//拖动鼠标改变位置
-	_moveApp: function (dragUl, otherUl) {
-		var _this = this;
-		dragUl.onmousedown = function () {
-			var e = event || window.event;//获取鼠标
-			var t = e.target || e.srcElement;//获取鼠标触发源
-			_this.liList = [];//class不是js-liBorderStyle的li元素集合
-			if (t.nodeName.toLowerCase() == "div" && t.className != "appDiv") {
-				var oLi = t.parentNode;
-				var oCopyLi = oLi.cloneNode(true);
-				let scrollTop = $(t).parents("nav").scrollTop();
-				var oNewLi = oCopyLi.cloneNode(true);
-				_this.removeClass(oNewLi, "js-liBorderStyle");
-				_this.removeClass(oNewLi, "js-move");
-				//oNewLi.innerHTML = oCopyLi.innerHTML;
-				//                    var oSpan = $find(oCopyLi,"span")[0];
-
-				document.body.appendChild(oCopyLi);
-				_this.addClass(oCopyLi, "js-newLi");
-				//                    oSpan.style.display = "none";
-				oCopyLi.style.left = _this.offset(oLi).left + "px";
-				oCopyLi.style.top = _this.offset(oLi).top + "px";
-
-				oLi.parentNode.replaceChild(oNewLi, oLi);//新创建的li替代原来的li
-				_this.addClass(oNewLi, "js-liBorderStyle");
-
-				_this._downX = e.clientX;
-				_this._downY = e.clientY;
-				_this._offsetLeft = oCopyLi.offsetLeft;//鼠标按下时获取新生成的虚线li的坐标left
-				_this._offsetTop = oCopyLi.offsetTop;//鼠标按下时获取新生成的虚线li的坐标top
-
-				_this._liList = $find(_this.mainDiv, "li");//获取要拖拽下的ul里的所有li
-				for (var i = 0, length = _this._liList.length; i < length; i++) {
-					var li = _this._liList[i];
-					if (li.className != "js-liBorderStyle") {//获取到class不是js-liBorderStyle的li
-						_this.liList.push(li);
-					}
-				}
-				//鼠标按下时移动图标的位置
-				_this.getAppLocation(_this._offsetLeft + 80, _this._offsetTop + 80);
-
-
-				document.onmousemove = function (event) {
-					var e = event || window.event;//获取鼠标
-					var t = e.target || e.srcElement;//获取鼠标触发源
-					var _X = e.clientX, _Y = e.clientY;//获取鼠标的坐标值
-					var _mLeft = _this._offsetLeft + _X - _this._downX,//获取图标移动时每一次坐标值
-						_mTop = _this._offsetTop + _Y - _this._downY;
-					var oSize = _this._overBorder(_mLeft, _mTop);//获取每次移动经过判断后（是否超过box范围）的坐标
-					_mLeft = oSize.left ? oSize.left : _mLeft;
-					_mTop = oSize.top ? oSize.top : _mTop;
-					oCopyLi.style.left = _mLeft + "px";
-					oCopyLi.style.top = _mTop - scrollTop + "px";
-					var index = _this.getAppLocation(_mLeft, _mTop);//？？获取需要插入的li的下标
-					_this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
-					_this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
-				}
-				document.onmouseup = function (event) {
-					var e = event || window.event;//获取鼠标
-					var t = e.target || e.srcElement;//获取鼠标触发源
-					var left = _this.offset(oNewLi).left;
-					var top = _this.offset(oNewLi).top;
-					//                        var oSpan2;
-					_this.animate(oCopyLi, {left: left, top: top}, 100, function () {
-						document.body.removeChild(oCopyLi);
-						oNewLi.innerHTML = oCopyLi.innerHTML;
-						_this.removeClass(oNewLi, "js-liBorderStyle");
-						_this.addClass(oNewLi, "js-move");
-                        //修改bug，清楚暴力乱移时出现在页面上的元素
-                        $("body").children(".js-liBorderStyle").remove();
-                        $(".js-liBorderStyle").removeClass("js-liBorderStyle");
-					});
-					document.onmousemove = null;
-					document.onmouseup = null;
-				}
-			}
-		}
-	},
-	//添加class
-	addClass: function (node, className) {
-		if (!node.className) {
-			node.className = className;
-		} else {
-			node.className += " " + className;
-		}
-	},
-	//删除class
-	removeClass: function (node, className) {
-		var string = node.className;
-		if (string.indexOf(className) > 0) {
-			node.className = string.replace(" " + className, "");
-		} else if (string.indexOf(className) == 0) {//判断class是否在第一个class，进行删除
-			if (string.indexOf(" ") < 0) {
-				node.className = string.replace(className, "");
-			} else {
-				node.className = string.replace(className + "", "");
-			}
-		} else {
-			return;
-		}
-	},
-	//元素在文档中的位置
-	offset: function (obj) {
-		var _offset = {};
-		var node = $id(obj);
-		var left = node.offsetLeft;
-		var top = node.offsetTop;
-		var parent = node.offsetParent;
-		//不断向上获取父元素的offsetLeft，知道获取到与页面的距离
-		while (parent != null) {
-			left += parent.offsetLeft;
-			top += parent.offsetTop;
-			parent = parent.offsetParent;
-		}
-		_offset.left = left;
-		//!!!!!配置页减去对应的滚动条距离
-		_offset.top = top -  $(".config-content").scrollTop();
-		return _offset;
-	},
-	//计算移动图标所处的位置
-	getAppLocation: function (x, y) {
-		var liList = this.liList;
-		var liW = liList[0].offsetWidth;//
-		var liH = liList[0].offsetHeight;//
-		for (var i = 0, length = liList.length; i < length; i++) {
-			var li = liList[i], left = this.offset(li).left, top = this.offset(li).top;
-			if ((x > left - liW && x < left + liW) && (y > top - liH && y < top + liH)) {
-				this._index = i;
-				break;
-			}
-		}
-		return this._index;
-	},
-	//图标超出边界处理
-	_overBorder: function (left, top) {
-		var x = 0, y = 0, mainDiv = this.mainDiv, oSize = {};
-		var mainDivLeft = this.offset(document.getElementById("all-item")).left;//因为绝对定位的原因，所有需要通过获取点击按钮的offsetLeft计算出来offsetLeft
-		var mainDivTop = this.offset(document.getElementById("all-item")).top;
-		if (left < mainDivLeft) {
-			x = mainDivLeft
-		}
-		if (left > mainDivLeft + mainDiv.offsetWidth) {
-			x = mainDivLeft + mainDiv.offsetWidth;
-		}
-		if (top < mainDivTop) {
-			y = mainDivTop
-		}
-		if (top > mainDivTop + mainDiv.offsetHeight) {
-			// y = mainDivTop + mainDiv.offsetHeight
-		}
-		oSize.left = x;
-		oSize.top = y;
-		return oSize;
-	},
-	//边框随鼠标移动改变位置,然后选择插入到哪个li后面
-	_insertApp: function (x, y, oldElement, newElement,my, other) {
-		var parent
-		var liList = $id(parent, "li");
-		//var lastLi = liList[liList.length - 1];
-		var selectX =  this.offset(document.getElementsByClassName("middleBtn")[0]).left;
-		///此段代码中的x大雨的值不同环境需要计算
-		if (x > selectX) {
-			parent = other;
-		} else {
-			parent = my;
-		}
-		//console.log(this.offset(parent).top - $(".config-content").scrollTop());
-		if (y > this.offset(parent).top && y < this.offset(parent).top + parent.offsetHeight) {
-			try {
-				parent.insertBefore(newElement, oldElement);
-			} catch (error) {
-				parent.appendChild(newElement)
-			}
-		} else {
-			parent.appendChild(newElement)
-		}
-	},
-	//动画方法，
-	animate: function (obj, params, time, handler) {
-		var node = $id(obj), handlerFlag = true, _style = node.currentStyle ? node.currentStyle : window.getComputedStyle(node, null);
-		time = document.all ? time * 0.6 : time * 0.9;
-		for (var p in params) {
-			(function (n) {
-				n = p;
-				if (n == "left" || n == "top") {
-					var _old = parseInt(_style[n]), _new = parseInt(params[n]), _length = 0, _tt = 10;
-					if (!isNaN(_old)) {
-						var count = _old, length = _old <= _new ? (_new - _old) : (_old - _new), speed = length / time * _tt, flag = 0;
-						var anim = setInterval(function () {
-							node.style[n] = count + "px";
-							count = _old <= _new ? count + speed : count - speed;
-							flag += _tt;
-							if (flag >= time) {
-								node.style[n] = _new + "px";
-								clearInterval(anim);
-							}
-						}, _tt);
-					}
-				}
-			})(p);
-		}
-
-		var timeHandler = setTimeout(function () {
-			if (handler && typeof handler == "function") {
-				handler();
-				clearTimeout(timeHandler);
-			}
-		}, time + 100);
-	},
-	//一次性添加所㓟可排序字段
-	addItem: function () {
-		$("body").on("click", ".addAllItem", function () {
-			var elem = $("#provide-item li");
-			for (var i = 0; i < elem.length; i++) {
-				var cloneElem = $(elem[i]).clone().addClass("js-move");
-				$(".sort-item ul").append(cloneElem);
-				elem.remove();
-			}
-		})
-		return this;
-	},
-	//一次性移除所有已排序字段
-	removeItem: function () {
-		$("body").on("click", ".removeAllItem", function () {
-			var elem = $("#sort-item li");
-			for (var i = 0; i < elem.length; i++) {
-				var cloneElem = $(elem[i]).clone().addClass("js-move");
-				$(".provide-item ul").append(cloneElem);
-				elem.remove();
-			}
-		})
-		return this;
-	}
-	//决定单个项目中的升序和降序
-};
-
-/*************=========================排程后页面拉框选中元素方法---微调多选一=========================*************/
-function Pointer(x, y) {
-    this.x = x ;
-    this.y = y ;
-}
-function Position(left, top) {
-    this.left = left ;
-    this.top = top ;
-}
-function Direction(horizontal, vertical) {
-    this.horizontal = horizontal ;
-    this.vertical = vertical ;
-}
-let oldPointer = new Pointer() ;
-let oldPosition = new Position() ;
-let direction = new Direction("Right","") ;
-let isDown = true;
-let isMouseUp = true;//判断mouseup事件中框距离小于一定值时，不执行事件
-
-let div = $("<div></div>").css({
-    background : "#1e7cd9",
-    position  : "absolute",
-    opacity : "0.2"
-}).appendTo($("body")) ;
-
-$(document)
-    .on("mousedown",function (e) {
-    	if($(".jResultPage").length !== 0){
-            isMouseUp = true;
-            isDown = true ;
-            oldPointer.x = e.clientX ;
-            oldPointer.y = e.clientY ;
-            oldPosition.left = e.clientX;
-            oldPosition.top = e.clientY;
-            div.css({
-                left : e.clientX,
-                top : e.clientY
-            }) ;
-            div.extend({
-                checkC : function() {
-                    let $this = this ;
-                    // if($scope.resultPage){
-                    $(".jResultContent .table-td").each(function() {
-                        if(
-                            $this.offset().left + $this.width() > $(this).offset().left &&
-                            $this.offset().left < $(this).offset().left + $(this).width()
-                            && $this.offset().top + $this.height() > $(this).offset().top
-                            && $this.offset().top < $(this).offset().top + $(this).height()
-                        ) {
-                            //为每一个符合条件的选中临时的class cache-check
-                            if($(this).hasClass("cache-check")){
-                                $(this).removeClass("cache-check");
-                            }else{
-                                $(this).addClass("cache-check");
-                            }
-                        }
-                    });
-                    // }
-                }
-            });
-		}
-    })
-    .on("mousemove",function (e) {
-        if($(".jResultPage").length !== 0){
-            if(!isDown) return isDown ;
-            // console.log(isDown + "---move");
-            if(e.clientX > oldPointer.x) {
-                direction.horizontal = "Right" ;
-            } else if(e.clientX < oldPointer.x) {
-                direction.horizontal = "Left" ;
-            } else {
-                direction.horizontal = "1" ;
-            }
-            if(e.clientY > oldPointer.y) {
-                direction.vertical = "Down" ;
-            } else if(e.clientY < oldPointer.y) {
-                direction.vertical = "Up" ;
-            } else {
-                direction.vertical = "1" ;
-            }
-            if(direction.horizontal === direction.vertical){direction.vertical = direction.horizontal = "11";}
-            let directionOperation = {
-                none : function () {
-                },
-                LeftUp : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : Math.abs(e.clientY - oldPointer.y),
-                        top : oldPosition.top - Math.abs(e.clientY - oldPointer.y) ,
-                        left : oldPosition.left - Math.abs(e.clientX - oldPointer.x)
-                    }) ;
-                },
-                LeftDown : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : Math.abs(e.clientY - oldPointer.y),
-                        left : oldPosition.left - Math.abs(e.clientX - oldPointer.x)
-                    }) ;
-                },
-                Left1 : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : 1,
-                        left : oldPosition.left - Math.abs(e.clientX - oldPointer.x)
-                    }) ;
-                },
-                RightDown : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : Math.abs(e.clientY - oldPointer.y)
-                    }) ;
-                },
-                RightUp : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : Math.abs(e.clientY - oldPointer.y),
-                        top : oldPosition.top - Math.abs(e.clientY - oldPointer.y)
-                    }) ;
-                },
-                Right1 : function() {
-                    div.css({
-                        width : Math.abs(e.clientX - oldPointer.x),
-                        height : 1
-                    }) ;
-                },
-                "1Down" : function() {
-                    div.css({
-                        width : 1,
-                        height : Math.abs(e.clientY - oldPointer.y)
-                    }) ;
-                },
-                "1Up" : function() {
-                    div.css({
-                        width : 1,
-                        height : Math.abs(e.clientY - oldPointer.y),
-                        top : oldPosition.top - Math.abs(e.clientY - oldPointer.y)
-                    }) ;
-                },
-                "1111" : function () {
-                    //针对先左键后右键的的报错
-                }
-            };
-            directionOperation[direction.horizontal + direction.vertical]() ;
-		}
-    })
-    .on("mouseup",function (e) {
-        if($(".jResultPage").length !== 0){
-            if(!isDown) return isDown;
-            isDown = false;
-            // if(div[0].releaseCapture) {
-            //     div[0].releaseCapture(true) ;
-            // }
-            // //如果移动距离小于10像素，则不执行方法
-            // //没有想通为什么别的页面点击会失效
-            if((Math.abs(e.clientX - oldPointer.x) < 10 || Math.abs(e.clientY- oldPointer.y) < 10)){
-                isMouseUp = false;
-            }
-            div.checkC();
-            div.width(0).height(0);
-            $(".cache-check").each(function () {
-                if(isMouseUp){
-                    // debugger;
-                    $(this).trigger("click");
-                }
-            })
-            //将效果优先呈现出来，再移除class
-                .removeClass("cache-check");
-            // }
-		}
-    });
-
-//临时项的升序和降序
-$("body")
-	.on("click", ".sort-item .itemOrder", function (e) {
-	var parent = $(this).parent();
-	var attr = parent.attr("data-keyname");
-	if ($(this).hasClass("desc")) {
-		parent.attr("data-order", "up").attr("data-keyname",attr.replace(":desc",""));
-	} else {
-		parent.attr("data-order", "down").attr("data-keyname",attr+":desc");
-	}
-	$(this).toggleClass("desc");
-	e.stopPropagation();
-});
-
-/************==============合并项==============***********/
-$(".page-wrapper")
-	//点击出现下拉框
-	.on("click",".combine-menu",function(e){
-		$(this).addClass("active");
-		$(this).children(".combine-drag").addClass("drag");
-		e.stopPropagation();
-		$(this).find("li").click(function(){
-			$(".combine-menu").removeClass("active");
-			$(".combine-menu").children("ul").removeClass("drag");
-		})
-	})
-	//移出下拉框小时
-	.on("mouseleave",".combine-menu",function(e){
-		$(this).removeClass("active");
-		$(this).children("ul").removeClass("drag");
-	});
-
-/******************/

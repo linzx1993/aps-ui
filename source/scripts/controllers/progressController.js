@@ -134,13 +134,14 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 			)			
 		}else if(state === "自动排程失败"){
 			//.如果后台有提供二级页面选项,通过判断是否有detailInfoObject这个属性
-			if(info.detailInfoObject){
-				//新的二级提示页面，以表格形式展现
-				$scope.newAlertError(info.detailInfoObject);
-			}else{
+			//德意分支暂不支持此功能
+			// if(info.detailInfoObject){
+			// 	//新的二级提示页面，以表格形式展现
+			// 	$scope.newAlertError(info.detailInfoObject);
+			// }else{
 				let briefInfo = info.briefInfo;
 				$scope.in_alert_data.push(briefInfo);
-			}
+			// }
 		}
 
 		
@@ -163,6 +164,7 @@ app.controller('progressCtrl', function($scope, $rootScope, $interval, $location
 	//新的错误提示形式，以二级页面展现
 	$scope.newAlertError = function (info) {
 		$scope.checkSchedule = true;//出现二级页面
+		$scope.checkItemTableOrder = info.column;//获得表格的列顺序
 		$scope.checkItemTableData = scheduleTableViewModelService.displayCheckBeforeSchedule(info);
 		$scope.checkItemTableHeadData = $scope.checkItemTableData.checkItemTableHeadData;//表格头
 		$scope.checkItemTableBodyData = $scope.checkItemTableData.checkItemTableBodyData;//表格主体内容

@@ -51,79 +51,106 @@ export default {
         });
         return schemeTableData;
     },
+
   /**
-   * desc : 返回一个eCharts双饼图所需的数据格式
-   * @param resData
-   * @returns {{reasonPieCharts: {nameList: Array, valueList: Array}, locationPieCharts: {nameList: Array, valueList: Array}}}
+   * 将处理后得到的数据传进来转换成echarts所需要的option
+   * @param optionData
+   * @returns {{title: {text, show: boolean, x: string, y: string}, tooltip: {trigger: string}, legend: {data: Array, top: string, left: string}, toolbox: {top: string, right: string, show: boolean, feature: {dataView: {show: boolean}, restore: {show: boolean}, dataZoom: {show: boolean}, saveAsImage: {show: boolean}, magicType: {type: [string,string]}}}, calculable: boolean, dataZoom: [*,*], xAxis: [*], yAxis: [*], series: Array}}
    */
-    getHistorySchedulePieCharts(resData){
-        //新建一个对象，同时包含地点分布和原因分布饼图所需的数据
-        const pieChartsData = {
-            reasonPieCharts : {
-                name : '重排原因',
-                nameList : [],
-                valueList :[]
+    getBarEChartsOption(optionData) {
+        //		  console.log(optionData);
+        let option = {
+            title: {
+                text : optionData.title.text,
+                show : !!optionData.title,
+                x : optionData.title.x || 'center',
+                y : optionData.title.y || '0%'
             },
-            locationPieCharts : {
-                name : '重排车间',
-                nameList : [],
-                valueList :[]
+            //鼠标移到折线图上是否有数据提示
+            tooltip: {
+                trigger: 'axis'
             },
+            //标题展示项
+            legend: {
+                data: [],
+                top : '7%',
+                left : 'center'
+            },
+            //标题小工具栏
+            toolbox: { //可视化的工具箱
+                top : "0%",
+                right : '10%',
+                show: true,
+                feature: {
+                    //数据视图
+                    dataView: {show: false},
+                    //重置
+                    restore: {show: false},
+                    //数据缩放视图
+                    dataZoom: {show: false},
+                    //保存图片
+                    saveAsImage: {show: true},
+                    //动态类型切换
+                    magicType: {type: ['bar', 'line']}
+                }
+            },
+            calculable: true,
+            dataZoom: [
+                {startValue: '0'},
+                {type: 'inside'},
+              //y轴拉缩框
+      //                {
+      //                    type: 'slider',
+      //                    yAxisIndex: 0,
+      //                    filterMode: 'empty'
+      //                },
+            ],
+            xAxis: [{
+                type: 'category',
+      //                  axisLabel: {
+      //                      interval:0,//横轴信息全部显示
+      //                      rotate: 40,//60度角倾斜显示
+      //                      formatter:function(val) {
+      //                          return val.split("").join("\n"); //横轴信息文字竖直显示
+      //                      }
+      //                  },
+                data: []
+            }],
+            yAxis: [{
+                type: 'value',
+                interval : optionData.interval
+            }],
+            series: []
         };
-        //遍历原因分布列表的数据
-        for(let reason in resData.caclReasonData){
-            if(resData.caclReasonData.hasOwnProperty(reason)){
-                pieChartsData.reasonPieCharts.nameList.push(reason);
-                //eCharts饼图所需的数据格式
-                pieChartsData.reasonPieCharts.valueList.push({
-                    value : resData.caclReasonData[reason],
-                    name : reason
-                });
-            }
+        //如果y轴没有数据，直接返回，图标显示为空
+        if (optionData.yAxisList.length === 0) {
+            return option
         }
-        //遍历地点分布列表的数据
-        for(let location in resData.caclLocationData){
-            if(resData.caclLocationData.hasOwnProperty(location)) {
-                pieChartsData.locationPieCharts.nameList.push(location);
-                //eCharts饼图所需的数据格式
-                pieChartsData.locationPieCharts.valueList.push({
-                  value: resData.caclLocationData[location],
-                  name: location
-                });
-            }
-        }
-        return pieChartsData
-    },
-  /**
-   *  desc :根据数据获取重排原因页面的柱形图，主要展示每个日期的重排次数，点击图需要在表需要展现每个日期的重排信息
-   * @param resData
-   */
-    toHistoryECharts(resData){
-        //统计每天的重排次数
-        const timeCountObj = {};
-        const xAxisList = [];
-        for(let i in resData.reasonDtoList){
-            //如果没有当前日期，则记录下来,初始次数为1
-            const time = resData.reasonDtoList[i].scheduleTime.slice(0,10);
-            if(!timeCountObj[time]){
-                timeCountObj[time] = 1;
-                xAxisList.push(time);
-            }else{
-                timeCountObj[time] ++;
-            }
-        }
-        //根据顺序去获得每个时间对应的重排值
-        const yAxisList = [{
-            name : "历史排程次数",
-            valueList : []
-        }];
-        xAxisList.forEach((item) => {
-            yAxisList[0].valueList.push(timeCountObj[item]);
+        //设置x轴坐标
+        option.xAxis[0].data = optionData.xAxisList;
+        //设置y轴坐标
+        optionData.yAxisList.forEach((item) => {
+            //设置图表toolbox,提示小格子
+            option.legend.data.push(item.name);
+            //设置x轴各项在y轴对应的值
+            const obj = {
+                name: item.name,
+                type: optionData.type || 'bar',
+                data: item.valueList,
+                markPoint : {
+                    data : [
+                        {type : 'max', name: '最大值'},
+                        {type : 'min', name: '最小值'}
+                    ]
+                },
+                markLine : {
+                    data : [
+                        {type : 'average', name: '平均值'}
+                    ]
+                }
+            };
+            option.series.push(obj);
         });
-        //返回一个可以直接给option调用的值
-        return {
-            xAxisList : xAxisList,
-            yAxisList : yAxisList,
-        }
+        return option;
     },
 }

@@ -1,217 +1,103 @@
 @charset "utf-8";
 
-@import 'reset.scss';
-$borderColor : #dedede;
-$config-box-height : 814px;
-$title-height : 68px;
-$config-content-height : $config-box-height -  $title-height;
-/*========参数配置页面左边目录栏==========*/
+@import 'resetStyle.scss';
+$borderColor : #dedede;//不知道为什么被resetStyle覆盖了
+
 .config-box {
-    width: 1366px;
-    height: $config-box-height;
+    display: flex;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 94%;
+    height: 90%;
 }
 
-.config-nav {
-    width: 220px;
-    height: 100%;
-    color: #fff;
-    background-color: #38434f;
-    box-sizing: border-box;
-}
 
-.configNavTitle {
-    //padding: 14px 0;
-    min-height: $title-height;
-    line-height: $title-height;
-    font-size: 18px;
-    text-align: center;
-    color: #fff;
-    border-bottom: 1px solid #151b26;
-}
-
-.configLi a {
-    padding-left: 20px;
-    width: 210px;
-    line-height: 46px;
-    font-size: 16px;
-    color: #e5e5e5;
-    border-left: 4px solid transparent;
-    cursor: pointer;
-}
-.configLi a:hover{
-    color: #fff;
-    background-color: #375373;
-}
-.configLi.active > a {
-    color: #fff;
-    background-color: #375373;
-    border-left: 4px solid $themeColor;
-}
-.config-nav li li a{
-    font-size: 14px;
-}
-.config-nav li li.active > a {
-    margin-left: -20px;
-    padding-left: 40px;
-    color: #fff;
-    border-left: 4px solid $themeColor;
-    background-color: #375373;
-}
-
-/*二级目录样式*/
-.configLi{
-    .nav-angle {
-        position: absolute;
-        right: 20px;
-        top: 16px;
-        width: 9px;
-        height: 9px;
-        border-right: 1px solid #e6e6e6;
-        border-bottom: 1px solid #e6e6e6;
-        @include rotate(45deg);
-        @include transition(all, .5s);
-        &:hover {
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-        }
-    }
-    &.drag .nav-angle {
-        top: 22px;
-        @include rotate(-135deg);
-        @include transition(all, 1s);
-    }
-    ul{
-        max-height: 0;
-        background-color: #2c3642;
-        @include transition(max-height, 1s);
-    }
-    &.drag ul {
-        max-height: 150px;
-        @include transition(max-height, 1s);
-    }
-    li {
-        padding-left: 20px;
-        a:hover {
-            margin-left: -20px;
-            padding-left: 40px;
-        }
-        &.disabled,&.active{
-            pointer-events: none;
-        }
-    }
-    //.second-nav.active{
-    //    pointer-events: none;
-    //}
-}
+/*========参数配置页面左边目录栏==========*/
+@import "config/leftNav.scss";
 
 /*=========参数配置页面右边内容栏=========*/
-.config-box input[type=checkbox],
-.config-box input[type=radio],
-.config-box .checkItem select,
-.config-box .adminContent select
- {
-    display: none;
-}
-.config-box .input-text-box{
-    padding-left: 5px;
-    width: 133px;
-    height: 28px;
-    line-height: 24px;
-    border: 1px solid #d9d9d9;
-}
-.config-box .config-content {
-    width: 1138px;
-    height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    background-color: #f0f3fa;
-}
-
-.config-box .config-main {
-    position: relative;
-    height: 100%;
-
-}
-
-/*/多列配置页面/*/
-.config-box .config-content-title {
-    padding-left: 30px;
-    height: 67px;
-    line-height:67px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #195999;
-    border-top-right-radius: 4px;
-    border-bottom: 1px solid $borderColor;
-}
-
-/*单选框，多选框样式*/
-.input-check{
-    width: 16px;
-    height: 16px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    vertical-align: middle;
-    background-color: #fff;
-    cursor: pointer;
-}
-.input-radio{
-    @extend .input-check;
-    border-radius: 50%;
-}
-
-input:checked + .input-check {
-    border: none;
-    background: url("../images/selected.png") #fff;
-}
-input:checked + .input-radio{
-    position: relative;
-    border:1px solid $themeColor;
-    background-image: none;
-    &:after{
-        content: "";
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 6px;
-        height: 6px;
-        background-color: $themeColor;
-        border-radius: 50%;
-    }
-}
-.config-box .table-sort-itemList {
-    display: flex;
-    width: 480px;
-}
-.all-location{
-    &:after{
+.config-box {
+    input[type=checkbox], input[type=radio], select{
         display: none;
     }
+    .input-text-box{
+        padding-left: 5px;
+        width: 133px;
+        height: 28px;
+        line-height: 24px;
+        border: 1px solid #d9d9d9;
+    }
+    .config-content {
+        flex: auto;
+        height: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+        background-color: #f0f3fa;
+    }
+    .config-content-title {
+        padding-left: 30px;
+        height: 67px;
+        line-height:67px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #195999;
+        border-bottom: 1px solid #dedede;
+    }
+    .config-main {
+        position: relative;
+        height: 100%;
+    }
+    .right-content{
+        height: calc(100% - 68px);
+    }
 }
-/*二级页面显示项*/
-.display-combine-line{
-    display: flex;
-    align-items: center;
-}
-/*/===========校验规则可配===============/*/
+
+/*/===========右边内容小目录.config-box .right-content{===============/*/
 .check-rule-nav{
-    width: 200px;
+    width: 15%;
+    min-width: 120px;
     background-color: #dde5f0;
-    //.schedulePlanLi.active, .schedulePlanLi:hover,.rule-li.active,.rule-li:hover {
-    //    background-color: #f0f3fa;
-    //}
-    ul {
-        height: 700px;
-        overflow: auto;
-        background-color: #dde5f0;
+    .left-nav-title{
+        height: 46px;
+        border-bottom: 1px solid #dedede;
+        box-sizing: border-box;
+    }
+    nav{
+        height: calc(100% - 46px);  //减去标题头的高度
+        ul {
+            height: 100%;
+            overflow: auto;
+            background-color: #dde5f0;
+        }
     }
     li{
+        position: relative;
+        box-sizing: border-box;
+        padding-left: 20px;
+        width: 100%;
+        height: 46px;
+        line-height: 46px;
+        color: #292929;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        cursor: pointer;
         &.active{
             background-color: #f0f3fa;
         }
         &:hover{
             padding-right: 40px;
             background-color: #f0f3fa;
+        }
+        .left-nav-name {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
         b {
             display: none;
@@ -227,15 +113,8 @@ input:checked + .input-radio{
             display: block;
         }
     }
-//  .nav-manage {
-//      @extend .addRule;
-//      left: auto;
-//      right: 20px;
-//      background-image: url("../images/set-blue.png");
-//  }
 
     input {
-        //padding-left: 8px;
         width: 126px;
         height: 30px;
         line-height: 30px;
@@ -257,503 +136,22 @@ input:checked + .input-radio{
         color: $themeColor;
     }
 }
-.config-form{
-    //width: 902px;
-    padding: 0 50px 60px 0;
-    overflow: auto;
-    //height: 745px;
-    box-sizing: border-box;
-}
-.display-content .check-rule-nav li:first-child:hover{
-    background-color: #f0f3fa;
-}
-.rule-content{
-    width: calc(100% - 200px);
-}
-.rule-name {
-    border-bottom: 1px solid $borderColor;
-    input{
-        padding-left: 20px;
-        width: 100%;
-        line-height: 45px;
-        font-size: 20px;
-        border: none;
-        background-color: transparent;
-        box-sizing: border-box;
-        &:hover{
-            text-decoration: underline;
-        }
-    }
-}
-.check-rule-nav li, .check-scheme-nav li {
-    position: relative;
-    padding-left: 20px;
-    height: 46px;
-    line-height: 46px;
-    color: #292929;
-    cursor: pointer;
-    .left-nav-name{
-        width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-}
 
-.config-box .checkContent dt {
-    min-width: 170px;
-    text-align: right;
-}
+/********============配置页面显示项============********/
+@import "config/display.scss";
 
-.config-box dd.relative {
-    padding-left: 5px;
-    height: 28px;
-    width: 133px;
-    line-height: 28px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    cursor: pointer;
-    &:hover {
-        border: 1px solid $themeColor;
-    }
-}
+/********============排程规则============********/
+.check-content,.schedule-content{height: 100%;}
+@import "config/scheduleRule.scss";
 
-.config-box .config-form input[type=text] {
-    display: inline-block;
-    padding-left: 5px;
-    width: 133px;
-    height: 28px;
-    line-height: 24px;
-    border: 1px solid #d9d9d9;
-    &.error {
-        border: 1px solid red;
-    }
-    &:focus {
-        border: 1px solid $themeColor;
-    }
-    label {
-        display: inline-block;
-        min-width: 100px;
-    }
-}
+/********============排程方案============********/
+@import "config/schedulePlan.scss";
 
-.config-box .info {
-    font-size: 12px;
-    color: #aaa;
-    margin-left: 15px;
-}
+/********============管理员配置============********/
+@import "config/adminDisplay.scss";
 
-.config-box .scheduleCheck {
-    width: 100%;
-    label {
-        min-width: 200px;
-        &:nth-child(4n+1) {
-            text-align: left;
-        }
-    }
-}
 
-.config-content dd.relative:after {
-    content: "";
-    position: absolute;
-    top: 6px;
-    right: 12px;
-    width: 8px;
-    height: 8px;
-    border-bottom: 1px solid #999;
-    border-left: 1px solid #999;
-    -ms-transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-}
-
-.config-box .scheduleDrag {
-    display: none;
-    position: absolute;
-    top: 28px;
-    left: -1px;
-    background-color: #fff;
-    border: 1px solid $themeColor;
-    z-index: 10;
-    li {
-        padding: 0 5px;
-        width: 128px;
-        min-width: 88px;
-        height: 30px;
-        line-height: 30px;
-        cursor: pointer;
-        &:hover,&.active{
-            color: $themeColor;
-        }
-    }
-    &.draw {
-        display: block;
-    }
-}
-
-.config-box dd.disabled {
-    color: #808080;
-    background-color: #ecf0f1;
-    .scheduleDrag {
-        display: none;
-    }
-    &:hover {
-        border: 1px solid #d9d9d9;
-    }
-}
-
-.config-box dd.not-edit {
-    cursor: not-allowed;
-}
-
-.config-box .checkConfig {
-    padding: 30px 0 0 100px;
-}
-
-.config-setting ul {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 400px;;
-}
-/*排程规则-排程因子权重*/
-.schedule-weight-map {
-    h6 {
-        min-width: 170px;
-    }
-    dl {
-        height: 55px;
-    }
-    .clearfix dt {
-        min-width: 75px;
-    }
-    b {
-        font-weight: normal;
-        color: #f00;
-        height: 14px;
-        line-height: 14px;
-    }
-}
-.weight-map-box {
-    width: 600px;
-    dl:nth-child(even) {
-        margin-left: 30px;
-    }
-}
-
-input.disabled{
-    background-color: #ecf0f1;
-    cursor: not-allowed;
-}
-.show-advanced-configuration{
-    position: relative;
-    color: #0490f1;
-    cursor: pointer;
-    &:after,&:before{
-        content: "";
-        position: absolute;
-        top: 9px;
-        right: -12px;
-        width: 5px;
-        height: 5px;
-        border-left: 1px solid #0490f1;
-        border-top: 1px solid #0490f1;
-        @include rotate(45deg);
-    }
-    &:after{
-        top: 13px;
-    }
-    &.reverse{
-        &:after,&:before{
-            top: 10px;
-            @include rotate(-135deg);
-        }
-        &:before{
-            top: 5px;
-        }
-    }
-}
-/*高级设置分割线*/
-.checkR-rule-line{
-    border-top: 1px solid #ccc;
-}
-
-.look-online-config{
-    text-decoration: underline;
-    &:hover{
-        color: $themeColor;
-    }
-}
-
-/*排程方案*/
-.planContent {
-    height: 650px;
-//  overflow: auto;
-    border-bottom: 1px solid $borderColor;
-    margin-bottom: 20px;
-    padding-bottom: 30px;
-}
-
-.config-box .left-plan {
-    width: 200px;
-//  height: 650px;
-//  overflow: auto;
-    background-color: #dde5f0;
-    .left-plan-title{
-        height: 46px;
-        border-bottom: 1px solid #dedede;
-        box-sizing: border-box;
-    }
-    .addPlan {
-        padding-left: 10px;
-        color: $themeColor;
-        cursor: pointer;
-    }
-}
-
-.config-box .middle-workshop {
-    width: 340px;
-    height: 680px;
-    border-right: 1px solid $borderColor;
-    h6 span {
-        color: #808080;
-        font-size: 12px;
-    }
-    nav a {
-        position: relative;
-        padding-left: 5px;
-        width: 108px;
-        height: 30px;
-        line-height: 28px;
-        color: #333;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        border: 2px solid #d9d9d9;
-        background-color: #d9d9d9;
-        vertical-align: middle;
-        box-sizing: border-box;
-    }
-    nav {
-        height: 580px;
-        overflow: auto;
-        .select-rule {
-            width: 140px;
-            padding-right: 10px;
-        }
-        .select-rule:after {
-            content: "";
-            position: absolute;
-            right: 5px;
-            top: 6px;
-            width: 7px;
-            height: 7px;
-            border-right: 1px solid #999;
-            border-bottom: 1px solid #999;
-            @include rotate(45deg);
-        }
-    }
-    li > a .delete {
-        position: absolute;
-        top: -10px;
-        right: -7px;
-        width: 14px;
-        height: 14px;
-        background: url("../images/garbage.png") no-repeat;
-        z-index: 10;
-    }
-    .drag-rule-name{
-        width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-}
-
-//.workshop-manage {
-//    width: 16px;
-//    height: 16px;
-//    background: url("../images/set-gray.png") no-repeat;
-//    cursor: pointer;
-//    &:hover {
-//        background-image: url("../images/set-blue.png");
-//    }
-//}
-
-.workshop-ruleNav {
-    position: relative;
-    display: inline-block;
-    ul {
-        position: absolute;
-        top: 30px;
-        right: 0;
-        width: 140px;
-        max-height: 0;
-        line-height: 30px;
-        text-align: center;
-        overflow: hidden;
-        overflow-y: auto;
-        transition: max-height .5s;
-        z-index: 10;
-    }
-    &.active ul {
-        max-height: 140px;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-        @include transition(max-height, .5s);
-    }
-    li {
-        position: relative;
-        padding-left: 5px;
-        height: 30px;
-        line-height: 30px;
-        text-align: left;
-        color: #333;
-        background-color: #fff;
-        cursor: pointer;
-        &:hover {
-            background-color: $themeColor;
-            color: #fff;
-            .viewRule {
-                display: block;
-                color: #fff;
-            }
-        }
-    }
-    .viewRule {
-        display: none;
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 30px;
-        height: 30px;
-        color: $themeColor;
-        background-color: #1b6fc3;
-        &:before {
-            content: "";
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 14px;
-            height: 14px;
-            border: 1px solid #fff;
-            border-radius: 50%;
-        }
-        &:after {
-            content: "...";
-            color: #fff;
-            position: absolute;
-            top: -5px;
-            right: 9px;
-        }
-    }
-}
-.config-box .location-show {
-    position: absolute;
-    top: 0;
-    right: -52px;
-    padding-top: 0;
-    width: 596px;
-    height: 650px;
-    //overflow: auto;
-    background-color: transparent;
-}
-.planContent .rightLocation{
-    position: static;
-    h6 {
-        height: 54px;
-        line-height: 54px;
-    }
-    .location-list{
-        height: 580px;
-        overflow: auto;
-    }
-    i.disabled{
-        background: #eee;
-        border: 1px solid #ccc;
-        pointer-events: none;
-    }
-}
-///*pap*/
-//.papRuleContent label {
-//    display: block;
-//}
-
-.config-box .info-box {
-    position: fixed;
-    top: calc(50% - 130px);
-    left: 50%;
-    z-index: 120;
-    padding: 0 10px;
-    min-width: 178px;
-    height: 58px;
-    line-height: 58px;
-    //border: 1px solid $borderColor;
-    //overflow: hidden;
-    box-shadow: 1px 1px 30px rgba(0, 0, 0, .3);
-    background-color: #fff;
-    @include transition(transform,.3s);
-    @include scale(0);
-    @include transform-origin(50%, 50%);
-    &.active{
-        @include scale(1);
-    }
-}
-
-@-webkit-keyframes show {
-    from {
-        @include scale(0);
-    }
-    10% {
-        @include scale(1);
-    }
-    90% {
-        @include scale(1);
-    }
-    to {
-        @include scale(0);
-    }
-}
-
-@-ms-keyframes show {
-    from {
-        @include scale(0);
-    }
-    10% {
-        @include scale(1);
-    }
-    90% {
-        @include scale(1);
-    }
-    to {
-        @include scale(0);
-    }
-}
-
-.config-box .info-mask.active .info-box {
-    animation: show 2s;
-    transform-origin: 50% 50%;
-}
-
-.config-box .info-box span {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-    background: url("../images/config-info.jpg") no-repeat;
-}
-
-.config-box .info-box.error span {
-    background-position-y: -56px;
-}
-
-.delete-mask {
-    width: 14px;
-    height: 14px;
-    background: url("../images/delete.png");
-    background-size: 14px;
-    cursor: pointer;
-}
-
+/********============新建方案或规则的弹出框---start============********/
 .layer-box {
     position: absolute;
     top: calc(50% - 130px);
@@ -774,12 +172,6 @@ input.disabled{
     background-color: #f0f0f0;
 }
 
-.layer-title .close {
-    font-size: 32px;
-    color: #666;
-    cursor: pointer;
-}
-
 .layer-content {
     padding: 20px 30px;
 }
@@ -793,37 +185,11 @@ input.disabled{
 }
 
 #planSelect, #ruleSelect {
+    display: inline-block;
     width: 180px;
     height: 30px;
     border: 1px solid #ccc;
 }
+/********============新建方案或规则的弹出框---end============********/
 
-/*=========上线配置==========*/
-.online-content{
-    padding: 20px;
-    .online-table-box{
-        height: 500px;
-        overflow: auto;
-    }
-    .cascader-select-box input{
-        display: inline-block;
-    }
-    table{
-        width: 100%;
-        background-color: #fff;
-        th,td{
-            text-align: center;
-            border: 1px solid #ccc;
-        }
-        tr{
-            height: 30px;
-            line-height: 30px;
-            &:nth-child(even){
-                background-color: #EDEEED;
-            }
-        }
-        td{
-            padding: 5px 0;
-        }
-    }
-}
+/********============单选框，多选框样式============********/

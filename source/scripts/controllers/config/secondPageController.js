@@ -32,10 +32,9 @@ app
 				successFn: (res) => {
                     //获得get到的数据，渲染两个拖拽框
                     $scope.setDisplayGetData(res);
-                    $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
                 },
 				errorFn: () => {
-                    $scope.info.fail("获取数据失败，请检查是否连上服务器")
+					layer.msg('获取数据失败，请检查服务器', {time: 3000, icon: 2});
                 }
 			});
         };
@@ -44,8 +43,6 @@ app
         // //获取数据，创造车间树
         // $scope.createWorkshop(true,getColumnData);
 
-        //初始化拖拽
-        $scope.clickLiGetItem();
 
         /**列信息配置点击保存进行发送数据**/
         $scope.saveColumnContent = () => {
@@ -59,11 +56,11 @@ app
 				data: postData,
 				successFn: function(response){
                     if(response.data === true){
-                        $scope.info.success("数据保存成功");
+						layer.msg('保存成功', {time: 3000, icon: 1});
                     }
                 },
 				errorFn: function(){
-                    $scope.info.fail("数据保存失败");
+					layer.msg('保存失败', {time: 3000, icon: 2});
                 }
 			});
         };
@@ -76,10 +73,10 @@ app
                     $("#all-item").find(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                    $scope.info.success("还原配置成功");
+					layer.msg('还原配置成功', {time: 3000, icon: 1});
                 },
 				errorFn: function(){
-                    $scope.info.fail("还原配置失败");
+					layer.msg('还原配置失败', {time: 3000, icon: 2});
                 }
 			});
         };
@@ -97,7 +94,7 @@ app
                     $scope.setDisplayGetData(res);
                 },
 				errorFn: () => {
-                    $scope.info.fail("获取数据失败，请检查是否连上服务器")
+					layer.msg('获取数据失败，请检查是否连上服务器', {time: 3000, icon: 2});
                 }
 			});
             //合并项
@@ -129,8 +126,6 @@ app
         //渲染数据
         getSortConfig();
 
-        //初始化拖拽
-        $scope.clickLiGetItem();
 
         /**多列排序信息配置点击保存进行发送数据**/
         $scope.saveSortContent = () => {
@@ -144,11 +139,11 @@ app
 				data: postData,
 				successFn: function(response){
                     if(response.data === true){
-                        $scope.info.success("数据保存成功");
+						layer.msg('保存成功', {time: 3000, icon: 1});
                     }
                 },
 				errorFn: function(){
-                    $scope.info.fail("数据保存失败");
+					layer.msg('数据保存失败', {time: 3000, icon: 2});
                 }
 			});
             //合并项
@@ -171,7 +166,7 @@ app
                         //$scope.info.success("数据保存成功");
                     },
 					errorFn: function(res){
-                        $scope.info.fail("合并项保存失败");
+						layer.msg('合并项保存失败', {time: 3000, icon: 2});
                     }
 				});
             }else{
@@ -182,7 +177,7 @@ app
                         //$scope.info.success("数据保存成功");
                     },
 					errorFn: function(){
-                        $scope.info.fail("合并项保存失败");
+						layer.msg('合并项保存失败', {time: 3000, icon: 2});
                     }
 				});
             }
@@ -206,7 +201,7 @@ app
                         //$scope.info.success("数据保存成功");
                     },
 					errorFn: function(res){
-                        $scope.info.fail("汇总项保存失败");
+						layer.msg('汇总项保存失败', {time: 3000, icon: 2});
                     }
 				});
             }else{
@@ -217,7 +212,7 @@ app
                         //$scope.info.success("数据保存成功");
                     },
 					errorFn: function(res){
-                        $scope.info.fail("汇总项保存失败");
+						layer.msg('汇总项保存失败', {time: 3000, icon: 2});
                     }
 				});
             }
@@ -231,10 +226,10 @@ app
                     $("#all-item").find(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                    $scope.info.success("还原配置成功");
+					layer.msg('还原配置成功', {time: 3000, icon: 1});
                 },
 				errorFn: function(){
-                    $scope.info.fail("还原配置失败");
+					layer.msg('还原配置失败', {time: 3000, icon: 2});
                 }
 			});
             //还原合并项
@@ -249,7 +244,7 @@ app
                     }
                 },
 				errorFn:　function(res){
-                    $scope.info.fail("合并项保存失败");
+					layer.msg('合并项保存失败', {time: 3000, icon: 2});
                 }
 			});
             //还原汇总项
@@ -264,7 +259,7 @@ app
                     }
                 },
 				errorFn: function(res){
-                    $scope.info.fail("汇总项保存失败");
+					layer.msg('汇总项保存失败', {time: 3000, icon: 2});
                 }
 			});
         };

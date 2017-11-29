@@ -20,72 +20,56 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 
 
 	//获取所有设备类型
-	$scope.equipmentSelectTypeListZero = []; //选中的离散设备
-	$scope.equipmentSelectTypeListOne = [];	//选中的生产单元
-	//获取设备类型的下拉数据
-	$scope.equipmentTypeDataZero = {
-		showText : "离散设备",
-		value : "",
-		repeatData : [],
-	};
-	$scope.equipmentTypeDataOne = {
-		showText : "生产单元",
-		value : "",
-		repeatData : [],
-	};
+	$scope.equipmentSelectTypeZeroList = []; //离散设备的下拉列表
+	$scope.selectEquipmentTypeZero = []; //选中的离散设备
+	$scope.equipmentSelectTypeOneList = [];	//生产单元的下拉列表
+	$scope.selectEquipmentTypeOne = [];	//选中的生产单元
 	http.get({
 		url : $rootScope.restful_api.get_equipment_type + "?startTime=" + tool.getCorrectDate(new Date) + "&endTime=" + tool.getCorrectDate(new Date),
 		successFn : function (res) {
 			res.data.forEach((item) => {
+				item.id = item.modelId + "_" + item.modelType;
 				if(item.modelType === 0){
-					$scope.equipmentTypeDataZero.repeatData.push({
-						dragItemText : item.modelName,
-						id : item.modelId
-					});
-				}
-				if(item.modelType === 1){
-					$scope.equipmentTypeDataOne.repeatData.push({
-						dragItemText : item.modelName,
-						id : item.modelId
-					});
+					$scope.equipmentSelectTypeZeroList.push(item);
+				} else if(item.modelType === 1){
+					$scope.equipmentSelectTypeOneList.push(item);
 				}
 			});
 		}
 	});
 
 	//获取所有设备
-	$scope.equipmentSelectList = [];//设备下拉列表选中设备的数据
-	//获取设备下拉列表数据
-	$scope.equipmentData = {
-		showText : "设备",
-		value : "",
-		repeatData : [],
-	};
-	http.get({
-		url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
-		+ "&endTime=" + tool.getCorrectDate(new Date)
-		+ "&searchType=1"
-		+ "&modelIdList="
-		+ "&locationFilterList=" ,
+	$scope.equipmentList = [];
+	//设备下拉列表选中设备的数据
+	$scope.equipmentSelectList = [];
+
+	http.post({
+		url : $rootScope.restful_api.get_all_equipment,
+		data : {
+			startTime : tool.getCorrectDate(new Date),
+			endTime : tool.getCorrectDate(new Date),
+			searchType : 1,
+			modelIdList : [],
+			locationFilterList : []
+		},
 		successFn : function (res) {
-			$scope.equipmentList = res.data;
-			$scope.equipmentData.repeatData = getEquipmentList($scope.equipmentList);
+			$scope.equipmentList = getEquipmentList(res.data);
 		}
 	});
 
 	/*
 	 * desc : 请求获取到的设备列表是个对象，然后将其转化成数组
 	 */
-	function getEquipmentList(equipmentData) {
-		let equipmentList = [];
-		for(let i in equipmentData){
-			equipmentList.push({
-				dragItemText : equipmentData[i].productUnitName,
-				id : equipmentData[i].productUnitId + "_" + equipmentData[i].type,
-				equipmentCode : equipmentData[i].productUnitCode
+	function getEquipmentList(equipmentList) {
+		let equipmentData = [];
+		for(let i in equipmentList){
+			equipmentData.push({
+				label : equipmentList[i].productUnitName,
+				id : equipmentList[i].productUnitId + "_" + (equipmentList[i].type === "EQUIPMENT" ? 0 : 1),
+				equipmentCode : equipmentList[i].productUnitCode,
 			});
 		}
-		return equipmentList
+		return equipmentData
 	}
 
 	/**
@@ -130,15 +114,17 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 
 	//根据改动条件，获得equipment设备列表
 	$scope.getEquipment = function () {
-		http.get({
-			url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
-			+ "&endTime=" + tool.getCorrectDate(new Date)
-			+ "&searchType=1"
-			+ "&modelIdList=" + $scope.equipmentSelectTypeListZero.concat($scope.equipmentSelectTypeListOne).join(",")
-			+ "&locationFilterList=" + $scope.get_selected_location().join(","),
+		http.post({
+			url : $rootScope.restful_api.get_all_equipment,
+			data : {
+				startTime : tool.getCorrectDate(new Date),
+				endTime : tool.getCorrectDate(new Date),
+				searchType : 1,
+				modelIdList : $scope.selectEquipmentTypeZero.concat($scope.selectEquipmentTypeOne),
+				locationFilterList : $scope.get_selected_location()
+			},
 			successFn : function (res) {
-				$scope.equipmentList = res.data;
-				$scope.equipmentData.repeatData = getEquipmentList($scope.equipmentList);
+				$scope.equipmentList = getEquipmentList(res.data);
 			}
 		});
 	};
@@ -149,31 +135,32 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 		$scope.onlineConfigList = [];
 		/*因为坑爹的后台数据没法一次提供所有需要的，
 		 所以要先从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
-		 然后再去到请求获得数据里面根据设备id_type去获取对应的物料信息，将获得到的信息合并到$scope.onlineConfigList
+		 然后再去后台返回的数据里面，根据设备id_type去获取对应的物料信息，将获得到的物料信息合并到$scope.onlineConfigList
 		 */
 		//	前台加个判断，如果设备不选，默认全部全选
 		if($scope.equipmentSelectList.length === 0){
 			for(let i in $scope.equipmentList){
+				let equipment = $scope.equipmentList[i].id.split("_");
 				postData.push({
-					"equipmentId":$scope.equipmentList[i].productUnitId,
-					"produceUnitType":$scope.equipmentList[i].type
+					"equipmentId":equipment[0],
+					"produceUnitType":equipment[1]
 				})
 			}
 		}else{
 			$scope.equipmentSelectList.forEach((item) => {
-				let arr = item.split("_");
+				let equipment = item.split("_");
 				postData.push({
-					"equipmentId":arr[0],
-					"produceUnitType":item.replace(arr[0] + "_","")
+					"equipmentId":equipment[0],
+					"produceUnitType":equipment[1]
 				})
 			});
 		}
 		//从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
 		postData.forEach((selectItem) => {
-			$scope.equipmentData.repeatData.some((item) => {
+			$scope.equipmentList.some((item) => {
 				if(item.id === (selectItem.equipmentId + "_" + selectItem.produceUnitType)){
 					$scope.onlineConfigList.push({
-						equipmentName : item.dragItemText,
+						equipmentName : item.label,
 						equipmentCode : item.equipmentCode,
 						equipmentId : selectItem.equipmentId,
 						equipmentType : selectItem.produceUnitType,
@@ -194,7 +181,7 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 				res.data.forEach((resItem) => {
 					//获得渲染表格所需要的数据
 					$scope.onlineConfigList.forEach((onlineItem) => {
-						if(resItem.equipmentId + "_" + resItem.produceUnitType  === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
+						if(resItem.equipmentId + "_" + (resItem.produceUnitType === "EQUIPMENT" ? 0 : 1) === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
 							({
 								materialCode:onlineItem.materialCode,
 								materialId:onlineItem.materialId,
@@ -203,6 +190,7 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 						}
 					});
 				});
+
 				//出现table表格和按钮
 				$scope.isShowSearchConfig = true;
 			},
@@ -224,7 +212,7 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 	});
 
 	/**
-	 * desc： 物料下拉列表的联动，根据物料编码或者物料名称的选择，确定另外一个
+	 * desc： 物料下拉列表的联动，根据物料编码的选择，确定同行另外一个物料名称
 	 * @param data ： 用户选择的物料编码，所对应的对象
 	 */
 	$scope.selectMaterialName = function (data) {
@@ -268,7 +256,7 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 			url :$rootScope.restful_api.save_online_config,
 			data : postData,
 			successFn : function () {
-				$scope.info.success("保存成功");
+				layer.msg('保存成功', {time: 3000, icon: 1});
 			}
 		})
 	};
@@ -278,4 +266,7 @@ app.controller("onlineConfigController",["$rootScope","$scope","$state","tool","
 		$scope.searchOnlineConfig();
 	};
 
+	$scope.fixedTableHead = function () {
+		$(".online-content-table thead").css("transform","translateY(" + $(".online-table-box").scrollTop() + "px)")
+	}
 }]);

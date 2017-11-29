@@ -20,6 +20,7 @@
 	width: 60%;
 	height: calc(100vh - 150px);
 	min-width: 600px;
+	min-height: 500px;
 	top: 30px;
 	left: 20px;
 }
@@ -61,7 +62,7 @@
     margin-bottom: 10px;
     border-bottom: 1px solid #CCC;
 }
-.table-window .info-show .window-search-box{
+.window-search-box{
     display: inline-block;
     //width: 240px;
     height: 50px;
@@ -110,10 +111,10 @@
     text-align: center;
     background: url(../images/splitline.png) center center no-repeat;
 }
-.table-window .info-show .window-search-box>input{
+.table-window .window-search-box input{
     width: 118px;
     height: 22px;
-    padding: 3px 10px;
+    padding: 3px 20px 3px 10px;
     line-height: 25px;
     border: #DEDEDE 1px solid;
 }
@@ -169,147 +170,12 @@
     width: 100%;
     overflow: hidden;
 }
-.table-window .show-table .table-space{
-    position: absolute;
-    max-height: 100%;
-    //min-width: 100%;
-    width: 100%;
-    overflow: auto;
-}
-.table-window .show-table .cover-head{
-    position: absolute;
-    z-index: 10;
-    height: 36px;
-    line-height: 36px;
-}
-.table-window .show-table .cover-head div{
-    float: left;
-    height: 100%;
-    border: 1px solid #CCC;
-    background-color: #3E7EC3;
-    color: #FFF;
-}
-.table-window .show-table .countall{
-    height: 30px!important;
-    border: none;
-    border-left: 1px solid #ccc;
-}
-.table-window .show-table .countall{
-    div{
-        float: left;
-        height: 30px;
-        line-height: 30px;
-        color: #ff9927;
-        border: 1px solid #CCC;
-        background-color: #fff;
-    }
-    //.fixed-column{
-    //    height: 35px;
-    //}
-}
-.table-window .dialog-window-body .show-table table{
-    border-collapse:collapse;
-    width: 100%;
-    min-width: 100%;
-}
-//.table-window .dialog-window-body .show-table table thead{
-//    width: 100%;
-//    height: 36px;
-//}
-//.table-window .dialog-window-body .show-table table tbody{
-//    width: 100%;
-//}
-//.source-light{
-//    color: #d88200;
-//}
-
 .table-window .dialog-window-body .window-tr-onlook{
     background-color: #FCEFA1;
 }
-.dialog-window-body .show-table th,.dialog-window-body .show-table td{
-    border: 1px solid #CCCCCC;
-}
-.dialog-window-body .show-table th{
-    margin: 0 5px;
-    color: #1E7CD9;
-    cursor: pointer;
-}
-.dialog-window-body .show-table .sale-order-look,
-.dialog-window-body .show-table .sale-order-edit,
-.dialog-window-body .show-table .sale-order-change{
-    margin: 0 10px;
-    width: 14px;
-    height: 14px;
-    background:url("./../images/look-weitiao-list.png") no-repeat 0 -14px;
-    cursor: pointer;
-}
-.dialog-window-body .show-table .sale-order-change{
-    background-position: -14px -14px;
-}
-.dialog-window-body .show-table .sale-order-edit{
-	background-position: -28px -14px;
-}
-.dialog-window-body .show-table .sale-order-look:hover{
-    background-position: 0 0;
-}
-.dialog-window-body .show-table .sale-order-edit:hover{
-    background-position: -28px 0;
-}
-.dialog-window-body .show-table .sale-order-change:hover{
-    background-position: -14px 0;
-}
-.dialog-window-body .show-table th{
-    min-width: 40px;
-    min-height: 36px;
-    line-height: 36px;
-    table-layout: fixed;
-}
-.dialog-window-body .show-table td{
-    height: 30px;
-    line-height: 30px;
-}
-.dialog-window-body .show-table tr:nth-child(even){
-    background-color: #EDEEED;
-}
-.dialog-window-body .show-table label{
-	display: inline-block;
-    width: 14px;
-    height: 14px;
-    background: url(../images/unchecked.png);
-    cursor: pointer;
-}
-.dialog-window-body .show-table input{
-    display: none;
-}
-.dialog-window-body .show-table input:checked + label,
-.dialog-window-body .cover-head input:checked + label{
-    background:url(../images/selected.png) center #FFF;
-    border:1px solid #1E7CD9;
-}
-.fix-table-column{
-    position: absolute;
-    top:0;
-    left: 0;
-    overflow: hidden;
-    height: 100%;
-    //z-index: 10;
-    background-color: #fff;
-    table{
-        position: absolute;
-    }
-    .fix-table thead tr{
-        background-color: #3E7EC3;
-        th{
-            color: #fff;
-            font-weight: normal;
-        }
-    }
-}
-.fixed-column{
-    position: absolute;
-}
 .check-error{
 	width: 100%;
+	height: calc(100vh - 200px);
     z-index: 100;
 }
 /***多列排序弹窗***/
@@ -346,5 +212,12 @@
 		.show-table{
 			margin-top: 0;
 		}
+	}
+}
+.row-with-source{
+	color: #ee8f00;
+	
+	.aps-table-edit{
+		display: none;
 	}
 }

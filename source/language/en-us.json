@@ -18,5 +18,7 @@
   "WorkArea" : "Work area",
   "WorkUnit" : "Work unit",
   "WorkMenu" : "Work menu",
-  "onlineConfig" : "online config"
+  "onlineConfig" : "online config",
+  "adminConfig" : "admin config",
+  "defaultShowConfiguration" : "default show configuration"
 }

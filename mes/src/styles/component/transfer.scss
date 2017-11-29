@@ -1,0 +1,168 @@
+@import "../resetStyle";
+.aps-transfer-panel{
+    box-sizing: border-box;
+    position: relative;
+    display: inline-block;
+    width: 220px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.12), 0 0 6px rgba(0,0,0,.04);
+    vertical-align: middle;
+    border: 1px solid $borderColor;
+}
+.aps-transfer-panel-header{
+    padding-left: 20px;
+    height: 36px;
+    line-height: 36px;
+    color: #1f2d3d;
+    background: #f0f0f0;
+    border-bottom: 1px solid $borderColor;
+    box-sizing: border-box;
+    .aps-arrow{
+        float: right;
+        margin: 5px 5px 0 0;
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        border: 1px solid $borderColor;
+        i{
+            vertical-align: 6px;
+        }
+    }
+}
+.aps-transfer-panel-box{
+    height: 246px;
+    label{
+        display: block;
+        height: 32px;
+        line-height: 32px;
+        padding-left: 20px;
+        width: calc(100% - 52px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        span{
+          vertical-align: -3px;
+      }
+    }
+    .aps-transfer-panel-body{
+        padding: 6px 0;
+        list-style: none;
+        height: 246px;
+        overflow: auto;
+        box-sizing: border-box;
+        li{
+            cursor: pointer;
+            &:hover{
+                background: #e4e8f1;
+            }
+            &.is-disabled{
+                cursor: not-allowed;
+                color: #bbb;
+                label{
+                    cursor: not-allowed;
+                    pointer-events: none;
+                }
+                .checkBox-inner{
+                  background-color: #eef1f6;
+                  border-color: #d1dbe5;
+                }
+            }
+        }
+    }
+    &.is-filterable .aps-transfer-panel-body{
+        height: 214px;
+    }
+    .item-order{
+        display: inline-block;
+        position: absolute;
+        right: 20px;
+        top: 25%;
+        width: 16px;
+        height: 16px;
+        background:url($gImgBase + "toggleBtn.png") no-repeat 0 0;
+        background-size: 32px;
+        z-index: 101;
+        cursor: pointer;
+    }
+    .aps-transfer-panel-empty{
+        margin: 0;
+        height: 32px;
+        line-height: 32px;
+        padding: 6px 20px 0;
+        color: #8391a5;
+    }
+}
+.select-item .item-order{
+    background-position: -16px 0;
+    &.desc {
+        background-position: -16px -16px;
+    }
+}
+.aps-transfer-panel-footer{
+    box-sizing: border-box;
+    padding-left: 20px;
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    background: #fff;
+    border-top: 1px solid $borderColor;
+}
+.aps-transfer-buttons{
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 10px;
+}
+.aps-button{
+    box-sizing: border-box;
+    display: block;
+    margin: 0 auto;
+    padding: 7px 11px;
+    line-height: 1;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #c4c4c4;
+    border-radius: 4px;
+    -webkit-appearance: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    &.aps-button-primary{
+        color: #fff;
+        background-color: $themeColor;
+        border-color: $themeColor;
+    }
+    &.is-disabled,.aps-button-disabled{
+      color: #bfcbd9;
+      cursor: not-allowed;
+      background-color: #eef1f6;
+      border-color: #d1dbe5;
+    }
+}
+.aps-transfer-buttons .aps-button:first-child {
+    margin-bottom: 6px;
+}
+.aps-transfer-input{
+    position: relative;
+    margin-top: 10px;
+    text-align: center;
+    padding: 0 10px;
+    width: 100%;
+    box-sizing: border-box;
+    .el-input__icon{
+        right: 10px;
+    }
+    .aps-input{
+        width: 100%;
+        padding-right: 35px;
+        height: 22px;
+    }
+}
+.aps-input{
+    box-sizing: border-box;
+    height: 36px;
+    padding: 3px 10px;
+    color: #333;
+    line-height: 1;
+    border: 1px solid $borderColor;
+    border-radius: 4px;
+}

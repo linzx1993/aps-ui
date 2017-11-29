@@ -16,7 +16,7 @@
     <div class="header">
     </div>
     <!--二级页面-->
-    <div class="table-dialog-window table-window" style="opacity:0">
+    <div class="table-dialog-window table-window">
         <div class="dialog-window-body">
             <div class="info-show">
                 <div class="window-search-box">
@@ -27,15 +27,31 @@
                     <span>结束时间：</span>
                     <input id="windowEndTime" class="Wdate jEndTime" type="text" onClick="WdatePicker({isShowClear:false,minDate:'#F{$dp.$D(\'windowStartTime\')}'})" readonly>
                 </div>
-             	<cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="getEquipment()"></cascader>
-                <search-drop-down-list-with-id search-data="equipment_type_list_type_zero" class="equipment_type_list"></search-drop-down-list-with-id>
-                <search-drop-down-list-with-id search-data="equipment_type_list_type_one" class="equipment_type_list"></search-drop-down-list-with-id>
+             	<cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="clearEquipmentAndEquipmentType()"></cascader>
+                <div class="window-search-box">
+                    <span>设备类型：</span>
+                    <aps-select class="window-search-box jEquipmentType" style="{'width' : '118px'}"
+                                ng-model="selectEquipmentTypeList" multiple="true" filterable="true" on-change="getEquipment()"
+                    >
+                        <aps-option ng-repeat="data in equipmentTypeList" value={{data.id}} label={{data.modelName}} title={{data.modelName}}></aps-option>
+                    </aps-select>
+                </div>
                 <div class="window-search-box">
                     <span>设备名称：</span>
-                    <!--<input type="text">-->
-                    <input type="text" readonly="readonly" class="equipment-input" ng-click="equipment_list($event)">
+                    <aps-select class="window-search-box jPunitName" style="{'width' : '118px'}"
+                                ng-model="equipment_check_list" multiple="true" filterable="true" on-change="equipment_list()"
+                    >
+                        <aps-option ng-repeat="data in equipmentList" value={{data.id}} label={{data.productUnitName}}></aps-option>
+                    </aps-select>
                 </div>
-                <search-drop-down-list-with-id search-data="change_type"></search-drop-down-list-with-id>
+                <div class="window-search-box jChangeType">
+                    <span>换装类型：</span>
+                    <aps-select class="window-search-box jPunitName" style="{'width' : '118px'}"
+                                ng-model="retoolType" multiple="true"
+                    >
+                        <aps-option ng-repeat="data in changeTypeList" value={{data.id}} label={{data.text}}></aps-option>
+                    </aps-select>
+                </div>
                 <div class="window-search-box">
                     <span>物&#12288;&#12288;料：</span>
                     <input type="text" class="jMaterialName">
@@ -47,28 +63,7 @@
                 <div class="window-search-button" ng-click="change_window_table()">查询</div>
             </div>
             <div class="show-table">
-                <div class="table-space">
-                    <table ng-style="{width : (headDataView.length * 100) + 'px'}">
-                        <thead>
-                        <tr>
-                            <!--<th style="min-width: 44px;">序 号</th>-->
-                            <th ng-repeat="title in headDataView track by $index" on-finish-render>{{title}}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="tableRow in tableDataView" source={{tableRow[0].source}} on-finish-render>
-                            <!--<td>{{$index+1}}</td>-->
-                            <!--<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>-->
-                            <!--<td><span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)">查看</span></td>-->
-                            <td ng-repeat="tableCell in tableRow track by $index" rowspan={{tableCell.rowspan}}>{{tableCell.showText}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="cover-head">
-                    <!--<div>序 号</div>-->
-                    <div ng-repeat="title in headDataView track by $index">{{title}}</div>
-                </div>
+               	<aps-merge-table head-data="headDataView" body-data="tableDataView" text-name="showText"></aps-merge-table>
             </div>
         </div>
     </div>
@@ -82,6 +77,7 @@
 <script src="../scripts/lib/angular-translate.js"></script>
 <script src="../scripts/lib/angular-translate-loader-static-files.min.js"></script>
 <script src="../scripts/lib/layer/layer.js"></script>
+<script src="../scripts/lib/ngTouch.js"></script>
 <!-- 加载入口 -->
 <script src="../scripts/app.js"></script>
 <script src="../scripts/config/app.js"></script>
@@ -118,20 +114,11 @@
 			//获取排程前后所选的车间Id
 			locationId;
 		
-		$scope.change_type = {
-			repeatData:[
-				{
-					showName: "换装",
-					id: 1
-				},
-				{
-					showName: "保养换装",
-					id: 2
-				}
-			],
-			showText: "换装类型",
-			className: "jChangeType"
-		};
+		$scope.changeTypeList = [
+			{text: "换装", id: 1},
+			{text: "保养换装", id: 2}
+		]
+        $scope.retoolType = [];
 		
 		//根据不同来源，定义不同的接口
         if(htmlSource === "preview"){
@@ -162,11 +149,8 @@
 		 **/
 //		$scope.filterSame = true;
 		$scope.getChangeData = function(postData){
-			//查询换模类型、是否隐藏相同
-			let changeType = $(".jChangeType .search-input").attr("check_id");
-				
 			postData.filterSame = $scope.filterSame ? 1 : 0;
-			postData.retoolType = changeType ? changeType.split(",") : [1,2];
+			postData.retoolType = $scope.retoolType.length === 0 ? [1,2] : $scope.retoolType;
 			http.post({
 				url: sourceUrl,
 				data: postData,
@@ -189,26 +173,6 @@
                         layer.msg('未查询出结果', {time: 3500,icon: 2});
                         windowSearch = false;
                     }
-					//渲染完成，显示页面,重置表头宽度
-//					if(windowTableData.rowInfo.length === 0){
-//						tool.setTableHeadWidth($(".table-dialog-window"));
-//						$(".table-dialog-window").css("opacity",1);
-//						return;
-//					}
-					$scope.$on("ngRepeatFinished",function(){
-						tool.setTableHeadWidth($(".table-dialog-window"));
-						$(".table-dialog-window").css("opacity",1);
-						
-						$(".table-space").on("scroll", function () {
-							let coverHead = $(".cover-head");
-							let scrollLeft = $(this).scrollLeft();
-							let scrollTop = $(this).scrollTop();
-							coverHead.css("left", -scrollLeft);
-							//根据滚动条绝对定位固定列的位置
-							coverHead.children().eq(0).css("left",scrollLeft);
-							coverHead.children().eq(1).css("left",scrollLeft + coverHead.children().eq(0).width());
-						});
-					})
 				},
 				errorFn: function(response){
                     layer.alert('获取数据失败，请联系技术人员处理', {
@@ -217,108 +181,74 @@
                 }
 			})
 		}
-		
+
 		/**
-		 *desc:构造设备类型下拉框，两种
-		 *time:2017-06-01
-		 *author:dww
-		 *@param: equipmentTypeList:从后台查询的所有设备类型
-		 *@return:
-		 **/
-		$scope.creatEquipmentTypeList = function(equipmentTypeList){
-			let equipment_type_list_type_zero = [],//0是离散型，1是产线性
-				equipment_type_list_type_one = [];
-			//对设备类型进行分类
-			for(let i = 0, l = equipmentTypeList.length ; i < l ; i++){
-				let thisEquipmentType = equipmentTypeList[i],
-					thisData = {
-						showName: thisEquipmentType.modelName,
-						id: thisEquipmentType.modelId
-					};
-				
-				if(thisEquipmentType.modelType === 1){
-					equipment_type_list_type_one.push(thisData);
-				}else if(thisEquipmentType.modelType === 0){
-					equipment_type_list_type_zero.push(thisData);
-				}
-			}
-			//渲染到页面
-			$scope.equipment_type_list_type_one = {
-				repeatData: equipment_type_list_type_one,
-				showText: "生产单元",
-				className: "equipment_type_list_one"
-			};
-			$scope.equipment_type_list_type_zero = {
-				repeatData: equipment_type_list_type_zero,
-				showText: "离散设备",
-				className: "equipment_type_list_zero"
-			}
-		};
-		
-		/**
-		 *desc:查询设备信息
+		 *desc:获取所有的设备类型
 		 *time:2017-06-01
 		 *author:dww
 		 *@param:从后台查询的所有设备类型
 		 *@return:
 		 **/
-		$scope.getEquipment = function(thisEquipmentId){
-			//获取选中的设备类型
-			let typeListOne = $(".equipment_type_list_one .search-input").attr("check_id") || "",
-				typeListZero = $(".equipment_type_list_zero .search-input").attr("check_id") || "",
-				modelIdList;
-			
-			//设备类型
-			if(typeListOne && typeListZero){
-				modelIdList = typeListOne + "," + typeListZero;
-			}else{
-				modelIdList = typeListOne + typeListZero;
-			}
-			
-			//地点
-			let selectedLocationId = $scope.get_selected_location ? $scope.get_selected_location().join(",") : "";
-			
-			//查询设备
+		$scope.getEquipmentType = function(equipmentTypeList){
 			http.get({
-				url: $rootScope.restful_api.get_all_equipment + "?startTime=" + thisStartTime
-														 + "&endTime=" + thisEndTime 
-														 + "&searchType=" + (htmlSource === "preview" ? 0 : 1) 
-														 + "&modelIdList=" + modelIdList
-														 + "&locationFilterList=" + selectedLocationId,
+				url: $rootScope.restful_api.get_equipment_type,
 				successFn: function(res){
-					let equipmentData = res.data;
-					let thisIdTyList = [];
-					//设备下拉框
-					goEquipment = $.extend({},equipmentData);
-					//遍历除当前选中的设备名
-					thisEquipmentName = [];
-					//传入默认选项则使用默认选项，否则即为全选
-					if(thisEquipmentId){
-						thisEquipmentId.forEach(function(item){
-							let thisIdType = item.equipmentId + "_" + item.equipmentType;
-							goEquipment[thisIdType] ? thisEquipmentName.push(goEquipment[thisIdType].productUnitName) : "";
-							thisIdTyList.push(thisIdType);
+					let equipmentTypeList = res.data;
+					equipmentTypeList.forEach((item) => {
+						item.id = item.modelId + "_" + item.modelType
+					});
+					$scope.equipmentTypeList = equipmentTypeList
+				}
+			});
+		};
+
+		/**
+		 *desc:获取所有的设备
+		 *time:2017-06-01
+		 *author:dww
+		 *@param:从后台查询的所有设备
+		 *@return:
+		 **/
+		$scope.getEquipment = function(thisEquipmentId){
+			//地点
+			let selectedLocationId = $scope.get_selected_location ? $scope.get_selected_location() : [];
+
+			//查询设备
+			http.post({
+				url: $rootScope.restful_api.get_all_equipment,
+				data : {
+					startTime : thisStartTime,
+					endTime : thisEndTime,
+					searchType : (htmlSource === "preview" ? 0 : 1),
+					modelIdList : $scope.selectEquipmentTypeList,
+					locationFilterList : selectedLocationId
+				},
+				successFn: function(res){
+					goEquipment = res.data;
+					$scope.equipmentList = [];
+					$scope.equipment_check_list = [];   //每次更新数据之前，清空之前所选的设备
+
+					for(let i in goEquipment){
+						$scope.equipmentList.push({
+							productUnitName: goEquipment[i].productUnitName,
+							id: goEquipment[i].productUnitId + "_" + (goEquipment[i].type === "EQUIPMENT" ? 0 : 1),
+                            type : goEquipment[i].type === "EQUIPMENT" ? 0 : 1
 						})
-					}else{
-						for(let i in goEquipment){
-							thisEquipmentName.push(goEquipment[i].productUnitName);
-							thisIdTyList.push(i);
-						}
 					}
-					
-					
-					//已选设备添加到页面
-					$(".equipment-input").attr("idtype",thisIdTyList.join(","));
-					
+
 					//刷新查询参数
 					let windowSearchBox = $(".info-show").find(".window-search-box");
 					windowSearchBox.eq(0).find("input").val(thisStartTime);
 					windowSearchBox.eq(1).find("input").val(thisEndTime);
-					windowSearchBox.eq(2).find("input")
-						.val(thisEquipmentName.join())
-						.attr("title",thisEquipmentName.join());
 				}
 			});
+
+		};
+
+		//修改地点时，清楚设备类型和设备
+		$scope.clearEquipmentAndEquipmentType = function () {
+			$scope.selectEquipmentTypeList = [];
+			$scope.getEquipment();
 		};
 		
 		/**
@@ -369,22 +299,49 @@
 					
 				}
 			});
-			
-			//构造设备类型下拉框
-			http.get({
-				url: $rootScope.restful_api.get_equipment_type,
-				successFn: function(res){
-					$scope.creatEquipmentTypeList(res.data);
-				}
-			});
-			
-			//构造设备下拉框
-			$timeout(function(){
-				$scope.getEquipment(thisEquipmentId);
-			},500);
+
+			$scope.getEquipmentType();
 			
 			//根据传入数据查询一次数据
 			$scope.getChangeData(body_data);
+
+			//构造设备下拉框
+			let selectedLocationId = $scope.get_selected_location ? $scope.get_selected_location() : [];
+
+			//查询设备
+			http.post({
+				url: $rootScope.restful_api.get_all_equipment,
+				data : {
+					startTime : thisStartTime,
+					endTime : thisEndTime,
+					searchType : (htmlSource === "preview" ? 0 : 1),
+					modelIdList : $scope.selectEquipmentTypeList,
+					locationFilterList : selectedLocationId
+				},
+				successFn: function(res){
+					goEquipment = res.data;
+					$scope.equipmentList = [];
+
+					for(let i in goEquipment){
+						$scope.equipmentList.push({
+							productUnitName: goEquipment[i].productUnitName,
+							id: goEquipment[i].productUnitId + "_" + (goEquipment[i].type === "EQUIPMENT" ? 0 : 1),
+							type : goEquipment[i].type === "EQUIPMENT" ? 0 : 1
+						})
+					}
+
+					//刷新查询参数
+					let windowSearchBox = $(".info-show").find(".window-search-box");
+					windowSearchBox.eq(0).find("input").val(thisStartTime);
+					windowSearchBox.eq(1).find("input").val(thisEndTime);
+
+					$scope.equipment_check_list = [];
+					body_data.equipments.forEach(item => {
+						$scope.equipment_check_list.push(item.equipmentId + "_" + item.equipmentType);
+					})
+					console.log($scope.equipment_check_list);
+				}
+			});
 		})();
 		
         //输入检测
@@ -415,22 +372,29 @@
 			let thisStartTime = tool.getFromInput_nocode(".jStartTime"),
                 thisEndTime = tool.getFromInput_nocode(".jEndTime"),
                 materialName = tool.getFromInput(".jMaterialName"),
-                aEquipment = [];
-            //已选设备,没有就取全下拉框设备
-			let checkEqupment = $(".equipment-input").attr("idtype") ? $(".equipment-input").attr("idtype").split(",") : ($(".equipment-input").attr("allIdType") ? $(".equipment-input").attr("allIdType").split(",") : []);
-			
-			for(let i = 0 , l = checkEqupment.length ; i < l ; i++){
-				if(checkEqupment[i]){
-					let thisIdType = checkEqupment[i].split("_");
-					aEquipment.push({
-						equipmentId: thisIdType[0],
-						equipmentType: thisIdType[1]
-					})
+				aEquipmentId = [];
+
+			//设备
+			if($scope.equipment_check_list.length){
+				for(let i = 0, l = $scope.equipment_check_list.length; i < l; i++){
+					let equipment = $scope.equipment_check_list[i].split("_")
+					aEquipmentId.push({
+						equipmentId: equipment[0],
+						equipmentType: equipment[1]
+                    });
+				}
+			}else{
+				for(let i = 0, l = $scope.equipmentList.length; i < l; i++){
+					let equipment = $scope.equipmentList[i].id.split("_")
+					aEquipmentId.push({
+						equipmentId: equipment[0],
+						equipmentType: equipment[1]
+                    });
 				}
 			}
 			
             //输入检测
-            if(!checkSearchData(thisStartTime,thisEndTime,aEquipment)){
+            if(!checkSearchData(thisStartTime,thisEndTime,aEquipmentId)){
                 return;
             }else{
                 windowSearch = true;
@@ -441,7 +405,7 @@
 				startTime: thisStartTime,
 				endTime: thisEndTime,
 				materialName: materialName,
-				equipments: aEquipment
+				equipments: aEquipmentId
 			};
 			//如果是微调页
 			if(htmlSource === "result"){
@@ -449,24 +413,6 @@
 			}
 			//查询数据，渲染页面
 			$scope.getChangeData(searchData);
-        };
-		
-		$(window).on("resize",function(){
-			tool.setTableHeadWidth($(".table-dialog-window"));
-		});
-       
-        //二级页面设备下拉框
-        $scope.equipment_list = function($event){
-            if($(".equipment-list").length > 0){
-                $(".equipment-list").remove();
-                $(".table-dialog-window .equipment-input").css("border","1px solid #DEDEDE");
-            }else{
-				$timeout(function(){
-					tool.dialogWindowEquipmentInterim(goEquipment,$event,false);
-                	$(".table-dialog-window .equipment-input").css("border","1px solid #1E7CD9");
-				},200);
-                
-            }
         };
 		
 		//设备类型与班次联动

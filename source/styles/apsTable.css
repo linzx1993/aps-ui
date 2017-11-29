@@ -1,0 +1,77 @@
+@charset "UTF-8";
+/*常用颜色*/
+/*主题色*/
+/*表格灰框颜色*/
+/*下拉列表hover灰色*/
+/*标题栏背景灰色*/
+.c-theme-color {
+  color: #1E7CD9; }
+
+thead.table-head {
+  color: #fff;
+  background-color: #1E7CD9; }
+
+.aps-table {
+  width: 100%;
+  max-height: 100%;
+  background-color: #fff;
+  overflow: auto; }
+  .aps-table table {
+    width: 100%;
+    text-align: center;
+    border-collapse: inherit; }
+    .aps-table table thead {
+      height: 36px;
+      line-height: 36px; }
+      .aps-table table thead th {
+        padding: 0 4px;
+        border: 1px solid #ccc;
+        background-color: #1E7CD9;
+        white-space: nowrap;
+        color: #fff; }
+    .aps-table table tbody tr {
+      height: 30px;
+      line-height: 30px; }
+      .aps-table table tbody tr td {
+        padding: 0 4px;
+        border: 1px solid #ccc;
+        border-left: 0;
+        border-top: 0;
+        background-color: #fff;
+        white-space: nowrap; }
+        .aps-table table tbody tr td:first-child {
+          border-left: 1px solid #ccc; }
+      .aps-table table tbody tr:nth-child(even) td {
+        background-color: #EDEEED; }
+      .aps-table table tbody tr:nth-child(even) .bgc-white {
+        background-color: #fff; }
+      .aps-table table tbody tr .operation i {
+        margin: 0 10px;
+        width: 14px;
+        height: 14px;
+        background: url(../images/look-weitiao-list.png) no-repeat 0 -14px;
+        cursor: pointer; }
+        .aps-table table tbody tr .operation i:hover {
+          background-position-y: 0; }
+      .aps-table table tbody tr .operation .aps-table-edit {
+        background-position-x: -28px; }
+      .aps-table table tbody tr .operation .aps-table-change {
+        background-position-x: -14px; }
+      .aps-table table tbody tr .bgc-white {
+        background-color: #fff; }
+    .aps-table table tbody .count-tr td {
+      border-top: 1px solid #ccc; }
+    .aps-table table .aps-table-selection {
+      width: 50px; }
+      .aps-table table .aps-table-selection label {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: url(../images/select-state.png) #fff left center no-repeat;
+        background-position: -24px 0; }
+        .aps-table table .aps-table-selection label input {
+          display: none; }
+      .aps-table table .aps-table-selection .aps-table-selected {
+        background-position: 0 0; }
+
+/*# sourceMappingURL=apsTable.css.map */

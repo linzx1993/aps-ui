@@ -1,0 +1,44 @@
+.aps-scroll-box{
+    position: relative;
+    overflow: hidden;
+    &:hover .aps-scroll-bar{
+            opacity: 1;
+        }
+
+}
+.aps-scroll-wrap{
+    //margin-right: -17px;
+    //margin-bottom: -17px;
+    overflow: auto;
+    max-height: 274px;
+}
+.aps-scroll-bar{
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    z-index: 1;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .12s ease-out;
+    &.is-horizontal{
+        height: 6px;
+        left: 2px;
+    }
+    &.is-vertical{
+        width: 6px;
+        top: 2px;
+    }
+}
+.aps-scrollbar-thumb{
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    border-radius: inherit;
+    background-color: rgba(151,168,190,.3);
+    transition: background-color .3s;
+    &:hover{
+        background-color: rgba(151,168,190,.5);
+    }
+}

@@ -1,0 +1,163 @@
+@import '../resetStyle.scss';
+$borderColor : #dedede;
+
+.plan-content-box {
+    flex: auto;
+    .plan-content{
+        height: calc(100% - 100px);
+        border-bottom: 1px solid $borderColor;
+    }
+    .save-box{
+        padding-top: 30px;
+        border-top: 1px solid $borderColor;
+    }
+}
+
+.config-box .middle-workshop {
+    flex: 0 0 325px;
+    height: 100%;
+    border-right: 1px solid $borderColor;
+    h6 span {
+        color: #808080;
+        font-size: 12px;
+    }
+    nav a {
+        position: relative;
+        padding-left: 5px;
+        width: 108px;
+        height: 30px;
+        line-height: 28px;
+        color: #333;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        border: 2px solid #d9d9d9;
+        background-color: #d9d9d9;
+        vertical-align: middle;
+        box-sizing: border-box;
+    }
+    nav {
+        height: calc(100% - 120px);
+        overflow: auto;
+        .select-rule {
+            width: 140px;
+            padding-right: 10px;
+        }
+        .select-rule:after {
+            content: "";
+            position: absolute;
+            right: 5px;
+            top: 6px;
+            width: 7px;
+            height: 7px;
+            border-right: 1px solid #999;
+            border-bottom: 1px solid #999;
+            @include rotate(45deg);
+        }
+    }
+    li > a .delete {
+        position: absolute;
+        top: -10px;
+        right: -7px;
+        width: 14px;
+        height: 14px;
+        background: url("../images/garbage.png") no-repeat;
+        z-index: 10;
+    }
+    .drag-rule-name{
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+.workshop-ruleNav {
+    position: relative;
+    display: inline-block;
+    ul {
+        position: absolute;
+        top: 30px;
+        right: 0;
+        width: 140px;
+        max-height: 0;
+        line-height: 30px;
+        text-align: center;
+        overflow: hidden;
+        overflow-y: auto;
+        transition: max-height .5s;
+        z-index: 10;
+    }
+    &.active ul {
+        max-height: 140px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        @include transition(max-height, .5s);
+    }
+    li {
+        position: relative;
+        padding-left: 5px;
+        height: 30px;
+        line-height: 30px;
+        text-align: left;
+        color: #333;
+        background-color: #fff;
+        cursor: pointer;
+        &:hover {
+            background-color: $themeColor;
+            color: #fff;
+            .viewRule {
+                display: block;
+                color: #fff;
+            }
+        }
+    }
+    .viewRule {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        color: $themeColor;
+        background-color: #1b6fc3;
+        &:before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 14px;
+            height: 14px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+        }
+        &:after {
+            content: "...";
+            color: #fff;
+            position: absolute;
+            top: -5px;
+            right: 9px;
+        }
+    }
+}
+
+.plan-content-box .rightLocation{
+    position: static;
+    flex: auto;
+    height: 100%;
+    h6 {
+        height: 54px;
+        line-height: 54px;
+        text-align: left;
+        margin-left: 40px;
+    }
+    .location-list{
+        height: calc(100% - 60px);
+        overflow: auto;
+    }
+    i.disabled{
+        background: #eee;
+        border: 1px solid #ccc;
+        pointer-events: none;
+    }
+}

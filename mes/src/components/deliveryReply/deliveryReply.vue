@@ -1,6 +1,6 @@
 <template>
 	<div class="right-content-box deliveryReply">
-		<div class="query-area">
+    <aps-query-condition-box>
 			<!--选方案-->
 			<div class="schedule-list">
 				<a
@@ -139,8 +139,7 @@
 					查看
 				</a>
 			</div>
-		</div>
-		<hr>
+    </aps-query-condition-box>
 		<div class="delivery-reply-main">
 			<!--选择显示的方案-->
 			<div class="tab-list">
@@ -152,7 +151,7 @@
 					v-for='item in showSchemeList'
 					@click='searchScheme(item)'>
 					{{item.schemeName}}
-					<i 
+					<i
 						title="删除方案"
 						@click.stop='deleteScheme(item)'></i>
 				</span>
@@ -162,17 +161,20 @@
 				:headerData='headerData'
 				:bodyData='bodyData'
 				:allNumber='allNumber'
-				:operation=false
+				:printTitle='printTitle'
+				excel
+				print
+				page
 				v-show="headerData.length"
 				@detailsRowInfo='detailsRowInfo'
 				@pageChange='pageChange'>
+				<i
+					class='col-config-icon'
+					title='列信息配置'
+					v-show='showSchemeList.length'
+					@click='colConfig'>
+				</i>
 			</aps-table>
-			<i
-				class='col-config-icon'
-				title='列信息配置'
-				v-show='showSchemeList.length'
-				@click='colConfig'>
-			</i>
 			<div class="col-config-dialog">
 				<col-config
 					:configUrl='allUrl.colConfigUrl'
@@ -184,18 +186,13 @@
 </template>
 
 <script>
-import locationCascader from "../common/locationCascader.vue"	
 import Emitter from 'element-ui/src/mixins/emitter';
 
 export default{
 	mixins: [Emitter],
-	
+
 	name: 'deliveryReply',
-	
-	components: {
-	  	"location-cascader": locationCascader
-  	},
-	
+
 	data(){
 		return{
 			showSchemeList: [],
@@ -204,10 +201,11 @@ export default{
 			allSchemeList: [],
 			selectedScheme: '',
 			dialogVisible: false,
-			
+
 			date: {
-				startTime: +new Date(),	
-				endTime: +new Date() + 86400000
+				startTime: +new Date(),
+				endTime: +new Date() + 86400000,
+        quickSelect : ['currentWeek','nextWeek','currentMonth','nextMonth'],
 			},
 			selectLocationList: [], //级联下拉地点选中数据
 			customerList: [],  //客户名称下拉框
@@ -283,7 +281,7 @@ export default{
 			}
 		}
 	},
-	
+
 	computed: {
 		planCodeBody() {
 			return {
@@ -338,9 +336,16 @@ export default{
 				}
 			};
 			return url;
+		},
+		printTitle() {
+			const scheme = this.showSchemeList.filter(item =>{
+					return item.schemeId === this.selectedScheme;
+				});
+
+			return scheme.length ? scheme[0].schemeName + '方案交期答复' : '无';
 		}
 	},
-	
+
 	methods: {
 		//查询生产模式
 		getPlayType(){
@@ -417,7 +422,7 @@ export default{
 				return item.schemeId !== data.schemeId;
 			});
 			this.getSchemeIdList();
-			
+
 			if(data.schemeId == this.selectedScheme){
 				this.selectedScheme = '';
 				if(this.showSchemeList.length){
@@ -460,7 +465,7 @@ export default{
 				  resBodyData = resData.dataList,
 				  headData = [],
 				  bodyData = [];
-			
+
 			//表格数据
 			for(let i = 0, l = resBodyData.length; i < l; i++){
 				const row = [],
@@ -470,7 +475,7 @@ export default{
 				}
 				bodyData.push(row);
 			}
-			
+
 			this.headerData = resCnHeadData;
 			this.bodyData = bodyData;
 		},
@@ -481,7 +486,7 @@ export default{
 				this.materialNameList = [];
 				return;
 			}
-			
+
 			const _this = this;
 			this.$http.get(
 				this.url.get_material_name + '?materialName=' + query
@@ -496,7 +501,7 @@ export default{
 				this.materialCodeList = [];
 				return;
 			}
-			
+
 			const _this = this;
 			this.$http.get(
 				this.url.get_material_code + '?materialCode=' + query
@@ -509,6 +514,7 @@ export default{
 			if(!this.planCodeBody.searchType || this.planCodeBody.searchType.length === 0 || typeof(this.planCodeBody.startTime) === 'number' || typeof(this.planCodeBody.endTime) === 'number'){
 				return;
 			}
+			this.planCodeValue = [];
 			const _this = this;
 			this.$http.post(
 				this.url.get_plan_code,
@@ -554,20 +560,20 @@ export default{
 			this.broadcast('colConfig', 'openColConfig');
 		}
 	},
-	
+
 	created(){
 		//构造客户下拉框
 		this.getAllCustomer();
-		
+
 //		this.$on('colChange',this.searchTable);
 	},
 	mounted(){
 //		this.startTime = +new Date(); //选择开始时间
 //		this.endTime = +new Date() + 86400000; //选择结束时间
-		
+
 		//获取计划调度模式
 		this.getPlayType();
-		
+
 		//获取所有方案
 		this.getAllScheme();
 	}
@@ -579,66 +585,18 @@ export default{
 	.deliveryReply{
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 148px);
-		
-		.info-noSchedule{
-			margin-right: 5px;
-			text-decoration: underline;
-			&:hover{
-				color: $themeColor;
-			}
-			//border-bottom: 1px solid $borderColor;
-		}
-		.schedule-list{
-			display: flex;
-			align-items: center;
-		}
-		.schedule-name{
-			padding: 0 8px;
-			height: 26px;
-			line-height: 26px;
-			text-align: center;
-			color: $themeColor;
-			max-width: 180px;
-			text-overflow: ellipsis;
-			overflow: hidden;
-			white-space: nowrap;
-			vertical-align: middle;
-			border: 2px solid $themeColor;
-		}
-		.schedule-list ul{
-			display: flex;
-			li{
-				position: relative;
-				margin-right: 10px;
-				.delete-scheme{
-					display: none;
-					position: absolute;
-					right: -7px;
-					top: -7px;
-					width: 14px;
-					height: 14px;
-					background: url("../../assets/delete.png") no-repeat;
-					background-size: 14px;
-					cursor: pointer;
-				}
-				&:hover{
-					.delete-scheme{display: block}
-				}
-			}
-		}
-		
+
 		.delivery-reply-main{
 			flex: 1 1;
 			display: flex;
 			flex-direction: column;
 			position: relative;
-			width: calc(100vw - 260px);
-			
+
 			.tab-list{
 				flex: 0 0 30px;
 				height: 30px;/*不知道为什么，span加了overflow: hidden;以后，这里的高度变成了37，加30的高度强制定高*/
-				
+				position: absolute;
+
 				span{
 					box-sizing: border-box;
 					position: relative;
@@ -654,14 +612,14 @@ export default{
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
-					
+
 					i{
 						position: absolute;
 						right: 6px;
 						top: 11px;
 						width: 8px;
 						height: 8px;
-						background: url(../../assets/cancel.png) center center;
+						background: url(../../asserts/cancel.png) center center;
 					}
 				}
 				.tab-list-selected{
@@ -673,7 +631,7 @@ export default{
 				}
 			}
 		}
-		
+
 		//查询条件筛选
 		.query-conditions-list{
 			display: flex;
@@ -684,14 +642,12 @@ export default{
 				margin-right: 30px;
 			}
 		}
-		
+
 		.col-config-icon{
-			width: 14px;
-			height: 14px;
-			position: absolute;
-			top: -17px;
-			right: 0;
-			background: url(../../assets/config.png) center center;
+			width: 20px;
+			height: 20px;
+			margin-left: 5px;
+			background: url(../../asserts/config.png) center center;
 			background-size: 100% 100%;
 			cursor: pointer;
 		}

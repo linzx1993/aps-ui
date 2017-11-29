@@ -9,7 +9,7 @@
 		{{userName||"用户"}}</span>
 </div>
 <div class="relative m-0-auto mt-50 config-box">
-    <nav class="config-nav fl">
+    <nav class="config-nav">
         <h1 class="configNavTitle">{{"configOption" | translate}}</h1>
             <ul>
                 <li class="configLi relative textover" ng-repeat="configLi in configLis track by $index" ng-class="isActiveNav(configLi.sref) ? 'active' : ''"  ng-click=selectLi(configLi.sref,$event)>
@@ -24,7 +24,4 @@
             </ul>
     </nav>
     <div class="config-content" ui-view></div>
-        <div class="info-box" ng-class="{'active':infoObj.mask,'error':infoObj.errorInfo}">
-            <p class="tc"><span class="mr-15"></span>{{infoObj.text}}</p>
-        </div>
 </div>

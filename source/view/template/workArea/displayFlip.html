@@ -1,17 +1,16 @@
-<div class="config-main" ng-controller="displayFlipController">
-    <div class="mt-20 ml-55 relative">
-        <dl class="clearfix">
-            <dt class="fl">翻转设置(当前地点：{{currentShowLocationName}})</dt>
-            <br/>
-            <dd class="ml-5">
-                <label for="flip{{$index}}" class="mr-15 mt-10 display-combine-line" ng-repeat="data in firstPage.flipList">
-                    <input id="flip{{$index}}" type="radio" name="flip"  value={{data.valueContent}} ng-checked="selectValue === data.valueContent" ng-model="$parent.selectValue"/><span class="input-radio mr-5"></span>{{data.valueAlias}}
-                </label>
-            </dd>
-        </dl>
+<div ng-controller="displayFlipController">
+    <div class="mt-20 ml-55 relative display-combine">
+        <p>翻转设置(当前地点：{{currentShowLocationName}})</p>
+        <aps-radio class="mt-10"
+                   ng-repeat="data in firstPage.flipList"
+                   ng-model="$parent.selectValue"
+                   name="'flip'"
+                   value="data.valueContent">
+            {{data.valueAlias}}
+        </aps-radio>
     </div>
     <!--<config-folder-tree></config-folder-tree>-->
-    <div class="m-0-auto mt-30 mb-20 tc clearfix" style="margin-right: 300px;">
+    <div class="m-0-auto mt-30 mb-20 tc clearfix">
         <a class="mr-15 save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveDisplayFlip()>应用</a>
         <!--<a class="ml-15 reset-config" href="javascript:void(0);" ng-click=resetDisplayDays()>还原</a>-->
     </div>

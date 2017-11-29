@@ -1,144 +1,259 @@
-<div class="config-main checkContent">
+<div class="check-content checkContent">
     <h1 class="config-content-title">{{"ScheduleRuleSetting" | translate}}</h1>
     <p ng-if="!ruleList.length" class="mt-20 ml-50 c-999" ng-show="!ruleList.length">暂无规则，请点击<a href="javascript:;" class="c-theme-color bold" ng-click="openRuleWindow()">添加规则</a></p>
-    <div ng-show="ruleList.length" class="checkItem clearfix">
-        <div class="fl left-plan">
-            <p class="left-plan-title tc"><span class="addRule" ng-click="openRuleWindow()" title="新建规则">新建规则</span></p>
-            <nav class="fl check-rule-nav">
-                <ul class="clearfix">
+    <div ng-show="ruleList.length" class="flex config-main  right-content checkItem">
+        <div class="content-left-nav check-rule-nav">
+            <p class="left-nav-title tc"><span class="addRule" ng-click="openRuleWindow()" title="新建规则">新建规则</span></p>
+            <nav>
+                <ul>
                     <li ng-repeat="data in ruleList" class="rule-li" ng-click="lookRule(data)" data-rule-id={{data.ruleId}} ng-class="$first ? 'active' : ''">
-                        <span class="left-nav-name" title={{data.ruleName}}>{{data.ruleName}}</span>
+                        <span class="left-nav-name" title={{data.ruleName}}>
+                            <em style="color: red;" ng-show="data.ruleId.slice(0,9) === 'temporary'">*</em>
+                            {{data.ruleName}}
+                        </span>
                         <b ng-click="deleteRule($event)" title="删除规则"></b>
                     </li>
                 </ul>
             </nav>
         </div>
-        <div class="fr rule-content">
-            <h4 class="rule-name"><input maxlength="20" ng-model="currentRule.ruleName" type="text" value={{currentRule.ruleName}}></h4>
-            <form class="fr config-form" style="width: 100%;">
+        <div class="rule-content">
+            <h4 class="rule-name"><input maxlength="15" ng-model="currentRule.ruleName" type="text" value={{currentRule.ruleName}}></h4>
+            <form class="config-form" style="width: 100%;">
                 <div class="simpleConfiguration">
-                    <dl class="mt-15 clearfix" data-name={{scheduleRuleItemShow.isLoadLaunchConfig}} ng-hide="scheduleRuleItemShow.isLoadLaunchConfig">
+                    <dl class="mt-15 clearfix algorithm">
+                        <dt class="fl">算法名 ：</dt>
+                        <dd class="fl relative">
+                            <!--<span class="textover drop-down-name algorithm-name" data-value="{{}}">{{algorithmName}}</span>-->
+                            <!--<ul class="scheduleDrag">-->
+                                <!--<li ng-click="changeAlgorithm(data)" ng-repeat="data in algorithmList" data-value={{data}} title={{data}}>{{data}}</li>-->
+                            <!--</ul>-->
+                            <aps-select ng-model="algorithmName">
+                                <aps-option ng-repeat="data in algorithmList" label={{data}} value={{data}}>{{data}}</aps-option>
+                            </aps-select>
+                            <select id="algorithm" ng-model="algorithmName">
+                                <option ng-repeat="data in algorithmList" value={{data}}>{{data}}</option>
+                            </select>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" data-name={{scheduleCheckDataItemMap.isLoadLaunchConfig}} ng-if="scheduleCheckDataItemMap.isLoadLaunchConfig">
                         <dt class="fl">上线模式 ：</dt>
-                        <dd class="fl ml-5 isLoadLaunchConfig"><label for="isLoadLaunchConfig"><input id="isLoadLaunchConfig" name="isLoadLaunchConfig" type="checkbox" ng-model="scheduleCheckData.isLoadLaunchConfig" ng-checked="scheduleCheckData.isLoadLaunchConfig"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd>
-                        <a class="look-online-config jLookOnlineConfig" href="javascript:;" ng-click="lookOnlineConfig()">查看设备初始状态</a>
+                        <dd class="fl isLoadLaunchConfig">
+                            <aps-switch name="'isLoadLaunchConfig'" ng-model="scheduleCheckDataItemMap.isLoadLaunchConfig.itemValue"></aps-switch>
+                        </dd>
+                        <a class="ml-5 look-online-config jLookOnlineConfig" href="javascript:;" ng-click="lookOnlineConfig()">查看设备初始状态</a>
                     </dl>
-                    <dl class="mt-15 clearfix" data-name={{scheduleRuleItemShow.isLoadOverduePoolTask}} ng-hide="scheduleRuleItemShow.isLoadOverduePoolTask"><dt class="fl">当前日期前的车间计划 ：</dt><dd class="fl ml-5 isLoadOverduePoolTask"><label for="isLoadOverduePoolTask"><input id="isLoadOverduePoolTask" name="isLoadOverduePoolTask" type="checkbox" ng-model="scheduleCheckData.isLoadOverduePoolTask" ng-checked="scheduleCheckData.isLoadOverduePoolTask"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.overduePeriod"><dt class="fl">拉取当前车间计划天数 ：</dt>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isLoadOverduePoolTask"><dt class="fl">当前日期前的车间计划 ：</dt>
+                        <dd class="fl isLoadOverduePoolTask">
+                            <aps-switch  name="'isLoadOverduePoolTask'" ng-model="scheduleCheckDataItemMap.isLoadOverduePoolTask.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.overduePeriod"><dt class="fl">拉取当前车间计划天数 ：</dt>
                         <dd class="fl ml-5">
-                            <input id="overduePeriod" name="overduePeriod" type="text" maxlength="2" ng-model="scheduleCheckData.overduePeriod" ng-class="!scheduleCheckData.isLoadOverduePoolTask ? 'disabled' : ''" ng-value="scheduleCheckData.overduePeriod"/>
-                            <span class="info">(请输入1-90范围内的整数)</span>
+                            <input id="overduePeriod" name="overduePeriod" type="text" maxlength="2"
+                                   ng-model="scheduleCheckDataItemMap.overduePeriod.itemValue"
+                                   ng-disabled="!scheduleCheckDataItemMap.isLoadOverduePoolTask.itemValue ? 'disabled' : ''"
+                                   ng-value="scheduleCheckDataItemMap.overduePeriod.itemValue"
+                                   ng-focus="$($event.target).removeClass('error')"
+                                   ng-blur="testOverduePeriod($event)"/><span class="info">(请输入1-90范围内的整数)</span>
                         </dd>
                     </dl>
-                    <dl class="mt-15 clearfix schedulePeriod" ng-hide="scheduleRuleItemShow.schedulePeriodSelected">
+                    <dl class="mt-15 clearfix schedulePeriod" ng-if="scheduleCheckDataItemMap.schedulePeriod">
                         <dt class="fl">排程周期 ：</dt>
-                        <dd class="fl relative ml-5">
-                            <span data-value={{schedulePeriodSelected}}>按天</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="BY_DAY">按天</li><li data-value="BY_WEEK">按周</li><li data-value="BY_TENDAY">按旬</li><li data-value="BY_HALFMONTH">按半月</li><li data-value="BY_MONTH">按月</li>
-                            </ul>
-                            <select ng-model="schedulePeriodSelected" name="schedulePeriod" id="schedulePeriod"><option value="BY_DAY">按天</option><option value="BY_WEEK">按周</option><option value="BY_TENDAY">按旬</option><option value="BY_HALFMONTH">按半月</option><option value="BY_MONTH">按月</option></select>
+                        <dd class="fl">
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.schedulePeriod.itemValue" name="'schedulePeriod'" value="'0'">按天</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.schedulePeriod.itemValue" name="'schedulePeriod'" value="'1'">按周</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.schedulePeriod.itemValue" name="'schedulePeriod'" value="'2'">按旬</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.schedulePeriod.itemValue" name="'schedulePeriod'" value="'3'">按半月</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.schedulePeriod.itemValue" name="'schedulePeriod'" value="'4'">按月</aps-radio>
                         </dd>
                     </dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.scheduleInterval"><dt class="fl">排程间隔 ：</dt><dd class="fl ml-5"><input id="scheduleInterval" name="scheduleInterval" type="text" maxlength="2" ng-disabled="disable.scheduleInterval" ng-class="{'not-edit' : notEdit.scheduleInterval,'disabled' : disable.scheduleInterval}" ng-model="scheduleCheckData.scheduleInterval" ng-value="scheduleCheckData.scheduleInterval"/><span class="info">(请输入0-90范围内的整数)</span></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.minScheduleDay"><dt class="fl">最早起排日期 ：</dt><dd class="fl ml-5"><input id="minScheduleDay" name="minScheduleDay" class="Wdate" type="text" autocomplete="off" ng-model="scheduleCheckData.minScheduleDay" ng-value="scheduleCheckData.minScheduleDay" onClick="WdatePicker({minDate:currentTime(),dateFmt:'yyyy-MM-dd'})"/></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.freezePeriod"><dt class="fl">冻结期 ：</dt><dd class="fl ml-5"><input id="freezePeriod" name="freezePeriod" type="text" maxlength="2" ng-model="scheduleCheckData.freezePeriod" ng-value="scheduleCheckData.freezePeriod"/><span class="info">(请输入0-90范围内的整数)</span></dd></dl>
-                    <dl class="mt-15 clearfix scheduleCheck ">
-                        <dt class="fl">排程前校验 ：</dt>
-                        <dd style="width: 600px;" class="fl ml-_15">
-                            <label class="fl mb-10" ng-repeat="data in scheduleFrontData" for="validataFrom{{$index}}" ng-hide="scheduleRuleItemShow.preScheduleCheckMap[data.name]">
-                                <input id="validataFrom{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-model="data.select" ng-checked="data.select">
-                                <span class="column-content-checkbox ml-5 mr-15 input-check"></span>
-                                {{data.chinese}}
-                            </label>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.scheduleInterval">
+                        <dt class="fl">排程间隔 ：</dt>
+
+                        <dd class="fl ml-5">
+                            <input id="scheduleInterval" name="scheduleInterval" type="text" maxlength="2"
+                                   ng-disabled="scheduleCheckDataItemMap.schedulePeriod.itemValue !== '0'"
+                                   ng-model="scheduleCheckDataItemMap.scheduleInterval.itemValue" ng-value="scheduleCheckDataItemMap.scheduleInterval.itemValue"
+                                   ng-blur="testScheduleInterval($event)"/><span class="info">(请输入0-90范围内的整数)</span>
                         </dd>
                     </dl>
-                    <dl class="mt-15 clearfix scheduleCheck">
-                        <dt class="fl">排程后校验 ：</dt>
-                        <dd style="width: 600px;" class="fl ml-_15">
-                            <label class="fl mb-10" ng-repeat="data in scheduleLaterData" for="validataLater{{$index}}" ng-hide="scheduleRuleItemShow.postScheduleCheckMap[data.name]">
-                                <input id="validataLater{{$index}}" name={{data.name}} type="checkbox" value="ng-checked" ng-checked="data.select">
-                                <span class="column-content-checkbox ml-5 mr-15 input-check"></span>{{data.chinese}}
-                            </label>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.minScheduleDay"><dt class="fl">最早起排日期 ：</dt>
+                        <dd class="fl ml-5">
+                            <input id="minScheduleDay" name="minScheduleDay" class="Wdate" type="text" autocomplete="off" ng-model="scheduleCheckDataItemMap.minScheduleDay.itemValue" ng-value="scheduleCheckDataItemMap.minScheduleDay.itemValue" onClick="WdatePicker({minDate:currentTime(),dateFmt:'yyyy-MM-dd'})"/><span class="info">(此项在锁定期和冻结期皆为0时失效)</span>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.freezePeriod">
+                        <dt class="fl">冻结期 ：</dt>
+                        <dd class="fl ml-5"><input id="freezePeriod" name="freezePeriod" type="text" maxlength="2"
+                                                   ng-model="scheduleCheckDataItemMap.freezePeriod.itemValue"
+                                                   ng-value="scheduleCheckDataItemMap.freezePeriod.itemValue"
+                                                   ng-blur="testFreezePeriod($event)"/><span class="info">(请输入0-90范围内的整数)</span>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix scheduleCheck" ng-if="preScheduleCheck">
+                        <dt>排程前校验 ：</dt>
+                        <dd class="ml-_15 flex">
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.CAPABILITY_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.CAPABILITY_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.CAPABILITY_INFO_CHECKING'].itemValue">产能校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.FIXTURE_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.FIXTURE_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.FIXTURE_INFO_CHECKING'].itemValue">夹具信息校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.CT_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.CT_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.CT_INFO_CHECKING'].itemValue">刀具信息校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.COLOR_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.COLOR_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.COLOR_INFO_CHECKING'].itemValue">颜色信息校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.MATERIAL_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.MATERIAL_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.MATERIAL_INFO_CHECKING'].itemValue">物料信息校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.PAP_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING'].itemValue">PAP信息校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.ROUTING_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.ROUTING_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.ROUTING_INFO_CHECKING'].itemValue">工艺路线校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.SUITABLE_PRODUCT_INFO_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.SUITABLE_PRODUCT_INFO_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.SUITABLE_PRODUCT_INFO_CHECKING'].itemValue">适宜设备校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'preScheduleCheck.SYSTEM_CONFIG_CHECKING'" ng-if="scheduleCheckDataItemMap['preScheduleCheck.SYSTEM_CONFIG_CHECKING']" ng-model="scheduleCheckDataItemMap['preScheduleCheck.SYSTEM_CONFIG_CHECKING'].itemValue">系统配置校验</aps-checkbox>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix scheduleCheck" ng-if="postScheduleCheck">
+                        <dt>排程后校验 ：</dt>
+                        <dd class="ml-_15 flex">
+                            <aps-checkbox class="mb-10" name="'postScheduleCheck.ASSEMBLING_UNIT'" ng-if="scheduleCheckDataItemMap['postScheduleCheck.ASSEMBLING_UNIT']" ng-model="scheduleCheckDataItemMap['postScheduleCheck.ASSEMBLING_UNIT'].itemValue">组合件校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'postScheduleCheck.CAPABILITY_OVER_CHECKING'" ng-if="scheduleCheckDataItemMap['postScheduleCheck.CAPABILITY_OVER_CHECKING']" ng-model="scheduleCheckDataItemMap['postScheduleCheck.CAPABILITY_OVER_CHECKING'].itemValue">超产能校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'postScheduleCheck.POMO_SUIT_CHECKING'" ng-if="scheduleCheckDataItemMap['postScheduleCheck.POMO_SUIT_CHECKING']" ng-model="scheduleCheckDataItemMap['postScheduleCheck.POMO_SUIT_CHECKING'].itemValue">齐套性校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'postScheduleCheck.PROCESS_SEQ_CHECKING'" ng-if="scheduleCheckDataItemMap['postScheduleCheck.PROCESS_SEQ_CHECKING']" ng-model="scheduleCheckDataItemMap['postScheduleCheck.PROCESS_SEQ_CHECKING'].itemValue">物流疏通校验</aps-checkbox>
+                            <aps-checkbox class="mb-10" name="'postScheduleCheck.PRODUCTION_TIME_CHECKING'" ng-if="scheduleCheckDataItemMap['postScheduleCheck.PRODUCTION_TIME_CHECKING']" ng-model="scheduleCheckDataItemMap['postScheduleCheck.PRODUCTION_TIME_CHECKING'].itemValue">生产时间校验</aps-checkbox>
                         </dd>
                     </dl>
                 </div>
-                <span class="mt-30 show-advanced-configuration" ng-class="!jAdvancedConfiguration ? 'reverse' : ''" ng-show="!jAdvancedConfiguration && !scheduleRuleItemShow.scheduleInterval" ng-click="toggleAdvancedShow(jAdvancedConfiguration)">显示高级设置</span>
+                <span class="mt-30 show-advanced-configuration"
+                      ng-class="!jAdvancedConfiguration ? 'reverse' : ''"
+                      ng-show="!jAdvancedConfiguration"
+                      ng-click="toggleAdvancedShow()">显示高级设置</span>
                 <div ng-show="jAdvancedConfiguration" class="advancedConfiguration">
-                    <dl class="mt-15 clearfix pap-type" ng-hide="scheduleRuleItemShow.scheduleInterval">
+                    <dl class="mt-15 clearfix pap-type" ng-if="scheduleCheckDataItemMap.papType">
                         <dt class="fl">PAP类型 ：</dt>
-                        <dd class="fl relative ml-5">
-                            <span data-value={{papTypeSelected}}>不启用</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="PAP_DISABLE">不启用</li><li data-value="PAP_SCHEDULE_RULE">启用PAP控制规则</li><li data-value="PAP_DEFAULT_RULE">启用PAP默认规则</li>
-                            </ul>
-                            <select ng-model="papTypeSelected" name="papType" id="papType"><option ng-selected="papTypeSelected" value="PAP_DISABLE">不启用</option><option ng-selected="papTypeSelected" value="PAP_SCHEDULE_RULE">启用PAP控制规则</option><option ng-selected="papTypeSelected"   value="PAP_DEFAULT_RULE">启用PAP默认规则</option></select>
+                        <dd class="fl">
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.papType.itemValue" name="'papType'" value="'0'">不启用</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.papType.itemValue" name="'papType'" value="'1'">启用PAP控制规则</aps-radio>
+                            <aps-radio class="mr-15" ng-model="scheduleCheckDataItemMap.papType.itemValue" name="'papType'" value="'2'">启用PAP默认规则</aps-radio>
                         </dd>
                     </dl>
-                    <dl class="mt-15 clearfix schedule-point" ng-hide="scheduleRuleItemShow.scheduleInterval">
+                    <!--下面这两项只会同时出现-->
+                    <dl class="mt-15 clearfix schedule-point" ng-if="scheduleCheckDataItemMap.schedulePoint">
                         <dt class="fl">起排工序 ：</dt>
-                        <dd class="fl relative ml-5" ng-class="{'not-edit' : notEdit.schedulePointSelected,'disabled' : disable.schedulePointSelected}">
-                            <span>首道工序</span>
-                            <ul class="scheduleDrag">
-                                <li data-value="FIRST_PROCESS">首道工序</li><li data-value="LAST_PROCESS">末道工序</li><li data-value="KEY_PROCESS">关键工序</li>
-                            </ul>
-                            <select ng-model="schedulePointSelected"  name="schedulePoint" id="schedulePoint"><option value="FIRST_PROCESS">首道工序</option><option value="LAST_PROCESS">末道工序</option><option value="KEY_PROCESS">关键工序</option></select>
+                        <dd class="fl">
+                            <aps-radio class="mr-15" disabled="disabledByPapType || disabledByPapTypeValue" ng-model="scheduleCheckDataItemMap.schedulePoint.itemValue" name="'schedulePoint'" value="'0'">首道工序</aps-radio>
+                            <aps-radio class="mr-15" disabled="disabledByPapType || disabledByPapTypeValue" ng-model="scheduleCheckDataItemMap.schedulePoint.itemValue" name="'schedulePoint'" value="'1'">末道工序</aps-radio>
+                            <aps-radio class="mr-15" disabled="disabledByPapType" ng-model="scheduleCheckDataItemMap.schedulePoint.itemValue" name="'schedulePoint'" value="'3'">关键工序</aps-radio>
                         </dd>
                     </dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.isFrequencyOn"><dt class="fl">启用生产频度 ：</dt><dd class="fl ml-5"><label for="isFrequencyOn"><input id="isFrequencyOn" name="isFrequencyOn" type="checkbox" ng-model="scheduleCheckData.isFrequencyOn" ng-checked="scheduleCheckData.isFrequencyOn"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.isEconomicOn"><dt class="fl">启用经济批量 ：</dt><dd class="fl ml-5"><label for="isEconomicOn"><input id="isEconomicOn" name="isEconomicOn" type="checkbox" ng-model="scheduleCheckData.isEconomicOn" ng-checked="scheduleCheckData.isEconomicOn"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.isCombinationOn"><dt class="fl">启用组合件 ：</dt><dd class="fl ml-5"><label for="isCombinationOn"><input id="isCombinationOn" name="isCombinationOn" type="checkbox" ng-model="scheduleCheckData.isCombinationOn" ng-checked="scheduleCheckData.isCombinationOn"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.isAheadOn"><dt class="fl">启用延迟生产 ：</dt><dd class="fl ml-5"><label for="isAheadOn"><input id="isAheadOn" name="isAheadOn" type="checkbox" ng-model="scheduleCheckData.isAheadOn" ng-checked="scheduleCheckData.isAheadOn"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <dl class="mt-15 clearfix" ng-hide="scheduleRuleItemShow.isUseNotMassEqu"><dt class="fl">使用非批量设备 ：</dt><dd class="fl ml-5"><label for="isUseNotMassEqu"><input id="isUseNotMassEqu" name="isUseNotMassEqu" type="checkbox" ng-model="scheduleCheckData.isUseNotMassEqu" ng-checked="scheduleCheckData.isUseNotMassEqu"/><span class="ios-switch-btn ml-5 mr-15"></span></label></dd></dl>
-                    <span class="mt-30 mb-10 show-advanced-configuration" ng-class="!jExpertConfiguration ? 'reverse' : ''" ng-show="!jExpertConfiguration" ng-click="toggleExpertShow()">显示专家设置</span>
-                    <p class="checkR-rule-line" ng-show="!jExpertConfiguration"></p>
-                    <span class="mt-10 show-advanced-configuration" ng-class="!jAdvancedConfiguration ? 'reverse' : ''" ng-show="!jExpertConfiguration" ng-click="hideAdvancedConfig()">隐藏高级设置</span>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.colorTypes">
+                        <dt class="fl">单台涂装支持的颜色种类 ：</dt>
+                        <dd class="fl">
+                            <input id="colorTypes" name="colorTypes" type="text" maxlength="2" ng-model="scheduleCheckDataItemMap.colorTypes.itemValue"  ng-value="scheduleCheckDataItemMap.colorTypes.itemValue" ng-keyup="testColorTypes()"/>
+                            <span class="info">(请输入整数)</span>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isFrequencyOn">
+                        <dt class="fl">启用生产频度 ：</dt>
+                        <dd class="fl">
+                            <aps-switch name="'isFrequencyOn'" ng-model="scheduleCheckDataItemMap.isFrequencyOn.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isEconomicOn">
+                        <dt class="fl">启用经济批量 ：</dt>
+                        <dd class="fl">
+                            <aps-switch name="'isEconomicOn'" ng-model="scheduleCheckDataItemMap.isEconomicOn.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isCombinationOn">
+                        <dt class="fl">启用组合件 ：</dt>
+                        <dd class="fl">
+                            <aps-switch  name="'isCombinationOn'" ng-model="isCombinationOn.isEconomicOn.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isAheadOn">
+                        <dt class="fl">启用延迟生产 ：</dt>
+                        <dd class="fl">
+                            <aps-switch name="'isAheadOn'" ng-model="scheduleCheckDataItemMap.isAheadOn.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <dl class="mt-15 clearfix" ng-if="scheduleCheckDataItemMap.isUseNotMassEqu">
+                        <dt class="fl">使用非批量设备 ：</dt>
+                        <dd class="fl">
+                            <aps-switch name="'isUseNotMassEqu'" ng-model="scheduleCheckDataItemMap.isUseNotMassEqu.itemValue"></aps-switch>
+                        </dd>
+                    </dl>
+                    <span class="mt-30 mb-10 show-advanced-configuration"
+                          ng-class="!jExpertConfiguration ? 'reverse' : ''"
+                          ng-show="!jExpertConfiguration && scheduleWeight"
+                          ng-click="toggleExpertShow()">显示专家设置</span>
+                    <p class="checkR-rule-line" ng-show="!jExpertConfiguration && scheduleWeight"></p>
+                    <span class="mt-10 show-advanced-configuration"
+                          ng-class="!jAdvancedConfiguration ? 'reverse' : ''"
+                          ng-show="!jExpertConfiguration"
+                          ng-click="toggleAdvancedShow()">隐藏高级设置</span>
                     <div ng-show="jExpertConfiguration" class="expertConfiguration">
-                        <div class="mt-15 clearfix schedule-weight-map jScheduleWeightMap ">
+                        <div class="mt-15 clearfix schedule-weight-map jScheduleWeightMap flex" ng-show="scheduleWeight">
                             <h6 class="fl tr">排程因子权重 ：<br/><span class="info">(请输入0.0-100.0内的数字)</span></h6>
                             <div class="fl weight-map-box">
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.SAME_CT"><dt class="fl"><em class="red">*</em>相同刀具</dt><dd class="fl ml-5"><input id="SAME_CT" class="require" name="SAME_CT" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SAME_CT" ng-value="scheduleCheckData.scheduleWeightMap.SAME_CT" /><br/><b class="hide"></b></dd></dl>
-                                <!--<dl class="fl clearfix"><dt class="fl"><em class="red">*</em>相同模具</dt><dd class="fl ml-5"><input id="SAME_MOULD" class="require" name="SAME_MOULD" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SAME_MOULD" ng-value="scheduleCheckData.scheduleWeightMap.SAME_MOULD" /><br/><b class="hide"></b></dd></dl>-->
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.SAME_FIXTURE"><dt class="fl"><em class="red">*</em>相同夹具</dt><dd class="fl ml-5"><input id="SAME_FIXTURE" class="require" name="SAME_FIXTURE" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SAME_FIXTURE" ng-value="scheduleCheckData.scheduleWeightMap.SAME_FIXTURE" /><br/><b class="hide"></b></dd></dl>
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.SAME_MATERIAL"><dt class="fl"><em class="red">*</em>相同物料</dt><dd class="fl ml-5"><input id="SAME_MATERIAL" class="require" name="SAME_MATERIAL" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SAME_MATERIAL" ng-value="scheduleCheckData.scheduleWeightMap.SAME_MATERIAL" /><br/><b class="hide"></b></dd></dl>
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.SIMILAR_MATERIAL"><dt class="fl"><em class="red">*</em>相似物料</dt><dd class="fl ml-5"><input id="SIMILAR_MATERIAL" class="require" name="SIMILAR_MATERIAL" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SIMILAR_MATERIAL" ng-value="scheduleCheckData.scheduleWeightMap.SIMILAR_MATERIAL" /><br/><b class="hide"></b></dd></dl>
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.KEY_EQUIPMENT"><dt class="fl"><em class="red">*</em>关键设备</dt><dd class="fl ml-5"><input id="KEY_EQUIPMENT" class="require" name="KEY_EQUIPMENT" type="text" ng-model="scheduleCheckData.scheduleWeightMap.KEY_EQUIPMENT" ng-value="scheduleCheckData.scheduleWeightMap.KEY_EQUIPMENT" /><br/><b class="hide"></b></dd></dl>
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.MOST_USED_EQUIPMENT"><dt class="fl"><em class="red">*</em>高负荷设备</dt><dd class="fl ml-5"><input id="MOST_USED_EQUIPMENT" class="require" name="MOST_USED_EQUIPMENT" type="text" ng-model="scheduleCheckData.scheduleWeightMap.MOST_USED_EQUIPMENT" ng-value="scheduleCheckData.scheduleWeightMap.MOST_USED_EQUIPMENT" /><br/><b class="hide"></b></dd></dl>
-                                <dl class="fl clearfix" ng-hide="scheduleRuleItemShow.scheduleWeightMap.SAME_COLOR"><dt class="fl"><em class="red">*</em>相同颜色</dt><dd class="fl ml-5"><input id="SAME_COLOR" class="require" name="SAME_COLOR" type="text" ng-model="scheduleCheckData.scheduleWeightMap.SAME_COLOR" ng-value="scheduleCheckData.scheduleWeightMap.SAME_COLOR" /><br/><b class="hide"></b></dd></dl>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.SAME_CT']"><em class="red">*</em>相同刀具<input id="SAME_CT" class="require" name="scheduleWeight.SAME_CT" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SAME_CT'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SAME_CT'].itemValue" /><br/><b class="hide"></b></span>
+                                <!--<span ng-if="scheduleCheckDataItemMap['scheduleWeight.SAME_MOULD']"><em class="red">*</em>相同模具<input id="SAME_MOULD" class="require" name="scheduleWeight.SAME_MOULD" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SAME_MOULD'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SAME_MOULD'].itemValue" /><br/><b class="hide"></b></span>-->
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.SAME_FIXTURE']"><em class="red">*</em>相同夹具<input id="SAME_FIXTURE" class="require" name="scheduleWeight.SAME_FIXTURE" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SAME_FIXTURE'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SAME_FIXTURE'].itemValue" /><br/><b class="hide"></b></span>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.SAME_MATERIAL']"><em class="red">*</em>相同物料<input id="SAME_MATERIAL" class="require" name="scheduleWeight.SAME_MATERIAL" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SAME_MATERIAL'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SAME_MATERIAL'].itemValue" /><br/><b class="hide"></b></span>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.SIMILAR_MATERIAL']"><em class="red">*</em>相似物料<input id="SIMILAR_MATERIAL" class="require" name="scheduleWeight.SIMILAR_MATERIAL" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SIMILAR_MATERIAL'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SIMILAR_MATERIAL'].itemValue" /><br/><b class="hide"></b></span>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.KEY_EQUIPMENT']"><em class="red">*</em>关键设备<input id="KEY_EQUIPMENT" class="require" name="scheduleWeight.KEY_EQUIPMENT" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.KEY_EQUIPMENT'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.KEY_EQUIPMENT'].itemValue" /><br/><b class="hide"></b></span>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.MOST_USED_EQUIPMENT']"><em class="red">*</em>高负荷设备<input id="MOST_USED_EQUIPMENT" class="require" name="scheduleWeight.MOST_USED_EQUIPMENT" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.MOST_USED_EQUIPMENT'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.MOST_USED_EQUIPMENT'].itemValue" /><br/><b class="hide"></b></span>
+                                <span ng-if="scheduleCheckDataItemMap['scheduleWeight.SAME_COLOR']"><em class="red">*</em>相同颜色<input id="SAME_COLOR" class="require" name="scheduleWeight.SAME_COLOR" type="text" ng-model="scheduleCheckDataItemMap['scheduleWeight.SAME_COLOR'].itemValue" ng-value="scheduleCheckDataItemMap['scheduleWeight.SAME_COLOR.itemValue']" /><br/><b class="hide"></b></span>
                             </div>
                         </div>
-                        <!--<p class="mt-20 mb-20 checkR-rule-line"></p>-->
-                        <span class="show-advanced-configuration" ng-click="hideAdvancedConfig()">隐藏高级设置</span>
+                        <p class="mt-20 mb-20 checkR-rule-line"></p>
+                        <span class="show-advanced-configuration" ng-click="toggleExpertShow()">隐藏专家设置</span>
                     </div>
                 </div>
-                <div class="m-0-auto mt-30 mb-20 tc clearfix">
-                    <a class="save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveCheckConfig()>应用</a>
-                </div>
             </form>
+            <div class="m-0-auto mt-30 mb-20 tc">
+                <a class="save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveCheckConfig()>应用</a>
+            </div>
         </div>
     </div>
 </div>
 <div style="display: none;" class="addNewRule">
     <div class="layer-title">
-        <p>创建排程规则<span class="fr mr-20 close">×</span></p>
+        <p>创建排程规则<span class="fr mr-15 mt-15 close"></span></p>
     </div>
     <div class="layer-content">
-        <p>创建排程规则 ：<input type="text" ng-model="newRuleName" maxlength="10" class="ruleName"/></p>
+        <p>创建排程规则 ：<input type="text" ng-model="newRuleName" maxlength="15" class="ruleName"/></p>
         <div class="mt-20 relative">
-            复制排程规则 ：<select id="ruleSelect" name="">
-                <option value="0">无</option>
-                <option ng-repeat="data in ruleList track by $index" value={{data.ruleId}}>{{data.ruleName}}</option>
-            </select>
+            复制排程规则 ：<select id="ruleSelect" name="ruleSelect">
+            <option value="0">无</option>
+            <option ng-repeat="data in ruleList track by $index" value={{data.ruleId}}>{{data.ruleName}}</option>
+        </select>
         </div>
         <p class="mt-30 tc">
-            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="recordTemporaryPlan()">应用</a>
+            <a class="ml-20 mr-20 save-sort" href="javascript:;" ng-click="recordTemporaryRule()">应用</a>
             <a class="ml-20 mr-20 reset-config cancal" href="javascript:;">取消</a>
         </p>
     </div>
 </div>
 <div style="display: none;" class="online-content jOnlineContent">
     <cascader cascader-data="location_data" get-selected-location="get_selected_location" on-change="getEquipment()"></cascader>
-    <search-drop-down-list class="ml-10" search-data="equipmentTypeData" ng-model="equipmentSelectTypeList"  on-change="getEquipment()"></search-drop-down-list>
-    <search-drop-down-list class="ml-10" search-data="equipmentData" ng-model="equipmentSelectList" ></search-drop-down-list>
+    <div class="window-search-box">
+        <span>离散设备：</span>
+        <aps-select class="window-search-box" style="{'width' : '104px'}"
+                    ng-model="selectEquipmentTypeZero" multiple="true" placeholder="请选择"
+                    on-change="getEquipment()"
+        >
+            <aps-option ng-repeat="data in equipmentSelectTypeZeroList" value={{data.id}} label={{data.modelName}} title={{data.modelName}}></aps-option>
+        </aps-select>
+    </div>
+    <div class="window-search-box">
+        <span>生产单元：</span>
+        <aps-select class="window-search-box" style="{'width' : '104px'}"
+                    ng-model="selectEquipmentTypeOne" multiple="true" placeholder="请选择"
+                    on-change="getEquipment()"
+        >
+            <aps-option ng-repeat="data in equipmentSelectTypeOneList" value={{data.id}} label={{data.modelName}} title={{data.modelName}}></aps-option>
+        </aps-select>
+    </div>
+    <div class="window-search-box">
+        <span>设备名称：</span>
+        <aps-select class="window-search-box jPunitName" style="{'width' : '104px'}"
+                    ng-model="equipmentSelectList" multiple="true" placeholder="请选择"
+        >
+            <aps-option ng-repeat="data in equipmentList" value={{data.id}} label={{data.label}} title={{data.label}}></aps-option>
+        </aps-select>
+    </div>
     <a href="javascript:void(0)" class="ml-20 start-search" ng-click="searchOnlineConfig()">查询</a>
     <div class="mt-20 online-table-box" ng-show="isShowSearchConfig">
         <table class="online-content-table">

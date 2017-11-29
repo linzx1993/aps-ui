@@ -1,39 +1,40 @@
 /** * Created by linzx on 2017/7/17. */
 <template>
     <div class="right-content-box re-schedule-reason">
-        <div class="search-box">
-            <p class="time-condition">
-                <span>时间 ： </span>
-                <el-date-picker
-                    v-model="startTime"
-                    type="date"
-                    placeholder="选择日期">
-                </el-date-picker>
-                &#12288;至&#12288;
-                <el-date-picker
-                    v-model="endTime"
-                    type="date"
-                    placeholder="选择日期">
-                </el-date-picker>
-                <a class="quick-time-condition" href="javascript:void(0);" :class="{active : quickTime === 'currentWeek'}" @click="quickSelectTime('currentWeek')">本周</a>
-                <a class="quick-time-condition" href="javascript:void(0);" :class="{active : quickTime === 'nextWeek'}" @click="quickSelectTime('previousWeek')">上周</a>
-                <a class="quick-time-condition" href="javascript:void(0);" :class="{active : quickTime === 'currentMonth'}" @click="quickSelectTime('currentMonth')">本月</a>
-                <a class="quick-time-condition" href="javascript:void(0);" :class="{active : quickTime === 'nextMonth'}" @click="quickSelectTime('previousMonth')">上月</a>
-            </p>
-            <div class="mt-20 query-conditions" v-show="schedulePersonList.length > 1">
-                <span>人员 ： </span>
-                <el-select v-model="schedulePerson" placeholder="请选择">
-                    <el-option
-                        v-for="item in schedulePersonList"
-                        :key="item.userId"
-                        :label="item.userName"
-                        :value="item.userId">
-                    </el-option>
-                </el-select>
+        <aps-query-condition-box>
+            <div class="search-box">
+                <p class="time-condition">
+                    <span>时间 ： </span>
+                    <el-date-picker
+                        v-model="startTime"
+                        type="date"
+                        placeholder="选择日期">
+                    </el-date-picker>
+                    &#12288;至&#12288;
+                    <el-date-picker
+                        v-model="endTime"
+                        type="date"
+                        placeholder="选择日期">
+                    </el-date-picker>
+                    <a class="quick-time-condition" href="javascript:void(0);" @click="quickSelectTime('currentWeek')">本周</a>
+                    <a class="quick-time-condition" href="javascript:void(0);" @click="quickSelectTime('previousWeek')">上周</a>
+                    <a class="quick-time-condition" href="javascript:void(0);" @click="quickSelectTime('currentMonth')">本月</a>
+                    <a class="quick-time-condition" href="javascript:void(0);" @click="quickSelectTime('previousMonth')">上月</a>
+                </p>
+                <div class="mt-20 query-conditions" v-show="schedulePersonList.length > 1">
+                    <span>人员 ： </span>
+                    <aps-dropdown v-model="schedulePerson">
+                    	<aps-option
+                    		v-for="item in schedulePersonList"
+                            :key="item.userId"
+                            :label="item.userName"
+                            :value="item.userId">
+                    	</aps-option>
+                    </aps-dropdown>
+                </div>
+                <a class="mt-20 default-btn" href="javascript:void(0);" @click="getHistoryList">查看</a>
             </div>
-            <a class="mt-20 default-btn" href="javascript:void(0);" @click="getHistoryList">查看</a>
-        </div>
-        <hr class="mt-20 mb-20">
+        </aps-query-condition-box>
         <p v-show="!showEChartAndTable" class="c-theme-color">{{showTips}}</p>
         <div>
             <div class="re-schedule-canvas-box mb-40">
@@ -41,44 +42,36 @@
                 <hr style="background-color: #d9d9d9;width: 1px;height: 400px;margin-top: 0;">
                 <div id="countAll" class="canvas"></div>
             </div>
-            <table class="compare-equipment" v-show="showEChartAndTable">
-                <thead>
-                <tr>
-                    <th style="width: 160px">时间</th>
-                    <th>排程方案</th>
-                    <th>排程地点</th>
-                    <th>排程原因</th>
-                    <th>详情</th>
-                    <th>历史查询</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="row in historyScheduleTableList">
-                    <td>{{row.scheduleTime}}</td>
-                    <td>{{row.schemeName}}</td>
-                    <td>{{row.location}}</td>
-                    <td>{{row.reason}}</td>
-                    <td>{{row.detail}}</td>
-                    <td><a style="color: #1d7ed8" href="javascript:void(0);" @click="historyScheduleReason(row)">详情</a></td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="aps-table-container">
+				<aps-table
+					:headerData="defaultHeadData"
+					:bodyData="historyScheduleTableBody"
+					:printTitle="printTitle"
+					@detailsRowInfo="historyScheduleReason"
+					operation
+					excel
+					print
+					v-if="showEChartAndTable">
+				</aps-table>
+            </div>
         </div>
         <el-dialog
             title="详情"
             :visible.sync="historyScheduleReasonShow"
             size="large">
             <reschedule-dialog
-              :reasonId="thisRowId"
+              :scheduleTime="thisRowScheduleTime"
               :thisScheduleTime="thisRowTime">
             </reschedule-dialog>
         </el-dialog>
     </div>
 </template>
 <script>
-
 	  import reScheduleDialog from '../common/reScheduleDialog'
+
     export default {
+		name: "reScheduleDialog",
+
         components: {
             "reschedule-dialog": reScheduleDialog,
         },
@@ -100,8 +93,17 @@
                 showSecond: true,
                 dialogTableVisible:false,
                 historyScheduleReasonShow:false,
-                thisRowId:0,
+                historyScheduleTableShow:false,
+                thisRowScheduleTime:'',
                 thisRowTime:'',
+                defaultHeadOrder: ['scheduleTime','schemeName','location','reason','detail'],
+                defaultHeadData: ['时间','排程方案','排程地点','排程原因','详情'],
+                historyScheduleTableBody: [],
+            }
+        },
+        computed: {
+            printTitle(){
+                return t.getCorrectDate(this.startTime) + "~" + t.getCorrectDate(this.endTime) + "历史重排原因";
             }
         },
         mounted() {
@@ -115,9 +117,10 @@
             this.$http.get(this.url.get_all_schedule_person).then((res) => {
             	  this.schedulePersonList = res.data;
             },(res)=>{
-              this.schedulePersonList = []
+                this.schedulePersonList = []
             });
             this.historyScheduleTableList = this.historyScheduleData.reasonDtoList;
+            this.historyScheduleTableBody = this.dataProcessing(this.historyScheduleData.reasonDtoList);
         },
         methods : {
             //时间快速选择器
@@ -144,20 +147,20 @@
                     this.startTime = new Date(year + "-" + month + "-01").getTime();
                 } else {
                     //来源本个月的最后一天加一天
-                    this.endTime = new Date(year + "-" + month + "-01").getTime() - 86400000;
-                    this.startTime = this.endTime - (getMonthDays(this.endTime) - 1) * 86400000;
+                  this.endTime = new Date(year + "-" + month + "-01").getTime() - 86400000;
+                  this.startTime = this.endTime - (t.getMonthDays(this.endTime) - 1) * 86400000;
                 }
             },
             //根据查询条件，查看时间,获取所有的历史排程信息
             getHistoryList(){
                 //结束时间不能大于开始时间
                 if(this.startTime > this.endTime){
-                    this.$alert('开始时间不能大于结束时间', '提示');
+                    this.$message.error('开始时间不能大于结束时间');
                     return;
                 }
                 const obj = {
-                    startTime : t.getMonthDays(this.startTime),
-                    endTime : t.getMonthDays(this.endTime),
+                    startTime : t.getCorrectDate(this.startTime),
+                    endTime : t.getCorrectDate(this.endTime),
                     userId : this.schedulePerson
                 };
                 this.$http.post(this.url.get_history_list,obj).then((res) => {
@@ -174,23 +177,27 @@
                     this.historyScheduleData = res.data;
                     //获得表格渲染的数据
                     this.historyScheduleTableList = this.historyScheduleData.reasonDtoList;
+                    this.historyScheduleTableBody = this.dataProcessing(this.historyScheduleTableList);
                     this.showEChartAndTable = true;
                     this.packageECharts();
-                },(res) => {
-                    res.data = {
-                        "caclReasonData": {},
-                        "caclLocationData": {},
-                        "reasonDtoList": []
-                    };
-                    this.$alert('请检查服务器', '提示')
-                });
+
+                    this.historyScheduleTableShow = true;
+                        },(res) => {
+                            res.data = {
+                                "caclReasonData": {},
+                                "caclLocationData": {},
+                                "reasonDtoList": []
+                        };
+                        this.$message.error('请检查服务器');
+                    });
             },
             packageECharts(){
             	  //如果有正确的数据的话,则渲染图表
                 if(this.historyScheduleData.reasonDtoList && this.historyScheduleData.reasonDtoList.length){
                     //====历史排程次数代码====
-                    const historyTimeCount = this.dataProcess.toHistoryECharts(this.historyScheduleData);
-                    const optionData = $.extend({},getBarEChartsOption(historyTimeCount),{interval : 1});//设置值的间隔为2
+                    const historyTimeCount = this.toHistoryECharts(this.historyScheduleData);
+                    historyTimeCount.title = {text : "历史重排原因查询"};
+                    const optionData = $.extend({},this.dataProcess.getBarEChartsOption(historyTimeCount),{title : {text : "历史重排原因查询"},interval : 1});//设置值的间隔为2
                     this.myChartsHistoryCount.setOption(optionData);
                     //点击图表的柱子，筛选出对应日期所有的重排数据,前台筛选
                     this.myChartsHistoryCount.on("click",(params) => {
@@ -198,81 +205,115 @@
                         this.historyScheduleTableList = this.historyScheduleData.reasonDtoList.filter((item) => {
                               return item.scheduleTime.slice(0,10) === time;
                         })
+						this.historyScheduleTableBody = this.dataProcessing(this.historyScheduleTableList);
                     });
                     //======饼图代码======
-                    const historyScheduleList = this.dataProcess.getHistorySchedulePieCharts(this.historyScheduleData);
+                    const historyScheduleList = this.getHistorySchedulePieCharts(this.historyScheduleData);
                     this.myChartsCountAll.setOption(getPieEChartsOption(historyScheduleList));
                 }
             },
+            /**
+             * desc : 返回一个eCharts双饼图所需的数据格式
+             * @param resData
+             * @returns {{reasonPieCharts: {nameList: Array, valueList: Array}, locationPieCharts: {nameList: Array, valueList: Array}}}
+             */
+            getHistorySchedulePieCharts(resData){
+                //新建一个对象，同时包含地点分布和原因分布饼图所需的数据
+                const pieChartsData = {
+                    reasonPieCharts : {
+                        name : '重排原因',
+                        nameList : [],
+                        valueList :[]
+                    },
+                    locationPieCharts : {
+                        name : '重排车间',
+                        nameList : [],
+                        valueList :[]
+                    },
+                };
+                //遍历原因分布列表的数据
+                for(let reason in resData.caclReasonData){
+                    if(resData.caclReasonData.hasOwnProperty(reason)){
+                        pieChartsData.reasonPieCharts.nameList.push(reason);
+                        //eCharts饼图所需的数据格式
+                        pieChartsData.reasonPieCharts.valueList.push({
+                            value : resData.caclReasonData[reason],
+                            name : reason
+                        });
+                    }
+                }
+                //遍历地点分布列表的数据
+                for(let location in resData.caclLocationData){
+                    if(resData.caclLocationData.hasOwnProperty(location)) {
+                        pieChartsData.locationPieCharts.nameList.push(location);
+                        //eCharts饼图所需的数据格式
+                        pieChartsData.locationPieCharts.valueList.push({
+                            value: resData.caclLocationData[location],
+                            name: location
+                        });
+                    }
+                }
+                return pieChartsData
+            },
+            /**
+             *  desc :根据数据获取重排原因页面的柱形图，主要展示每个日期的重排次数，点击图需要在表需要展现每个日期的重排信息
+             * @param resData
+             */
+            toHistoryECharts(resData){
+                //统计每天的重排次数
+                const timeCountObj = {};
+                const xAxisList = [];
+                for(let i in resData.reasonDtoList){
+                    //如果没有当前日期，则记录下来,初始次数为1
+                    const time = resData.reasonDtoList[i].scheduleTime.slice(0,10);
+                    if(!timeCountObj[time]){
+                        timeCountObj[time] = 1;
+                        xAxisList.push(time);
+                    }else{
+                      timeCountObj[time] ++;
+                    }
+                }
+                //根据顺序去获得每个时间对应的重排值
+                const yAxisList = [{
+                    name : "历史排程次数",
+                    valueList : []
+                }];
+                xAxisList.forEach((item) => {
+                    yAxisList[0].valueList.push(timeCountObj[item]);
+                });
+                //返回一个可以直接给option调用的值
+                return {
+                    xAxisList : xAxisList,
+                    yAxisList : yAxisList,
+                }
+            },
             historyScheduleReason(rowInfo){
-                this.thisRowId = rowInfo.id;
-                this.thisRowTime = rowInfo.scheduleTime;
+                const rowIndex = rowInfo.rowIndex,
+                rowData = this.historyScheduleTableList[rowIndex];
+
+                this.thisRowScheduleTime  = rowData.scheduleTime;
                 this.historyScheduleReasonShow = !this.historyScheduleReasonShow;
+            },
+             /**
+             *  desc :接口返回数据=》表格可用数据  处理方法
+             * @param resData
+             * @return tableData
+             */
+            dataProcessing(resData){
+                const returnData = [];
+                for(let i = 0, l = resData.length; i < l; i++){
+                    const returnRowData = [],
+                        rowData = resData[i];
+                    for(let i = 0, l = this.defaultHeadOrder.length; i < l; i++){
+                        returnRowData.push(rowData[this.defaultHeadOrder[i]]);
+                    };
+                    returnData.push(returnRowData);
+                };
+                return returnData;
             }
         }
     }
-    function getBarEChartsOption(optionData) {
-        let option = {
-            title : {
-                text: optionData.title || '历史重排查询',
-                x : 'center',
-                y : '0%'
-            },
-            tooltip : {
-                trigger: 'axis'
-            },
-            legend: {
-                data:[]
-            },
-            toolbox: { //可视化的工具箱
-                right : '10%',
-                show: true,
-                feature: {
-                    dataView: { //数据视图
-                        show: false
-                    },
-                    restore: { //重置
-                        show: false
-                    },
-                    dataZoom: { //数据缩放视图
-                        show: false
-                    },
-                    saveAsImage: { //保存图片
-                        show: true
-                    },
-                    magicType: { //动态类型切换
-                        type: ['bar', 'line']
-                    }
-                }
-            },
-            grid : {
-                left: '0%',
-                right: '0%',
-                bottom: '0%',
-                containLabel: true
-            },
-            xAxis :  {
-                type: 'category',
-                data: []
-            },
-            yAxis : {
-                type : 'value',
-                interval : optionData.interval
-            },
-            series : []
-        };
-        option.xAxis.data = optionData.xAxisList;
-        optionData.yAxisList.forEach((item) => {
-            const obj = {
-                name:item.name,
-                type: optionData.type || 'bar',
-                barWidth :optionData.barWidth,
-                data:item.valueList
-            };
-            option.series.push(obj);
-        });
-        return option
-    }
+
     function getPieEChartsOption (optionData) {
         let option = {
             title : {
@@ -324,3 +365,23 @@
     }
 
 </script>
+<style rel="stylesheet/scss" lang="scss" scoped>
+    .re-schedule-reason{
+        .re-schedule-canvas-box{
+            display: flex;
+            .canvas{
+                height: 400px;
+            }
+        }
+		.aps-table{
+			max-height: 400px;
+		}
+        #historyCount{
+            flex: 1 0 500px;
+            padding-right: 20px;
+        }
+        #countAll{
+            flex: 1 0 900px;
+        }
+    }
+</style>

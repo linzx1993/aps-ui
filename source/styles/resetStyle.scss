@@ -3,9 +3,12 @@
 /*常用颜色*/
 $themeColor : #1E7CD9;/*主题色*/
 $borderColor : #b3b3b3;/*表格灰框颜色*/
+$selectGraybg : #e4e8f1;/*下拉列表hover灰色*/
 $titleBgColor : #f0f0f0;/*标题栏背景灰色*/
 $orange : #ee8f00;//橘色
 $scrollbar : rgba(255,153,0,0.5);//一级界面时间控件用色
+$disabledColor : #bfcbd9;
+$title-height : 68px;
 .c-theme-color{color: $themeColor;}
 @mixin scale($n) {
   -webkit-transform: scale($n);

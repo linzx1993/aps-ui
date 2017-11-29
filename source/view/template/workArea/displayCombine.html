@@ -1,12 +1,16 @@
-<div class="config-main" ng-controller="displayCombineController">
+<div class="" ng-controller="displayCombineController">
     <div class="mt-20 ml-55 relative display-combine">
         <p>请选择显示合并项(当前地点：{{currentShowLocationName}})</p>
-        <label class="ml-20 mt-10 display-combine-line" for={{data.valueContent}} ng-repeat="data in firstPage.combineItemList">
-            <input id={{data.valueContent}} value={{data.valueContent}} name="combineItem" type="radio" ng-checked="selectValue === data.valueContent" ng-model="$parent.selectValue">
-            <span class="mr-15 column-content-checkbox input-radio"></span>{{data.valueAlias}}</label>
+        <aps-radio class="mt-10"
+                   ng-repeat="data in firstPage.combineItemList"
+                   ng-model="$parent.selectValue"
+                   name="'combineItem'"
+                   value="data.valueContent">
+            {{data.valueAlias}}
+        </aps-radio>
     </div>
     <!--<config-folder-tree></config-folder-tree>-->
-    <div  class="m-0-auto mt-30 mb-20 tc clearfix" style="margin-right: 300px;">
+    <div  class="m-0-auto mt-30 mb-20 tc clearfix">
         <a class="mr-15 save-sort saveCheckConfig" href="javascript:void(0);" ng-click=saveDisplayCombine()>应用</a>
         <!--<a class="ml-15 reset-config" href="javascript:void(0);" ng-click=resetDisplayCombine()>还原</a>-->
     </div>

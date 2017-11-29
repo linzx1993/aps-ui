@@ -13,14 +13,11 @@ app.controller("adminConfigController",["$rootScope","$scope","$timeout","schedu
                 $scope.setDisplayGetData(res);
             },
 			errorFn: () => {
-                $scope.info.fail("获取数据失败，请检查是否连上服务器")
+				layer.msg('获取数据失败，请检查是否连上服务器', {time: 3000, icon: 2});
             }
 		})
     };
     getColumnData();
-
-    //初始化拖拽
-    $scope.clickLiGetItem();
 
     //根据点击不同的车间选择不同的显示项
     $("#columnWorkshop").on("click", ".select-status", (e) => {
@@ -28,8 +25,6 @@ app.controller("adminConfigController",["$rootScope","$scope","$timeout","schedu
         $scope.locationId = e.target.getAttribute("data-location-id");
         $(".select-status").removeClass("active");
         $(e.target).addClass("active");
-        //移除临时拖拽项
-        $(".js-move").remove();
         getColumnData();
     });
 
@@ -45,11 +40,11 @@ app.controller("adminConfigController",["$rootScope","$scope","$timeout","schedu
 			data: postData,
 			successFn: function(response){
                 if(response.data === true){
-                    $scope.info.success("默认显示项保存成功");
+					layer.msg('默认显示项保存成功', {time: 3000, icon: 1});
                 }
             },
 			errorFn: function(){
-                $scope.info.fail("默认显示项保存失败");
+				layer.msg('默认显示项保存失败', {time: 3000, icon: 2});
             }
 		});
     };
@@ -77,7 +72,7 @@ app.controller("adminConfigController",["$rootScope","$scope","$timeout","schedu
                     });
                 },
                 errorFn: function(res){
-                    layer.alert("读取车间失败，请检查服务器");
+					layer.msg('读取车间失败，请检查服务器', {time: 3000, icon: 2});
                 }
             });
         }

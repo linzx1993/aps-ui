@@ -137,14 +137,14 @@ app.config(['$stateProvider','$urlRouterProvider', function($stateProvider,$urlR
          })
          .state('config.admin',{
              url:'/admin',
-             templateUrl:'view/template/adminDisplay.html',
+             templateUrl:'view/template/adminDisplay/adminDisplay.html',
              controller: function($state){
                  $state.go('config.defaultDisplay')
              }
          })
          .state('config.defaultDisplay',{
              url:'/defaultDisplay',
-             templateUrl:'view/template/adminDisplay.html',
+             templateUrl:'view/template/adminDisplay/adminDisplay.html',
              controller: 'adminConfigController'
          })
 		.state('config.onlineConfig',{

@@ -1,0 +1,28 @@
+@import "../resetStyle.scss";
+.time-condition{
+  input {
+    height: 30px;
+  }
+  .el-input__icon{
+    right: 10px;
+  }
+  .el-icon-date{
+    right: 3px;
+    background: url($gImgBase + "calendar.png") no-repeat 0 7px;
+    &:before{
+      content: "";
+    }
+  }
+  .el-date-editor.el-input{
+    width: 180px;
+  }
+}
+
+//时间选择
+.quick-time-condition{
+  margin: 0 15px;
+  line-height: 30px;
+  &.active{
+    color: $themeColor;
+  }
+}

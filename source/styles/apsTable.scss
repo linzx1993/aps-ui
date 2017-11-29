@@ -1,0 +1,105 @@
+@charset "utf-8";
+@import "resetStyle.scss";
+
+thead.table-head{
+	color: #fff;
+	background-color: $themeColor;
+}
+.aps-table {
+	width: 100%;
+	max-height: 100%;
+	background-color: #fff;
+	overflow:auto;
+	
+	table{
+		width: 100%;
+		text-align: center;
+		border-collapse: inherit;
+		
+		thead {
+			height: 36px;
+			line-height: 36px;
+
+			th {
+				padding: 0 4px;
+				border: 1px solid #ccc;
+				background-color: $themeColor;
+				white-space: nowrap;
+				color: #fff;
+			}
+		}
+		tbody {
+			tr {
+				height: 30px;
+				line-height: 30px;
+
+				td {
+					padding: 0 4px;
+					border: 1px solid #ccc;
+					border-left: 0;
+					border-top: 0;
+					background-color: #fff;
+					white-space: nowrap;
+					
+					&:first-child{
+						border-left: 1px solid #ccc;
+					}
+				}
+				&:nth-child(even){
+					td{
+						background-color: #EDEEED;
+					}
+					.bgc-white{
+						background-color: #fff;
+					}
+				}
+				.operation{
+					i{
+						margin: 0 10px;
+						width: 14px;
+						height: 14px;
+						background: url(../images/look-weitiao-list.png) no-repeat 0 -14px;
+						cursor: pointer;
+						
+						&:hover{
+							background-position-y: 0;
+						}
+					}
+					.aps-table-edit{
+						background-position-x: -28px;
+					}
+					.aps-table-change{
+						background-position-x: -14px;
+					}
+				}
+				.bgc-white{
+					background-color: #fff;
+				}
+			}
+			
+			.count-tr{
+				td{
+					border-top: 1px solid #ccc;
+				}
+			}
+		}
+		.aps-table-selection{
+			width: 50px;
+			
+			label{
+				display: inline-block;
+				width: 12px;
+				height: 12px;
+				background:  url(../images/select-state.png) #fff left center no-repeat;
+				background-position: -24px 0;
+
+				input{
+					display: none
+				}
+			}
+			.aps-table-selected{
+				background-position: 0 0;
+			}
+		}
+	}
+}

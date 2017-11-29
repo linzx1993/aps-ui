@@ -81,7 +81,7 @@ app.service('http', function($rootScope,$http) {
 			data = httpObj.data||{},
 			successFn = httpObj.successFn || function(){},
 			errorFn = httpObj.errorFn || function(res){
-										 	layer.alert(res.data.error_response?res.data.error_response.text : "获取数据失败！", {
+										 	layer.alert(res.data.error_response?($rootScope.errorCode[res.data.error_response.code] ? $rootScope.errorCode[res.data.error_response.code] : "未知错误!") : "获取数据失败！", {
 											skin: 'layer-alert-themecolor' //样式类名
 											});
 										 },

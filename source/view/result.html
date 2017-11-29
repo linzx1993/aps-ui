@@ -26,9 +26,56 @@
 		<div class="search-btn search-btn-normal right-menu-button change-one">
 			<i class="search-btn-icon"></i>
 			<div class="search-box tl" ng-mousedown="$event.stopPropagation()">
-				<h6 class="search-box-title">查询</h6>
+				<h6 class="search-box-title">查询<span class="fr mt-15 mr-15 close"></span></h6>
 				<div class="search-content">
-					<search-drop-down-list ng-repeat="searchData in searchDataList" ng-model="placeholderaaa" search-data="searchData"></search-drop-down-list>
+					<div class="material-code search-item">
+						<span class="search-item-name">物料编码：</span>
+						<aps-select ng-model="selectMaterialCode" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in materialCodeList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="material-name search-item">
+						<span class="search-item-name">物料名称：</span>
+						<aps-select ng-model="selectMaterialName" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in materialNameList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="process-code search-item">
+						<span class="search-item-name">工序编码：</span>
+						<aps-select ng-model="selectProcessCode" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in processCodeList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="process-name search-item">
+						<span class="search-item-name">工序名称：</span>
+						<aps-select ng-model="selectProcessName" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in processNameList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="punit-code search-item">
+						<span class="search-item-name">设备编码：</span>
+						<aps-select ng-model="selectPunitCode" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in punitCodeList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="punit-name search-item">
+						<span class="search-item-name">设备名称：</span>
+						<aps-select ng-model="selectPunitName" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in punitNameList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="sale-order search-item">
+						<span class="search-item-name">销售订单：</span>
+						<aps-select ng-model="selectSaleOrder" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in saleOrderList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
+					<div class="order-code search-item">
+						<span class="search-item-name">主生产号：</span>
+						<aps-select ng-model="selectOrderCode" filterable="true" multiple="true">
+							<aps-option ng-repeat="data in orderCodeList" is-active={{data.isActive}} value={{data.value}} label={{data.text}}></aps-option>
+						</aps-select>
+					</div>
 					<div class="start-search" ng-click="search()">查询</div>
 				</div>
 			</div>
@@ -64,12 +111,6 @@
 			<div class="tip">校验</div>
 			<input type="checkbox" class="check-check-box" />
 		</div>
-<!--
-		<div class="right-menu-button back-one" ng-click="rollback()">
-			<i class="back-one-icon"></i>
-			<div class="tip">撤销</div>
-		</div>
--->
 		<div class="right-menu-button tab-fo-ba" ng-click="around()">
 			<i class="pap-open-icon"></i>
 			<div class="tip">前拉后推</div>
@@ -140,26 +181,7 @@
 			</div>
 			<div class="dialog-window-body">
 				<div class="show-table">
-					<div class="table-space">
-						<table ng-style="{width : (checkItemTableHeadData.length * 100) + 'px'}">
-							<thead>
-							<tr>
-								<th>序号</th>
-								<th ng-repeat="title in checkItemTableHeadData track by $index" >{{title.showText}}</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr ng-repeat="checkItemTableRow in checkItemTableBodyData track by $index">
-								<td ng-if="checkErrorType !== 3">{{$index + 1}}</td>
-								<td ng-repeat="tableCell in checkItemTableRow track by $index" ng-class="tableCell.errorClass ? 'red' : ''" rowspan={{tableCell.rowNum}}>{{tableCell.showText}}</td>
-							</tr>
-							</tbody>
-						</table>
-					</div>
-					<div class="cover-head">
-						<div>序号</div>
-						<div ng-repeat="title in checkItemTableHeadData track by $index">{{title.showText}}</div>
-					</div>
+					<aps-merge-table head-data="checkItemTableHeadData" body-data="checkItemTableBodyData" text-name="showText"></aps-merge-table>
 				</div>
 			</div>
 		</div>
@@ -216,7 +238,7 @@
 						<div class="current-show-location-name"></div>
 						<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">-->
 						<div style="display: flex;" class="jDateListDiv">
-							<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft} : {}">
+							<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft,color:date.color} : {color:date.color}">
 								<span>{{date.thisDate.substring(5,7)}}</span>月
 								<span>{{date.thisDate.substring(8,10)}}</span>日
 							</div>
@@ -265,7 +287,7 @@
 					<div class="current-show-location-name"></div>
 					<!--<div ng-repeat="date in tableHeadViewModel track by $index" ng-click="date_click(date)">-->
 					<div style="display: flex;" class="jDateListDiv">
-						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft} : {}">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.bigTableMarginLeft,color:date.color} : {color:date.color}">
 							<span>{{date.thisDate.substring(5,7)}}</span>月
 							<span>{{date.thisDate.substring(8,10)}}</span>日
 						</div>
@@ -316,7 +338,7 @@
 				<div class="table-head">
 					<div></div>
 					<div style="display: flex;" class="jDateListDiv">
-						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')"  ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft} : {}">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')"  ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft,color:date.color} : {color:date.color}">
 							{{date.thisDate.substring(5,10)}}
 						</div>
 					</div>
@@ -349,7 +371,7 @@
 				<div class="table-head">
 					<div></div>
 					<div style="display: flex;" class="jDateListDiv">
-						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft} : {}">
+						<div ng-repeat="date in tableHeadViewModel track by $index" ng-right-click="showRightClickSmallNav(date,$event,'preview')" ng-style="$index === 0 ? {marginLeft:controllerDate.smallTableMarginLeft,color:date.color} : {color:date.color}">
 							{{date.thisDate.substring(5,10)}}
 						</div>
 					</div>
@@ -360,7 +382,7 @@
 					<!-- 表格主体部分 -->
 					<div class="table-equipment-head">
 						<div>
-							<div class="differSameItemEquipment"ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" title={{differ[0][0]['front'][0].text}}>
+							<div class="differSameItemEquipment" ng-repeat="differ in differTableBodyViewModel track by $index" ng-if="!(differ[0][0]['useData'].isEmpty && differ[1][0]['useData'].isEmpty && hide_empty)" title={{differ[0][0]['front'][0].text}}>
 								<div class="table-td" ng-repeat="row in differ track by $index">{{row[0]['front'][0].text}}</div>
 							</div>
 						</div>
@@ -491,8 +513,15 @@
 					<span>结束时间：</span>
 				<input id="windowEndTime" class="Wdate" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\'windowStartTime\')}'})">
 				</span>
-				<search-drop-down-list single="true" ng-model="equipment_check_list" search-data="equipmentsList" style="{'width' : '104px'}" class="window-search-box jPunitName" on-change="refreshShift()"></search-drop-down-list>
-				<search-drop-down-list ng-model="shift_check_list" search-data="shiftData" style="{'width' : '104px'}" class="window-search-box jShiftName"></search-drop-down-list>
+				<div class="window-search-box">
+					<span>设备名称：</span>
+					<aps-select class="window-search-box jPunitName" style="{'width' : '118px'}"
+					            ng-model="equipment_check_list" placeholder="请选择" filterable="true"
+					>
+						<aps-option ng-repeat="data in equipmentList" value={{data.value}} label={{data.label}}></aps-option>
+					</aps-select>
+				</div>
+				<!--<search-drop-down-list single="true" ng-model="equipment_check_list" search-data="equipmentsList" style="{'width' : '104px'}" class="window-search-box jPunitName"></search-drop-down-list>-->
 <!--				<search-drop-down-list-with-id search-data="shiftData" style="{'width' : '104px'}" class="jShiftName"></search-drop-down-list-with-id>-->
 				<span class="window-search-box jSaleOrder">
 					<span>订单编号：</span>
@@ -509,66 +538,7 @@
 				<a href="javascript:;" class="ml-30 window-search-button" ng-click="change_window_table()">查询</a>
 			</div>
 			<div class="show-table">
-				<div class="table-space">
-					<table ng-style="{width : (headDataView.length * 100) + 'px'}">
-						<thead>
-							<tr>
-								<th>选择</th>
-								<th>操作</th>
-								<th ng-repeat="title in headDataView track by $index" >{{title}}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="tableRow in tableDataView track by $index" source={{tableRow[0].source}} ng-class="tableRow[0].source ? 'orange' : ''" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}} index={{tableRow[0].index}}>
-								<td class="check-box">
-									<!--<input id="SecondPage{{$index}}" name="single" type="checkbox" />-->
-									<!--<label for="SecondPage{{$index}}" ng-style="{pointerEvents:tableRow[0].source?'none':'auto'}"></label>-->
-								</td>
-								<td>
-									<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
-									<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="修改开始时间"></span>
-									<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
-								</td>
-								<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="fix-table-column">
-					<table class="fix-table">
-						<thead>
-						<tr>
-							<th style="min-width: 44px;">
-								<input type="checkbox" id="" name="all" />
-								<label for="" class="headCheckbox"></label>
-							</th>
-							<th>操 作</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr ng-repeat="tableRow in tableDataView track by $index" ng-class="tableRow[0].source ? 'orange' : ''"  source={{tableRow[0].source}} pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}} index={{tableRow[0].index}}>
-							<td>
-								<input id="SecondPage{{$index}}" name="single" type="checkbox" ng-disabled="tableRow[0].source"/>
-								<label for="SecondPage{{$index}}" ></label>
-							</td>
-							<td>
-								<span class="sale-order-look" ng-click="look_sale_order(tableRow,$event)" title="查看"></span>
-								<span class="sale-order-edit" ng-click="edit_start_time(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="修改开始时间"></span>
-								<span class="sale-order-change" ng-click="part_move_in_cache(tableRow,$event)" ng-style="{display:tableRow[0].source?'none':'inline-block'}" title="微调"></span>
-							</td>
-						</tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="cover-head">
-					<div class="fixed-column">
-						<input type="checkbox" ng-style="" style="display: none;" id="headtrSelect" name="all" />
-						<label for="headtrSelect" class="headCheckbox"></label>
-					</div>
-					<div class="fixed-column">操作</div>
-					<div ng-repeat="title in headDataView track by $index">{{title}}</div>
-				</div>
+				<aps-base-table ng-model="tableDialogWindowValue" head-data="headDataView" body-data="tableDataView" row-details="look_sale_order" row-edit="edit_start_time" row-change="part_move_in_cache" row-class-name="rowClassName" selectable="'multiple'"></aps-base-table>
 			</div>
 			<div class="move-to-cache">
 				<span ng-click="move_to_cache()">移出日程</span>
@@ -668,7 +638,7 @@
 				<p class="dialog-window-heads title-left">排程前</p>
 				<div class="differ-wrap-table differ-table-pool table-left" id="front-task" onscroll="document.getElementById('back-task').scrollLeft = this.scrollLeft;">
 					<div class="cover-heads cover-headsPool_left" >
-						<div ng-repeat="title in headDataView_leftPool track by $index" on-finish-render="testOnFinishEnd()">{{title}}</div>
+						<div ng-repeat="title in headDataView_leftPool track by $index">{{title}}</div>
 					</div>
 					<div class="show-table-differ">
 						<div class="table-space-differ">
@@ -721,9 +691,9 @@
 	<!--二级页面差异化结束-->
 
 	<!--暂存间-->
-	<div class="cache-window table-window jMovable" ng-mousedown="priorityDisplay($event)">
+	<div class="cache-window table-window jMovable" ng-mousedown="priorityDisplay($event)" ng-show="cache_window_show">
 		<div class="dialog-window-head">暂存区
-			<i class="close-window"></i>
+			<i class="close-window" ng-click="close_cache_window()"></i>
 		</div>
 		<div class="dialog-window-body">
 			<div class="info-show">
@@ -746,65 +716,7 @@
 				<a href="javascript:;" class="ml-30 window-search-button" ng-click="cache_window_type()">{{cache_box_type}}</a>
 			</div>
 			<div class="show-table">
-				<div class="table-space">
-					<table ng-style="{width : (cacheHeadDataView.length * 100) + 'px'}">
-						<thead>
-							<tr>
-								<th ng-if="isByPk">选择</th>
-								<th ng-if="isByPk">操作</th>
-								<th ng-repeat="title in cacheHeadDataView track by $index">{{title}}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="tableRow in cacheTableDataView track by $index" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
-								<td class="check-box" ng-if="isByPk">
-									<input name="StorageSingle" type="checkbox" />
-									<label ng-click="cache_tip(tableRow,$event)"></label>
-								</td>
-								<td ng-if="isByPk">
-									<!--<span class="sale-order-look" ng-click="look_sale_order(tableRow)">查看</span>-->
-									<span class="sale-order-change" ng-click="part_move_out_cache(tableRow,$event)" title="微调"><!--ng-style="{display:tableRow[0].canChange}"--></span>
-								</td>
-								<td ng-repeat="tableCell in tableRow track by $index">{{tableCell.showText}}
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="cover-head">
-					<div class="fixed-column" ng-if="isByPk">
-						<input id="headtrChoose" name="StorageAll" type="checkbox" />
-						<label for="headtrChoose" ng-if="table_dialog_window_show"></label>
-					</div>
-					<div class="fixed-column" ng-if="isByPk">操作</div>
-					<div ng-repeat="title in cacheHeadDataView track by $index">{{title}}</div>
-				</div>
-				<div ng-style="{height : cacheTableDataView.length * 30 + 36 + 'px'}" class="fix-table-column" ng-if="isByPk">
-					<table class="fix-table" style="width: 92px;">
-						<thead>
-							<tr>
-								<th>
-									<input  name="StorageAll" type="checkbox" />
-									<label for="" ng-if="table_dialog_window_show"></label>
-								</th>
-								<th>操 作</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="tableRow in cacheTableDataView track by $index" pk-id={{tableRow[0].pkId}} versionId={{tableRow[0].versionId}} processOrder={{tableRow[0].processOrder}}>
-								<td class="check-box">
-									<input id="Storage{{$index}}" name="StorageSingle" type="checkbox" />
-									<label for="Storage{{$index}}" ng-click="cache_tip(tableRow,$event)"></label>
-								</td>
-								<td>
-									<!--<span class="sale-order-look" ng-click="look_sale_order(tableRow)">查看</span>-->
-									<span class="sale-order-change" ng-click="part_move_out_cache(tableRow,$event)" title="微调"><!--ng-style="{display:tableRow[0].canChange}"--></span>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+				<aps-base-table ng-model="cacheDataValue" head-data="cacheHeadDataView" body-data="cacheTableDataView" row-change="isByPk ? part_move_out_cache : ''" selectable="isByPk ? (table_dialog_window_show ? 'multiple' : 'radio') : ''" on-change="cache_tip"></aps-base-table>
 			</div>
 			<div class="move-to-cache">
 				<span ng-click="move_out_cache()" ng-if="table_dialog_window_show && isByPk">排入日程</span>

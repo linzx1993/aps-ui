@@ -1,0 +1,50 @@
+
+//==========================管理员配置==============================//
+.admin-display{
+    height: 100%;
+}
+.admin-display-box{
+    height: calc(100% - 68px);
+    .admin-display-content{
+        flex: auto;
+        height: calc(100% - 150px);
+        min-height: 400px;
+        .location-show{
+            height: 100%;
+            overflow: auto;
+        }
+    }
+}
+/*=========上线配置==========*/
+.online-content{
+    padding: 20px;
+    .online-table-box{
+        height: 500px;
+        overflow: auto;
+    }
+    .cascader-select-box input{
+        display: inline-block;
+    }
+    table{
+        border-collapse: initial;
+        width: 100%;
+        border-right:1px solid $borderColor;
+        border-bottom:1px solid $borderColor;
+        background-color: #fff;
+        th,td{
+            text-align: center;
+            border-left: 1px solid $borderColor;
+            border-top: 1px solid $borderColor;
+        }
+        tr{
+            height: 30px;
+            line-height: 30px;
+            &:nth-child(even){
+                background-color: #EDEEED;
+            }
+        }
+        td{
+            padding: 5px 0;
+        }
+    }
+}

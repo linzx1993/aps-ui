@@ -110,6 +110,7 @@ export default{
 		options(){
 			this.checkedAll = true;
 			this.broadcast('apsOption', 'queryChange', this.query.toLowerCase());
+			this.setSelected();
 		},
 		value(val){
 			
@@ -317,6 +318,9 @@ export default{
 		if(this.value.length === 0 || this.value === ''){
 			this.$emit('input', this.multiple ? [] : '');
 		}
+		setTimeout(() =>{
+			this.setSelected();
+		},0);
 	}
 }
 

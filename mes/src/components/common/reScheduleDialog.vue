@@ -70,6 +70,10 @@
 				:headerData='headerData'
 				:bodyData='bodyData'
 				:allNumber='allNumber'
+				excel
+				print
+				page
+				printTitle="历史排程任务清单"
 				@detailsRowInfo='detailsRowInfo'
 				@pageChange='pageChange'>
 			</aps-table>
@@ -96,7 +100,7 @@ export default{
 	data() {
 		return {
 			searchDefaultBody: {
-				reasonId: this.reasonId,
+				scheduleTime: this.scheduleTime,
 				year: this.thisScheduleTime.substring(0,4),
 				startTime: '',
 				endTime: '',
@@ -142,14 +146,14 @@ export default{
 		}
 	},
 	props:{
-		reasonId: Number,
+		scheduleTime: String,
 		thisScheduleTime: String
 	},
 	watch:{
-		reasonId(val, oldValue){
+		scheduleTime(val, oldValue){
 			this.ResetSearchBody();
 			//原因ID改变时查询一次数据
-			this.searchDefaultBody.reasonId = val;
+			this.searchDefaultBody.scheduleTime = val;
 			this.getScheduleDetailInfo();
 		}
 	},
@@ -171,10 +175,14 @@ export default{
 			this.searchDefaultBody.equipments = null;
 		},
 		getEquipment(){
-			 const _this = this,
-				   url = this.url.get_all_equipment + `?startTime=${this.searchDefaultBody.startTime || this.startTime}&endTime=${this.searchDefaultBody.endTime || this.endTime}&searchType=1`;
-			this.$http.get(
-				url
+			 const _this = this;
+			this.$http.post(
+				this.url.get_all_equipment,
+				{
+					startTime: this.searchDefaultBody.startTime || this.startTime,
+					endTime: this.searchDefaultBody.endTime || this.endTime,
+					searchType: 1
+				}
 			).then(res =>{
 				const resData = res.data;
 				
@@ -199,7 +207,7 @@ export default{
 		},
 		getScheduleDetailInfo(){
 			let _this = this;
-			if(this.selectedEquipments && this.selectedEquipments.length){
+			if(this.selectedEquipments){
 				const returnData = [];
 				this.selectedEquipments.every(item =>{
 					const equipmentInfo = item.split("_");

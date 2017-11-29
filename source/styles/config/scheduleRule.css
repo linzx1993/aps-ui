@@ -1,0 +1,195 @@
+@charset "UTF-8";
+/*常用颜色*/
+/*主题色*/
+/*表格灰框颜色*/
+/*下拉列表hover灰色*/
+/*标题栏背景灰色*/
+.c-theme-color {
+  color: #1E7CD9; }
+
+.rule-content {
+  flex: auto; }
+
+.rule-name {
+  border-bottom: 1px solid #dedede; }
+  .rule-name input {
+    padding-left: 20px;
+    width: 100%;
+    line-height: 45px;
+    font-size: 20px;
+    border: none;
+    background-color: transparent;
+    box-sizing: border-box; }
+    .rule-name input:hover {
+      text-decoration: underline; }
+
+.config-form {
+  box-sizing: border-box;
+  padding: 0 50px 60px 50px;
+  height: calc(100% - 130px);
+  overflow: auto; }
+
+.algorithm-name {
+  width: 110px; }
+
+.config-box .checkContent dt {
+  min-width: 170px;
+  text-align: right;
+  margin-right: 5px; }
+
+.config-box .config-select-box {
+  padding-left: 5px;
+  height: 28px;
+  width: 133px;
+  line-height: 28px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer; }
+  .config-box .config-select-box:hover {
+    border: 1px solid #1E7CD9; }
+  .config-box .config-select-box:after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-bottom: 1px solid #999;
+    border-left: 1px solid #999;
+    -ms-transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg); }
+
+.config-box .config-form input[type=text] {
+  display: inline-block;
+  padding-left: 5px;
+  width: 133px;
+  height: 28px;
+  line-height: 24px;
+  border: 1px solid #d9d9d9; }
+  .config-box .config-form input[type=text].error {
+    border: 1px solid red; }
+  .config-box .config-form input[type=text]:focus {
+    border: 1px solid #1E7CD9; }
+  .config-box .config-form input[type=text] label {
+    display: inline-block;
+    min-width: 100px; }
+
+.config-box .info {
+  font-size: 12px;
+  color: #aaa;
+  margin-left: 15px; }
+
+.config-box .scheduleCheck {
+  display: flex;
+  width: 100%; }
+  .config-box .scheduleCheck dd {
+    display: flex;
+    flex-wrap: wrap; }
+  .config-box .scheduleCheck label {
+    min-width: 200px; }
+    .config-box .scheduleCheck label:nth-child(4n+1) {
+      text-align: left; }
+
+.config-box .scheduleDrag {
+  display: none;
+  position: absolute;
+  top: 28px;
+  left: -1px;
+  background-color: #fff;
+  border: 1px solid #1E7CD9;
+  z-index: 10; }
+  .config-box .scheduleDrag li {
+    padding: 0 5px;
+    width: 128px;
+    min-width: 88px;
+    height: 30px;
+    line-height: 30px;
+    cursor: pointer; }
+    .config-box .scheduleDrag li:hover, .config-box .scheduleDrag li.active {
+      color: #1E7CD9; }
+  .config-box .scheduleDrag.draw {
+    display: block; }
+
+.config-box dd.disabled {
+  color: #808080;
+  background-color: #ecf0f1; }
+  .config-box dd.disabled .scheduleDrag {
+    display: none; }
+  .config-box dd.disabled:hover {
+    border: 1px solid #d9d9d9; }
+
+.config-box dd.not-edit {
+  cursor: not-allowed; }
+
+.config-box .checkConfig {
+  padding: 30px 0 0 100px; }
+
+.config-setting ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 400px; }
+
+/*排程规则-排程因子权重*/
+.schedule-weight-map h6 {
+  min-width: 170px; }
+.schedule-weight-map b {
+  font-weight: normal;
+  color: #f00;
+  height: 14px;
+  line-height: 14px; }
+.schedule-weight-map .weight-map-box {
+  display: flex;
+  flex-wrap: wrap; }
+  .schedule-weight-map .weight-map-box span {
+    width: 230px;
+    height: 55px; }
+
+input.disabled {
+  background-color: #ecf0f1;
+  cursor: not-allowed; }
+
+.show-advanced-configuration {
+  position: relative;
+  color: #0490f1;
+  cursor: pointer;
+  z-index: 1000; }
+  .show-advanced-configuration:after, .show-advanced-configuration:before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    right: -12px;
+    width: 5px;
+    height: 5px;
+    border-left: 1px solid #0490f1;
+    border-top: 1px solid #0490f1;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
+  .show-advanced-configuration:after {
+    top: 13px; }
+  .show-advanced-configuration.reverse:after, .show-advanced-configuration.reverse:before {
+    top: 10px;
+    -webkit-transform: rotate(-135deg);
+    -ms-transform: rotate(-135deg);
+    transform: rotate(-135deg);
+    -webkit-transition: transform 0.5s;
+    -ms-transition: transform 0.5s;
+    transition: transform 0.5s; }
+  .show-advanced-configuration.reverse:before {
+    top: 5px; }
+
+/*高级设置分割线*/
+.checkR-rule-line {
+  border-top: 1px solid #ccc; }
+
+.look-online-config {
+  text-decoration: underline; }
+  .look-online-config:hover {
+    color: #1E7CD9; }
+
+/*# sourceMappingURL=scheduleRule.css.map */

@@ -4,18 +4,23 @@
 app.controller("ruleController",["$rootScope","$scope","$http","$timeout","scheduleTableViewModelService","tool","http", function($rootScope,$scope,$http,$timeout,scheduleTableViewModelService,tool,http){
     //-----本页面相关初始化操作-----
     $scope.configNav.activeNav = ".rule";//配置选项栏设置active的class
-    $scope.$parent.showManage = false;//管理目录的垃圾桶删除按钮消失
 
-    $scope.disable = {
-        schedulePointSelected : false,//pap排程规则下拉列表==>
-        scheduleInterval : false//排程周期 ==>
-    };
-    $scope.notEdit = {
-        schedulePointSelected : false,
-        scheduleInterval:false
-    };
-    //-----本页面相关初始化操作-----
+	$scope.regex = {
+		overduePeriod : /(^[1-9]$)|(^[1-8][0-9]$)|90$/,
+		scheduleInterval : /(^[0-9]$)|(^[1-8][0-9]$)|90$/,
+		freezePeriod : /(^[0-9]$)|(^[1-8][0-9]$)|90$/,
+		colorTypes :　/[^0-9]/g
+	};
 
+    //请求所有的算法名称
+    http.get({
+        url: $rootScope.restful_api.get_all_Algorithm,
+        successFn : (res) => {
+            $scope.algorithmList = res.data;
+        },
+    });
+
+    //获取所有规则
     http.get({
         url: $rootScope.restful_api.all_schedule_rule,
         successFn: (res) => {
@@ -27,107 +32,47 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
                 http.get({
                     url: $rootScope.restful_api.single_schedule_rule+$scope.ruleId,
                     successFn: (res) => {
-                        $scope.currentRule = $scope.ruleList[0];
-                        $scope.renderRulePage(res.data);
-                    }
-                })
-                //表单初始化
-                    .then(function () {
-                        //设置pap排程规则
-                        if($scope.scheduleCheckData.papType === "PAP_DISABLE"){
-                            $scope.disable.schedulePointSelected = true;
-                            $scope.notEdit.schedulePointSelected = true;
-                        }else if($scope.scheduleCheckData.papType === "PAP_SCHEDULE_RULE"){
-                            $scope.disable.schedulePointSelected = false;
-                            $scope.notEdit.schedulePointSelected = true;
-                        }
-                        //设置下拉选中值,初始化时间框
-                        setTimeout(function(){
-                            Array.prototype.forEach.call($("dd.relative span"),function(item){
-                                let text = $(item).siblings("select").find("option:selected").text();
-                                $(item).text(text);
-                            })
-                        },0);
-                        $("#freezePeriod,#scheduleInterval")
-                            .keyup(function () {
-                                if (this.value.length === 1) {
-                                    this.value = this.value.replace(/[^0-9]/g, '')
-                                } else {
-                                    this.value = this.value.replace(/\D/g, '')
-                                }
-                                if (this.value > 90) {
-                                    this.value = 90;
-                                }
-                            })
-                            .blur(function(){
-                                if(!this.value){
-                                    this.value = 0;
-                                }
-                            });
+						$scope.currentRule = $scope.ruleList[0];
+                        $scope.scheduleCheckData = res.data;
 
-                        let regex = /(^[1-8][0-9]$)|(^[1-9]$)$/;
-                        $("#overduePeriod")
-                            .keyup(function () {
-                                if (this.value.length === 1) {
-                                    this.value = this.value.replace(/[^1-9]/g, '')
-                                } else {
-                                    this.value = this.value.replace(/\D/g, '')
-                                }
-                                if (this.value > 90) {
-                                    this.value = 90;
-                                }
-                            })
-                            .blur(function(){
-                                if(!this.value){
-                                    this.value = 1;
-                                }
-                            });
-                    })
-                    //表单验证及相关逻辑联动
-                    .then(function(){
-                        let regex = /^(\d{1,2}(\.\d{1})?|100)$/;//只能输入大于0小于100的数字
+                        $scope.renderRulePage(res.data);
+
+                        //================表单验证及相关逻辑联动
+                        let scheduleWeightregex = /^(\d{1,2}(\.\d{1})?|100)$/;//只能输入大于0小于100的数字
                         $(".jScheduleWeightMap input").each(function(){
                             $(this).keyup(function(){
                                 if(!$(this).val()){
                                     $(this).addClass("error").siblings("b").show().text("输入项不能为空");
-                                } else if(!regex.test($(this).val())){
+                                } else if(!scheduleWeightregex.test($(this).val())){
                                     $(this).addClass("error").siblings("b").show().text("输入项不符合规则");
                                 } else {
                                     $(this).removeClass("error").siblings("b").hide();
                                 }
                             })
                         })
-                    })
+                    }
+                })
             }
         },
         errorFn: () => {
-            $scope.info.fail("请求规则失败，请检查服务器");
+			layer.msg('获取排程规则失败，请检查服务器', {time: 3000, icon: 2})
             $scope.ruleList = [];
         }
     });
 
-
     //判断需要发送的数据要保存的属性
-    function getFromValue(postData,searchObj){
-        for(let name in postData){
-            //如果这个属性是对象的话
-            if(typeof postData[name] === "object"){
-                getFromValue(postData[name],searchObj)
+    function getRuleFromValue(postData,searchObj){
+        const itemMap = postData.itemMap;
+        for(let name in searchObj){
+            if(searchObj[name] === "on"){
+                itemMap[name].itemValue = true;
+            }
+            //为false，表示表单未选中
+            else if(!searchObj[name]){
+                itemMap[name].itemValue = false;
             }else{
-                //如果序列化结果没有这个属性的话，例如userId,ruleId
-                if(searchObj[name] === undefined){
-                }else{
-                    //boolean属性判断,on或者ng-checked表示选中
-                    if(searchObj[name] === "on" || searchObj[name] === "ng-checked"){
-                        postData[name] = true;
-                    }
-                    //为false，表示表单未选中
-                    else if(!searchObj[name]){
-                        postData[name] = false;
-                    }else{
-                        postData[name] = searchObj[name];
-                    }
-                }
+
+                itemMap[name].itemValue = searchObj[name];
             }
         }
         return postData;
@@ -179,10 +124,24 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
         })
     };
 
+    //修改算法改变规则列表
+    $scope.changeAlgorithm = function (algorithm) {
+		http.get({
+			url: $rootScope.restful_api.single_schedule_rule + '/default/' + algorithm,
+			successFn: function (res) {
+				//将排程规则的配置参数更新为选择算法给的配置参数，然后用于渲染
+				$scope.scheduleCheckData.algorithmName = algorithm;
+				// console.log(algorithm);
+				$scope.scheduleCheckData.itemMap = res.data;
+				$scope.renderRulePage($scope.scheduleCheckData);
+			}
+		});
+	};
+
 	//创建临时规则数据库，存储临时创建但是未保存的规则，刷新或者离开页面数据库消失，表示用户不想保存
 	$scope.temporaryRuleData = {};
 	//执行临时创建规则
-	$scope.recordTemporaryPlan = () => {
+	$scope.recordTemporaryRule = () => {
 		//检测是否重名
 		if(!$scope.newRuleName){
 			layer.msg('请输入正确的排程规则名');
@@ -193,12 +152,23 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 			return;
 		}
 		layer.closeAll();
-		//判断用户是否选了规则,没选设置为默认规则
-		$scope.ruleId = $("#ruleSelect").val() === "0" ? "default" : $("#ruleSelect").val();
+		// 判断用户是否选了规则,没选设置为默认规则，
+		// 默认规则需要添加算法 2017-06-20
+		let isSelectAlgorithm = $("#ruleSelect").val() === "0";
+		$scope.ruleId = isSelectAlgorithm ? "default/" + $scope.algorithmList[0] : $("#ruleSelect").val();
 		http.get({
 			url: $rootScope.restful_api.single_schedule_rule + $scope.ruleId,
 			successFn: (res) => {
-				$scope.scheduleCheckData = res.data;
+				//如果选默认的，后台的返回值是排程规则配置项的map数据，而请求规则时，返回的是一个完整的排程规则数据
+				if(isSelectAlgorithm){
+					$scope.scheduleCheckData = {
+						algorithmName : $scope.algorithmList[0],
+						itemMap : res.data
+					};
+				}else{
+					$scope.scheduleCheckData = res.data;
+				}
+
 				$scope.ruleId = "temporary" + new Date().getTime();
 				$scope.currentRule = {
 					"ruleId" : $scope.ruleId,
@@ -208,13 +178,14 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				$scope.temporaryRuleData[$scope.ruleId] = $scope.scheduleCheckData;
 
 				$scope.renderRulePage($scope.scheduleCheckData);
+				$scope.newRuleName = "";//清空新建规则弹出框的规则名字，便于下次新建规则
 
-				//最后一个li获得actice的状态
+				//最后一个li获得active的状态
 				$timeout(function () {
 					$(".check-rule-nav .rule-li").last().addClass("active").siblings().removeClass("active");
 				},0);
 			},
-			errorFn: () => {$scope.info.fail("获取排程规则失败，请检查网络")}
+			errorFn: () => {layer.msg('获取排程规则失败，请检查服务器', {time: 3000, icon: 2})}
 		})
 	};
 
@@ -223,7 +194,7 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 		//排程规则名字不可为空
 		let ruleName = $(".rule-name input").val();
 		if(!ruleName){
-			layer.alert("排程规则名不可为空");
+			layer.msg('排程规则名不可为空',{icon : 2});
 			return;
 		}
 		//=========判断表单是否为空
@@ -236,8 +207,6 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				//如果没填写
 				if(!item.value){
 					$(item).addClass("error").siblings("b").show().text("输入项不能为空");
-					//获取提示文字，去除文字和冒号
-					// let tipWord = item.parentNode.previousElementSibling.innerText.slice(1,-2);
 					validata = false;
 				}else{
 					//如果输入项不符合规则的话
@@ -255,12 +224,34 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 		if(!validata){
 			return false;
 		}
+
+		//判断几个输入框是否符合正则----拉取当前车间计划天数
+		if($("#overduePeriod").val() !== undefined && !$scope.regex.overduePeriod.test($("#overduePeriod").val())){
+			layer.msg('请输入正确的拉取当前车间计划天数',{icon : 2});
+			return;
+		}
+		//判断几个输入框是否符合正则----拉取当前车间计划天数
+		if($("#scheduleInterval").val() !== undefined && !$scope.regex.scheduleInterval.test($("#scheduleInterval").val())){
+			layer.msg('请输入正确的排程间隔天数',{icon : 2});
+			return;
+		}
+		//判断几个输入框是否符合正则----拉取当前车间计划天数
+		if($("#freezePeriod").val() !== undefined && !$scope.regex.freezePeriod.test($("#freezePeriod").val())){
+			layer.msg('请输入正确的冻结期天数	',{icon : 2});
+			return;
+		}
+		//判断几个输入框是否符合正则----单台涂装支持的颜色种类
+		if(!$("#colorTypes").val() || $scope.regex.colorTypes.test($("#colorTypes").val())){
+			layer.msg('请输入正确的单台涂装支持的颜色种类	',{icon : 2});
+			return;
+		}
+
 		//表单序列化获得需要发送的数据
-		let post = getFromValue($scope.scheduleCheckData,$("form").serializeObject());
-		//表单序列化获取不到日历插件的值，手工获取
-		post.minScheduleDay = $("#minScheduleDay").val();
-		//获取规则名字
+		let post = getRuleFromValue($scope.scheduleCheckData,$("form").serializeObject());
+
+		//获取规则名字,算法名字
 		post.ruleName = ruleName;
+		post.algorithmName = $scope.algorithmName;
 
 		//判断是新建规则还是更新规则
 		if(($scope.ruleId + "").slice(0,9) === "temporary"){
@@ -271,16 +262,17 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				data: post,
 				successFn: function(res){
 					if(res.data.error_response){
-						$scope.info.fail("创建排程规则失败，请检查服务器");
+						layer.msg('创建排程规则失败,请检查服务器', {time: 3000, icon: 2});
 					}else{
 						$scope.ruleId = $scope.currentRule.ruleId = res.data;
-						$scope.info.success("创建排程规则成功");
+						layer.msg('创建排程规则成功', {time: 3000, icon: 1});
 					}
 				},
 				errorFn: function(){
-					$scope.info.fail("创建排程规则失败，请检查服务器");
+					layer.msg('排程规则更新失败,请检查服务器', {time: 3000, icon: 2});
 				}
 			});
+
 		}else{
 			//更新
 			http.put({
@@ -288,13 +280,13 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				data: post,
 				successFn: function(res){
 					if(res.data.error_response){
-						$scope.info.fail("排程规则更新失败");
+						layer.msg('排程规则更新失败', {time: 3000, icon: 2});
 					}else{
-						$scope.info.success("排程规则更新成功");
+						layer.msg('排程规则更新成功', {time: 3000, icon: 1});
 					}
 				},
 				errorFn: function(){
-					$scope.info.fail("排程规则更新失败,请检查服务器");
+					layer.msg('排程规则更新失败,请检查服务器', {time: 3000, icon: 2});
 				}
 			});
 		}
@@ -311,7 +303,8 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				url: $rootScope.restful_api.single_schedule_rule + rule.ruleId,
 				successFn: (res) => {
 					//渲染规则页面数据
-					$scope.renderRulePage(res.data);
+					$scope.scheduleCheckData = res.data;
+					$scope.renderRulePage($scope.scheduleCheckData);
 				}
 			});
 		}
@@ -327,14 +320,16 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
             layer.close(deleteRule);
             if((ruleId + "").slice(0, 9) === "temporary"){
 				$timeout(() => {
-
 					delete $scope.temporaryRuleData[ruleId];
 					$scope.ruleList = $scope.ruleList.filter((item) => {
 						return item.ruleId !== ruleId;
 					});
 
-					//没有方案时，不需要执行
-					if ($scope.ruleList.length !== 0) {
+					//删除成功，查看第一个排程规则，没有规则时，不需要执行
+					if($scope.ruleList.length !== 0){
+						$timeout(function () {
+							$(".check-rule-nav .rule-li").first().addClass("active").siblings().removeClass("active");
+						},0);
 						$scope.lookRule($scope.ruleList[0]);
 					}
 				})
@@ -349,9 +344,9 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 									$scope.ruleList.splice(index,1);
 								}
 							});
-							$scope.info.success("删除排程规则成功");
+							layer.msg('删除排程规则成功', {time: 3000, icon: 1});
 							//删除成功，查看第一个排程规则，没有规则时，不需要执行
-							if($scope.ruleList.length != 0){
+							if($scope.ruleList.length !== 0){
 								$timeout(function () {
 									$(".check-rule-nav .rule-li").first().addClass("active").siblings().removeClass("active");
 								},0);
@@ -361,13 +356,11 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 					},
 					errorFn: function(res){
 						if(res.data.error_response.code === 102){
-							$scope.info.fail("你没有权限删除此规则");
-							// return
+							layer.msg('你没有权限删除此规则', {time: 3000, icon: 4});
 						} else if(res.data.error_response.code === 103){
-							$scope.info.fail("此规则正在使用，无法删除");
-							// return
+							layer.msg('此规则正在使用，无法删除', {time: 3000, icon: 4});
 						}else{
-							$scope.info.fail("删除规则失败，请检查服务器")
+							layer.msg('删除规则失败，请检查服务器', {time: 3000, icon: 2});
 						}
 					}
 				});
@@ -376,6 +369,94 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
             layer.close(deleteRule);
         });
     };
+
+	//监听拉取当前车间计划天数
+	$scope.testOverduePeriod = function (e) {
+		let regex = /(^[1-9]$)|(^[1-8][0-9]$)|90$/;
+		if(!regex.test($scope.scheduleCheckDataItemMap.overduePeriod.itemValue)){
+			layer.msg("请输入正确的拉取当前车间计划天数",{icon : 2});
+			// $(e.target).addClass("error");
+		}
+	};
+
+    //监听冻结期的输入值是否符合标准
+    $scope.testFreezePeriod = function (e) {
+		let regex = /(^[0-9]$)|(^[1-8][0-9]$)|90$/;
+		if(!regex.test($scope.scheduleCheckDataItemMap.freezePeriod.itemValue)){
+			layer.msg("请输入正确的排程间隔天数",{icon : 2});
+			// $(e.target).addClass("error");
+		}
+	};
+
+
+    //监听排程间隔的输入值是否符合标准
+    $scope.testScheduleInterval = function (e) {
+		let regex = /(^[0-9]$)|(^[1-8][0-9]$)|90$/;
+		if(!regex.test($scope.scheduleCheckDataItemMap.scheduleInterval.itemValue)){
+			layer.msg("请输入正确的冻结期天数",{icon : 2});
+			// $(e.target).addClass("error");
+		}
+	};
+
+
+	//监听单台涂装支持的颜色种类的输入值是否符合标准
+    $scope.testColorTypes = function () {
+		$scope.scheduleCheckDataItemMap.colorTypes.itemValue = $scope.scheduleCheckDataItemMap.colorTypes.itemValue.replace(/[^0-9]/g, '')
+	};
+
+	//显示规则时，js设置目录栏高度,使左边目录栏的高度可以撑满整个div
+	//展开规则时，实时获取规则高度设置，收起时，保证不小于规则最小区域
+	$scope.setCheckRuleHeight = function () {
+		$timeout(function () {
+			let checkContentHeight = $(".checkContent").height();
+			let configFormHeight = $(".config-form").height();
+			$(".check-rule-nav").height(configFormHeight <= checkContentHeight ? checkContentHeight - $(".config-content-title").height() : configFormHeight);
+		})
+	};
+
+	//显示隐藏高级规则，专家规则---start
+	$rootScope.jExpertConfiguration = false;
+	$scope.toggleAdvancedShow = function(){
+		$scope.jAdvancedConfiguration = !$scope.jAdvancedConfiguration;
+		return $scope.setCheckRuleHeight()
+	};
+
+	$scope.toggleExpertShow = function(){
+		$scope.jExpertConfiguration = !$scope.jExpertConfiguration;
+		return $scope.setCheckRuleHeight()
+	};
+	//显示隐藏高级规则,专家规则---end
+
+	/*
+	 * 监测排程前校验中的pap选项，checkbox为false将pap类型下拉框设置为不启用，否则反之
+	 * 取消绑定，执行unbindWatchPap()
+	 */
+	$scope.$watch("scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING'].itemValue",function (newValue,oldValue) {
+		if(!$scope.scheduleCheckDataItemMap || !$scope.scheduleCheckDataItemMap.papType)return;
+		//设置为true，启用默认规则
+		if(newValue === true){
+			if($scope.scheduleCheckDataItemMap.papType.itemValue !== "1"){
+				$scope.scheduleCheckDataItemMap.papType.itemValue = "2";
+			}
+		}else {
+			$scope.scheduleCheckDataItemMap.papType.itemValue = "0";
+		}
+	});
+
+	$scope.$watch("scheduleCheckDataItemMap.papType.itemValue",function (newValue,oldValue) {
+		if(!$scope.scheduleCheckDataItemMap || !$scope.scheduleCheckDataItemMap.schedulePoint)return;
+		//设置为true，启用默认规则
+		if(newValue !== "0"){
+			$scope.scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING'].itemValue = true;
+			if(newValue === "1"){
+				$scope.scheduleCheckDataItemMap.schedulePoint.itemValue = "3";
+			}
+		}else {
+			$scope.scheduleCheckDataItemMap['preScheduleCheck.PAP_INFO_CHECKING'].itemValue = false;
+		}
+		$scope.disabledByPapType = $scope.scheduleCheckDataItemMap.papType.itemValue === '0';
+		$scope.disabledByPapTypeValue = $scope.scheduleCheckDataItemMap.papType.itemValue === '1';
+	});
 
     //==========================上线配置相关代码---start-=================//
     //查看设备初始状态
@@ -392,88 +473,87 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 	});
 
 	//获取所有设备类型
-	//设备类型下拉列表数据
-	$scope.equipmentSelectTypeList = [];
-	$scope.equipmentTypeData = {
-		showText : "设备类型",
-		value : "",
-		repeatData : [],
-	};
+	$scope.equipmentSelectTypeZeroList = []; //离散设备的下拉列表
+	$scope.selectEquipmentTypeZero = []; //选中的离散设备
+	$scope.equipmentSelectTypeOneList = [];	//生产单元的下拉列表
+	$scope.selectEquipmentTypeOne = [];	//选中的生产单元
 	http.get({
 		url : $rootScope.restful_api.get_equipment_type + "?startTime=" + tool.getCorrectDate(new Date) + "&endTime=" + tool.getCorrectDate(new Date),
 		successFn : function (res) {
 			res.data.forEach((item) => {
-				$scope.equipmentTypeData.repeatData.push({
-					dragItemText : item.modelName,
-					id : item.modelId
-				});
+				item.id = item.modelId + "_" + item.modelType;
+				if(item.modelType === 0){
+					$scope.equipmentSelectTypeZeroList.push(item);
+				} else if(item.modelType === 1){
+					$scope.equipmentSelectTypeOneList.push(item);
+				}
 			});
 		}
 	});
 
 	//获取所有设备
-	//设备下拉列表数据
+	$scope.equipmentList = [];
+	//设备下拉列表选中设备的数据
 	$scope.equipmentSelectList = [];
-	$scope.equipmentData = {
-		showText : "设备",
-		value : "",
-		repeatData : [],
-	};
-	http.get({
-		url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
-		+ "&endTime=" + tool.getCorrectDate(new Date)
-		+ "&searchType=1"
-		+ "&modelIdList="
-		+ "&locationFilterList=" ,
+	http.post({
+		url : $rootScope.restful_api.get_all_equipment,
+		data : {
+			startTime : tool.getCorrectDate(new Date),
+			endTime : tool.getCorrectDate(new Date),
+			searchType : 0,
+			modelIdList : [],
+			locationFilterList : []
+		},
 		successFn : function (res) {
-			$scope.equipmentList = res.data;
-			let equipmentList = [];
-			for(let i in $scope.equipmentList){
-				equipmentList.push({
-					dragItemText : $scope.equipmentList[i].productUnitName,
-					id : $scope.equipmentList[i].productUnitId + "_" + $scope.equipmentList[i].type,
-					equipmentCode : $scope.equipmentList[i].productUnitCode
-				});
-			}
-			$scope.equipmentData.repeatData = equipmentList;
+			$scope.equipmentList = getEquipmentList(res.data);
 		}
 	});
 
+	/*
+	 * desc : 请求获取到的设备列表是个对象，然后将其转化成数组
+	 */
+	function getEquipmentList(equipmentList) {
+		let equipmentData = [];
+		for(let i in equipmentList){
+			equipmentData.push({
+				label : equipmentList[i].productUnitName,
+				id : equipmentList[i].productUnitId + "_" + (equipmentList[i].type === "EQUIPMENT" ? 0 : 1),
+				equipmentCode : equipmentList[i].productUnitCode,
+				equipmentName : equipmentList[i].productUnitName,
+			});
+		}
+		return equipmentData
+	}
+
 	//根据改动条件，获得equipment设备列表
 	$scope.getEquipment = function () {
-		console.log($scope.equipmentSelectTypeList);
-		http.get({
-			url : $rootScope.restful_api.get_all_equipment + "?startTime=" + tool.getCorrectDate(new Date)
-			+ "&endTime=" + tool.getCorrectDate(new Date)
-			+ "&searchType=1"
-			+ "&modelIdList=" + $scope.equipmentSelectTypeList.join(",")
-			+ "&locationFilterList=" + $scope.get_selected_location().join(","),
+		http.post({
+			url : $rootScope.restful_api.get_all_equipment,
+			data : {
+				startTime : tool.getCorrectDate(new Date),
+				endTime : tool.getCorrectDate(new Date),
+				searchType : 1,
+				modelIdList : $scope.selectEquipmentTypeZero.concat($scope.selectEquipmentTypeOne),
+				locationFilterList : $scope.get_selected_location()
+			},
 			successFn : function (res) {
-				let productUnit = res.data;
-				let equipmentList = [];
-				for(let i in productUnit){
-					equipmentList.push({
-						dragItemText : productUnit[i].productUnitName,
-						id : productUnit[i].productUnitId + "_" + (productUnit[i].type === "PRODUCTION_UNIT" ? 1 : 0)
-					});
-				}
-				$scope.equipmentData.repeatData = equipmentList;
+				$scope.equipmentList = getEquipmentList(res.data);
 			}
 		});
 	};
 
 	//打开查看详细的上限配置
-    $scope.lookOnlineConfig = function () {
-        layer.open({
-            content : $(".jOnlineContent"),
+	$scope.lookOnlineConfig = function () {
+		layer.open({
+			content : $(".jOnlineContent"),
 			type: 1,
 			title: "初始生产状态",
-            area : ["600","700px"],
+			area : ["600","700px"],
 			shadeClose: true,
 			success : ()=> {
 
 			}
-        });
+		});
 		$scope.isShowSearchConfig = true;
 	};
 
@@ -483,39 +563,44 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 		$scope.onlineConfigList = [];
 		/*因为坑爹的后台数据没法一次提供所有需要的，
 		 所以要先从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
-		 然后再去到请求获得数据里面根据设备id_type去获取对应的物料信息，将获得到的信息合并到$scope.onlineConfigList
+		 然后再去后台返回的数据里面，根据设备id_type去获取对应的物料信息，将获得到的物料信息合并到$scope.onlineConfigList
 		 */
 		//	前台加个判断，如果设备不选，默认全部全选
 		if($scope.equipmentSelectList.length === 0){
 			for(let i in $scope.equipmentList){
+				let equipment = $scope.equipmentList[i].id.split("_");
 				postData.push({
-					"equipmentId":$scope.equipmentList[i].productUnitId,
-					"produceUnitType":$scope.equipmentList[i].type
+					"equipmentId":equipment[0],
+					"produceUnitType":equipment[1]
 				})
 			}
 		}else{
 			$scope.equipmentSelectList.forEach((item) => {
-				let arr = item.split("_");
+				let equipment = item.split("_");
 				postData.push({
-					"equipmentId":arr[0],
-					"produceUnitType":item.replace(arr[0] + "_","")
+					"equipmentId":equipment[0],
+					"produceUnitType":equipment[1]
 				})
 			});
 		}
 		//从选中的设备列表里面，根据设备id_type，到整个设备列表去获得设备名，得出一个新数组$scope.onlineConfigList
 		postData.forEach((selectItem) => {
-			$scope.equipmentData.repeatData.some((item) => {
-				if(item.id === (selectItem.equipmentId + "_" + selectItem.produceUnitType)){
+			$scope.equipmentList.some((item) => {
+				if((selectItem.equipmentId + "_" + selectItem.produceUnitType) === item.id){
 					$scope.onlineConfigList.push({
-						equipmentName : item.dragItemText,
+						equipmentName : item.label,
 						equipmentCode : item.equipmentCode,
-						equipmentId:selectItem.equipmentId,
-						equipmentType:selectItem.produceUnitType,
+						equipmentId : selectItem.equipmentId,
+						equipmentType : selectItem.produceUnitType,
 					});
 					return true;
 				}
 			});
 		});
+		if(postData.length === 0){
+			layer.alert('没有设备可以配置');
+			return;
+		}
 		// 请求获得数据里面根据设备id_type去获取对应的物料信息，将获得到的信息合并到$scope.onlineConfigList
 		http.post({
 			url : $rootScope.restful_api.search_online_config,
@@ -524,7 +609,7 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				res.data.forEach((resItem) => {
 					//获得渲染表格所需要的数据
 					$scope.onlineConfigList.forEach((onlineItem) => {
-						if(resItem.equipmentId + "_" + resItem.produceUnitType  === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
+						if(resItem.equipmentId + "_" + (resItem.produceUnitType === "EQUIPMENT" ? 0 : 1) === onlineItem.equipmentId + "_" + onlineItem.equipmentType){
 							({
 								materialCode:onlineItem.materialCode,
 								materialId:onlineItem.materialId,
@@ -536,89 +621,11 @@ app.controller("ruleController",["$rootScope","$scope","$http","$timeout","sched
 				//出现table表格和按钮
 				$scope.isShowSearchConfig = true;
 			},
+			errorFn : function (res) {
+				//table表格和按钮消失
+				$scope.isShowSearchConfig = false;
+			}
 		})
 	};
 	//==========================上线配置相关代码---end-=================//
-
-    //显示规则时，js设置目录栏高度,使左边目录栏的高度可以撑满整个div
-    //展开规则时，实时获取规则高度设置，收起时，保证不小于规则最小区域
-    $scope.setCheckRuleHeight = function () {
-        $timeout(function () {
-            let checkContentHeight = $(".checkContent").height();
-            let configFormHeight = $(".config-form").height();
-            $(".check-rule-nav").height(configFormHeight <= checkContentHeight ? checkContentHeight - $(".config-content-title").height() : configFormHeight);
-        })
-    };
-
-    //显示隐藏高级规则---start
-    $rootScope.jExpertConfiguration = false;
-    $scope.toggleAdvancedShow = function(){
-        $scope.jAdvancedConfiguration = !$scope.jAdvancedConfiguration;
-        return $scope.setCheckRuleHeight()
-    };
-
-    $scope.toggleExpertShow = function(){
-        $scope.jExpertConfiguration = !$scope.jExpertConfiguration;
-        return $scope.setCheckRuleHeight()
-    };
-    $scope.hideAdvancedConfig = function () {
-        $scope.jExpertConfiguration = $scope.jAdvancedConfiguration = false;
-        return $scope.setCheckRuleHeight()
-    };
-    //显示隐藏高级规则---end
-
-    // //取消绑定，执行unbindWatchPap()
-    // let unbindWatchPap = $scope.$watch("scheduleFrontData[5].select",function (newValue,oldValue) {
-    //     //设置为true，启用默认规则
-    //     if(newValue === true){
-    //         $scope.disable.schedulePointSelected = false;
-    //         $scope.notEdit.schedulePointSelected = true;
-    //         $(".pap-type .scheduleDrag li").eq(2).trigger("click");
-    //     }else {
-    //         //设置为false，下拉选项设置为不启用
-    //         $scope.disable.schedulePointSelected = true;
-    //         $scope.notEdit.schedulePointSelected = true;
-    //         $(".pap-type .scheduleDrag li").eq(0).trigger("click");
-    //     }
-    // });
-    // $("body")
-    // //点击pap类型决定起排工序,和影响排程前校验中的pap检验项
-    //     .on("click",".pap-type li",function(){
-    //         if($(this).attr("data-value")=="PAP_DISABLE"){
-    //             //不启用
-    //             $timeout(function(){
-    //                 $scope.disable.schedulePointSelected = true;
-    //                 $scope.notEdit.schedulePointSelected = true;
-    //                 $scope.scheduleFrontData[5].select = false;//联动排程前校验的pap
-    //                 $(".schedule-point li").eq(0).trigger("click");
-    //             })
-    //         }else if($(this).attr("data-value")=="PAP_SCHEDULE_RULE"){
-    //             $timeout(function(){
-    //                 $scope.disable.schedulePointSelected = false;
-    //                 $scope.notEdit.schedulePointSelected = true;
-    //                 $scope.scheduleFrontData[5].select = true;//联动排程前校验的pap
-    //                 $(".schedule-point li").eq(2).trigger("click");
-    //             })
-    //         }else{
-    //             $timeout(function(){
-    //                 $scope.disable.schedulePointSelected = false;
-    //                 $scope.notEdit.schedulePointSelected = false;
-    //                 $scope.scheduleFrontData[5].select = true;//联动排程前校验的pap
-    //             })
-    //         }
-    //     })
-    //     //排程周期决定排程间隔
-    //     .on("click",".schedulePeriod li",function(){
-    //         if($(this).attr("data-value")=="BY_DAY"){
-    //             $timeout(function(){
-    //                 $scope.disable.scheduleInterval = false;
-    //                 $scope.notEdit.scheduleInterval = false;
-    //             })
-    //         }else{
-    //             $timeout(function(){
-    //                 $scope.disable.scheduleInterval = true;
-    //                 $scope.notEdit.scheduleInterval = true;
-    //             })
-    //         }
-    //     })
 }]);

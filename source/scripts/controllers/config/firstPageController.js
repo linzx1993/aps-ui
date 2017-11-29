@@ -37,7 +37,7 @@ app
                     $scope.selectValue = res.data.selectList[0].valueContent;
                 },
 				errorFn: () => {
-                    layer.alert("获取显示合并项失败，请检查服务器");
+                    layer.alert("获取翻转显示项失败，请检查服务器");
                 }
 			});
         };
@@ -65,9 +65,9 @@ app
                 data:postData,
 				successFn: (res)=>{
                     if(res.data){
-                        $scope.info.success("数据保存成功")
+						layer.msg('保存成功', {time: 3000, icon: 1});
                     }else{
-                        $scope.info.fail("数据保存失败")
+						layer.msg('保存失败', {time: 3000, icon: 2});
                     }
                 },
 				errorFn: ()=>{
@@ -111,11 +111,11 @@ app
 				url: $rootScope.restful_api.firstPage_display_flip + $scope.locationId,
 				data: postData,
 				successFn: (res)=>{
-                    if(res.data){
-                        $scope.info.success("数据保存成功")
-                    }else{
-                        $scope.info.fail("数据保存失败")
-                    }
+					if(res.data){
+						layer.msg('保存成功', {time: 3000, icon: 1});
+					}else{
+						layer.msg('保存失败', {time: 3000, icon: 2});
+					}
                 },
 				errorFn: ()=>{
 					$scope.info.fail("数据保存失败，请检查服务器");

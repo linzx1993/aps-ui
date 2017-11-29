@@ -1,0 +1,17 @@
+<div class="columnContent admin-display">
+    <h1 class="config-content-title"><span>{{"adminConfig" | translate}}</span> > <span>{{"defaultShowConfiguration" | translate}}</span></h1>
+    <!--<h1 class="config-content-title">{{"adminConfig" | translate}} > 默认显示项</h1>-->
+    <div class="ml-45 relative admin-display-box">
+        <h6 class="ml-20 mt-15 fs-16">显示项默认配置-工作单元</h6>
+        <div class="flex admin-display-content">
+            <transfer class="mt-20" data="allItemList" value="selectItem" move="true"></transfer>
+            <div id="columnWorkshop" class="location-list location-show">
+                <h6 class="tc mb-5 mt-20">{{"selectWorkShop" | translate}} <span style="color: #808080" class="fs-12">（{{"selectWorkShopTip" | translate}}）</span></h6>
+                <folder-tree current-folder="folder"></folder-tree>
+            </div>
+        </div>
+        <div class="tc">
+            <a href="javascript:;" class="mr-15 save-sort saveConfig" ng-click="saveAdminDefaultDisplay()">应用</a>
+        </div>
+    </div>
+</div>

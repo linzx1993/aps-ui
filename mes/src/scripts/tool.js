@@ -1,8 +1,14 @@
 /**
+ * name : tool.js
+ * version : 0.0.1
+ * des : 公共小工具集合
  * Created by linzx on 2017/6/24.
  */
 (function (w, u) {
   w.t = {
+    init(){
+
+    },
     /**
      * 判断传入对象的类型
      * *time:2017-03-24
@@ -73,6 +79,26 @@
       curDate.setDate(0);
       /* 返回当月的天数 */
       return curDate.getDate();
-    }
+    },
+
+	/**
+     * desc:小数转指定位数的百分数
+     * time:2017-08-31
+     * last : duww
+     * @param: decimal ：需要进行操作的小数
+     * @param: length ：保留的位数
+     * @return: number 查询那个月的天数 0-31
+     **/
+	decimalToPercentage(decimal, length = 0){
+		if(!decimal && decimal !== 0){
+			return
+		}
+		return (decimal * 100).toFixed(length) + "%";
+	}
   };
+  "Boolean|Number|String|Function|Array|Date|RegExp|Object|Error".split("|").forEach(function (item) {
+    w.t["is" + item] = function (obj) {
+          return {}.toString.call(obj) === "[object " + item + "]";
+      }
+  });
 })(window);

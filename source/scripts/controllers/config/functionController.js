@@ -20,41 +20,43 @@ app
             showItemLists : [],//显示天数
             combineItemList : [],//显示合并项数组
         };
-
-
-        //======================taskController========================//
-        //设置面包屑导航
-        $scope.functionPage.showPageConfig = "任务池显示项";
-
-        //获取数据，创造车间树
-        // $scope.createWorkshop(true,getColumnData);
     }])
     .controller("taskColumnController",["$rootScope","$scope","http",function($rootScope,$scope,http){
+		//设置面包屑导航
+		$scope.functionPage.showPageConfig = "任务池显示项";
+		$scope.taskRoomDimension = "planDimension";    //进入页面默认显示计划维度
+        let taskRoomUrl = $rootScope.restful_api.task_column_plan_config;
+
+        $scope.$watch("taskRoomDimension",function (n, o) {
+            if(n === "planDimension"){
+				taskRoomUrl = $rootScope.restful_api.task_column_plan_config;
+				$scope.getColumnData();
+            }else if(n === 'orderDimension'){
+				taskRoomUrl = $rootScope.restful_api.task_column_order_config;
+				$scope.getColumnData();
+            }
+		});
         /**
          *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
          */
-        let getColumnData = () =>{
+		$scope.getColumnData = () =>{
             http.get({
-                url: $rootScope.restful_api.task_column_config + $scope.locationId,
+                url: taskRoomUrl + $scope.locationId,
                 successFn: (res) => {
                     //如果请求到的数据有列信息，没有则给出提醒信息
-                    if(res.data.optionList.length){
+                    if(res.data.optionList && res.data.optionList.length){
                         //获得get到的数据，渲染页面
-                        $scope.setDisplayGetData(res);
-                        $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
+						$scope.setDisplayGetData(res);
                     }else{
-                        $scope.info.fail("没有显示信息需要配置")
+						$scope.setDisplayGetData(res);
+                        layer.msg('没有显示项需要配置', {time: 3000, icon: 2});
                     }
                 },
                 errorFn: () => {
-                    $scope.info.fail("获取数据失败，请检查是否连上服务器")
+					layer.msg('获取数据失败，请检查是否连上服务器', {time: 3000, icon: 2});
                 }
             })
         };
-        getColumnData();
-
-        //初始化拖拽
-        $scope.clickLiGetItem();
 
         /**列信息配置点击保存进行发送数据**/
         $scope.saveTaskColumn = () => {
@@ -64,15 +66,15 @@ app
                 return;
             }
             http.put({
-                url: $rootScope.restful_api.task_column_config + $scope.locationId,
+                url: taskRoomUrl + $scope.locationId,
                 data: postData,
                 successFn: function(response){
                     if(response.data === true){
-                        $scope.info.success("数据保存成功");
+						layer.msg('保存成功', {time: 3000, icon: 1});
                     }
                 },
                 errorFn: function(){
-                    $scope.info.fail("数据保存失败");
+					layer.msg('保存失败', {time: 3000, icon: 2});
                 }
             })
         };
@@ -80,15 +82,14 @@ app
         /**列信息还原数据**/
         $scope.resetTaskColumn = () => {
             http.delete({
-                url: $rootScope.restful_api.task_column_config + $scope.locationId,
+                url: taskRoomUrl + $scope.locationId,
                 successFn: function(res){
-                    $(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                    $scope.info.success("还原配置成功");
+					layer.msg('还原成功', {time: 3000, icon: 1});
                 },
                 errorFn: function(){
-                    $scope.info.fail("还原配置失败");
+					layer.msg('还原失败', {time: 3000, icon: 2});
                 }
             });
         };
@@ -96,31 +97,38 @@ app
     .controller("cacheRoomController",["$rootScope","$scope","http",function($rootScope,$scope,http){
         //设置面包屑导航
         $scope.functionPage.showPageConfig = "暂存间显示项";
+		$scope.cacheRoomDimension = "planDimension";    //进入页面默认显示计划维度
+		let cacheRoomUrl = $rootScope.restful_api.cache_room_plan_config;
+
+		$scope.$watch("cacheRoomDimension",function (n, o) {
+			if(n === "planDimension"){
+				cacheRoomUrl = $rootScope.restful_api.cache_room_plan_config;
+				$scope.getColumnData();
+			}else if(n === 'orderDimension'){
+				cacheRoomUrl = $rootScope.restful_api.cache_room_order_config;
+				$scope.getColumnData();
+			}
+		});
         /**
          *根据点击的车间树获得相应的车间ID,显示对应排序表的数据
          */
-        let getColumnData = () =>{
+        $scope.getColumnData = () =>{
             http.get({
-                url: $rootScope.restful_api.cache_room_config + $scope.locationId,
+                url: cacheRoomUrl + $scope.locationId,
                 successFn: (res) => {
                     //如果请求到的数据有列信息，没有则给出提醒信息
-                    if(res.data.optionList.length){
-                        //获得get到的数据，渲染页面
-                        $scope.setDisplayGetData(res);
-                        $scope.displayData = {leftDisplay : "未显示项",rightDisplay : "已显示项"};
-                    }else{
-                        $scope.info.fail("没有显示信息需要配置")
-                    }
+					if(!res.data.optionList || res.data.optionList.length === 0){
+						layer.msg('没有显示项需要配置', {time: 3000, icon: 2});
+					}
+					//渲染数据
+					$scope.setDisplayGetData(res);
                 },
                 errorFn: () => {
-                    $scope.info.fail("获取数据失败，请检查是否连上服务器")
+					layer.msg('获取数据失败，请检查是否连上服务器', {time: 3000, icon: 2});
                 }
-            })
+            });
         };
-        getColumnData();
-
-        //初始化拖拽
-        $scope.clickLiGetItem();
+		// getColumnData();
 
         /**列信息配置点击保存进行发送数据**/
         $scope.saveCacheRoom = () => {
@@ -130,15 +138,15 @@ app
                 return;
             }
             http.put({
-                url: $rootScope.restful_api.cache_room_config + $scope.locationId,
+                url: cacheRoomUrl + $scope.locationId,
                 data: postData,
                 successFn: function(response){
                     if(response.data === true){
-                        $scope.info.success("数据保存成功");
+						layer.msg('保存成功', {time: 3000, icon: 1});
                     }
                 },
                 errorFn: function(){
-                    $scope.info.fail("数据保存失败");
+					layer.msg('还原失败', {time: 3000, icon: 2});
                 }
             })
         };
@@ -146,15 +154,14 @@ app
         /**列信息还原数据**/
         $scope.resetCacheRoom = () => {
             http.delete({
-                url: $rootScope.restful_api.cache_room_config + $scope.locationId,
+                url: cacheRoomUrl + $scope.locationId,
                 successFn: function(res){
-                    $(".js-move").remove();
                     //获得get到的数据，渲染页面
                     $scope.setDisplayGetData(res);
-                    $scope.info.success("还原配置成功");
+					layer.msg('还原成功', {time: 3000, icon: 1});
                 },
                 errorFn: function(){
-                    $scope.info.fail("还原配置失败");
+					layer.msg('还原失败', {time: 3000, icon: 2});
                 }
             });
         };

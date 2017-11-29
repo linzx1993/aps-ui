@@ -2,6 +2,7 @@
 /*常用颜色*/
 /*主题色*/
 /*表格灰框颜色*/
+/*下拉列表hover灰色*/
 /*标题栏背景灰色*/
 .c-theme-color {
   color: #1E7CD9; }
@@ -21,6 +22,7 @@
   width: 60%;
   height: calc(100vh - 150px);
   min-width: 600px;
+  min-height: 500px;
   top: 30px;
   left: 20px; }
 
@@ -34,7 +36,7 @@
 
 .dialog-window-head i {
   /*position: absolute;
-    right: 10px;*/
+  right: 10px;*/
   float: right;
   margin-right: 10px;
   padding: 10px;
@@ -62,7 +64,7 @@
   margin-bottom: 10px;
   border-bottom: 1px solid #CCC; }
 
-.table-window .info-show .window-search-box {
+.window-search-box {
   display: inline-block;
   height: 50px;
   line-height: 30px; }
@@ -110,10 +112,10 @@
   text-align: center;
   background: url(../images/splitline.png) center center no-repeat; }
 
-.table-window .info-show .window-search-box > input {
+.table-window .window-search-box input {
   width: 118px;
   height: 22px;
-  padding: 3px 10px;
+  padding: 3px 20px 3px 10px;
   line-height: 25px;
   border: #DEDEDE 1px solid; }
 
@@ -169,126 +171,12 @@
   width: 100%;
   overflow: hidden; }
 
-.table-window .show-table .table-space {
-  position: absolute;
-  max-height: 100%;
-  width: 100%;
-  overflow: auto; }
-
-.table-window .show-table .cover-head {
-  position: absolute;
-  z-index: 10;
-  height: 36px;
-  line-height: 36px; }
-
-.table-window .show-table .cover-head div {
-  float: left;
-  height: 100%;
-  border: 1px solid #CCC;
-  background-color: #3E7EC3;
-  color: #FFF; }
-
-.table-window .show-table .countall {
-  height: 30px !important;
-  border: none;
-  border-left: 1px solid #ccc; }
-
-.table-window .show-table .countall div {
-  float: left;
-  height: 30px;
-  line-height: 30px;
-  color: #ff9927;
-  border: 1px solid #CCC;
-  background-color: #fff; }
-
-.table-window .dialog-window-body .show-table table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 100%; }
-
 .table-window .dialog-window-body .window-tr-onlook {
   background-color: #FCEFA1; }
 
-.dialog-window-body .show-table th, .dialog-window-body .show-table td {
-  border: 1px solid #CCCCCC; }
-
-.dialog-window-body .show-table th {
-  margin: 0 5px;
-  color: #1E7CD9;
-  cursor: pointer; }
-
-.dialog-window-body .show-table .sale-order-look,
-.dialog-window-body .show-table .sale-order-edit,
-.dialog-window-body .show-table .sale-order-change {
-  margin: 0 10px;
-  width: 14px;
-  height: 14px;
-  background: url("./../images/look-weitiao-list.png") no-repeat 0 -14px;
-  cursor: pointer; }
-
-.dialog-window-body .show-table .sale-order-change {
-  background-position: -14px -14px; }
-
-.dialog-window-body .show-table .sale-order-edit {
-  background-position: -28px -14px; }
-
-.dialog-window-body .show-table .sale-order-look:hover {
-  background-position: 0 0; }
-
-.dialog-window-body .show-table .sale-order-edit:hover {
-  background-position: -28px 0; }
-
-.dialog-window-body .show-table .sale-order-change:hover {
-  background-position: -14px 0; }
-
-.dialog-window-body .show-table th {
-  min-width: 40px;
-  min-height: 36px;
-  line-height: 36px;
-  table-layout: fixed; }
-
-.dialog-window-body .show-table td {
-  height: 30px;
-  line-height: 30px; }
-
-.dialog-window-body .show-table tr:nth-child(even) {
-  background-color: #EDEEED; }
-
-.dialog-window-body .show-table label {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  background: url(../images/unchecked.png);
-  cursor: pointer; }
-
-.dialog-window-body .show-table input {
-  display: none; }
-
-.dialog-window-body .show-table input:checked + label,
-.dialog-window-body .cover-head input:checked + label {
-  background: url(../images/selected.png) center #FFF;
-  border: 1px solid #1E7CD9; }
-
-.fix-table-column {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  height: 100%;
-  background-color: #fff; }
-  .fix-table-column table {
-    position: absolute; }
-  .fix-table-column .fix-table thead tr {
-    background-color: #3E7EC3; }
-    .fix-table-column .fix-table thead tr th {
-      color: #fff;
-      font-weight: normal; }
-
-.fixed-column {
-  position: absolute; }
-
 .check-error {
   width: 100%;
+  height: calc(100vh - 200px);
   z-index: 100; }
 
 /***多列排序弹窗***/
@@ -321,5 +209,10 @@
     padding: 0; }
     .secondPage .layui-layer .change-third .dialog-window-body .show-table {
       margin-top: 0; }
+
+.row-with-source {
+  color: #ee8f00; }
+  .row-with-source .aps-table-edit {
+    display: none; }
 
 /*# sourceMappingURL=secondPage.css.map */

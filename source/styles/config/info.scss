@@ -1,0 +1,68 @@
+@import '../resetStyle.scss';
+
+.config-box .info-box {
+    position: fixed;
+    top: calc(50% - 130px);
+    left: 50%;
+    z-index: 120;
+    padding: 0 10px;
+    min-width: 178px;
+    height: 58px;
+    line-height: 58px;
+    //border: 1px solid $borderColor;
+    //overflow: hidden;
+    box-shadow: 1px 1px 30px rgba(0, 0, 0, .3);
+    background-color: #fff;
+    @include transition(transform,.3s);
+    @include scale(0);
+    @include transform-origin(50%, 50%);
+    &.active{
+        @include scale(1);
+    }
+}
+
+@-webkit-keyframes show {
+    from {
+        @include scale(0);
+    }
+    10% {
+        @include scale(1);
+    }
+    90% {
+        @include scale(1);
+    }
+    to {
+        @include scale(0);
+    }
+}
+
+@-ms-keyframes show {
+    from {
+        @include scale(0);
+    }
+    10% {
+        @include scale(1);
+    }
+    90% {
+        @include scale(1);
+    }
+    to {
+        @include scale(0);
+    }
+}
+
+.config-box .info-mask.active .info-box {
+    animation: show 2s;
+    transform-origin: 50% 50%;
+}
+
+.config-box .info-box span {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    background: url("../images/config-info.jpg") no-repeat;
+}
+
+.config-box .info-box.error span {
+    background-position-y: -56px;
+}

@@ -1,0 +1,49 @@
+@import "../resetStyle.scss";
+.aps-slide{
+    .aps-slide-way{
+        position: relative;
+        width: 100%;
+        height: 4px;
+        background-color: #e4e8f1;
+        border-radius: 3px;
+        vertical-align: middle;
+        cursor: pointer;
+        .aps-slide-way-inner{
+            position: absolute;
+            height: 4px;
+            border-radius: 3px;
+            background-color: $themeColor;
+        }
+        &.is-disabled{
+            .aps-slide-way-inner{
+                background-color: $disabledColor;
+            }
+            .aps-slide-button-inner{
+                background-color: $disabledColor;
+                cursor: not-allowed;
+                &:hover{
+                    transform: scale(1);
+                }
+            }
+        }
+    }
+    .aps-slide-button{
+        position: absolute;
+        top: -16px;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 36px;
+        text-align: center;
+        line-height: 36px;
+        .aps-slide-button-inner{
+            width: 12px;
+            height: 12px;
+            background-color: $themeColor;
+            border-radius: 50%;
+            transition: .2s;
+            &:hover{
+                transform: scale(1.5);
+            }
+        }
+    }
+}

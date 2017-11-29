@@ -44,6 +44,7 @@ export default {
 			handler: function (val, oldVal) {
 
                this.$emit("input", val);
+               this.$emit("change", val);
 			},
 		}
 	},

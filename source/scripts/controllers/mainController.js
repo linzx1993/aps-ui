@@ -8,14 +8,6 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	//默认翻转状态
 	$rootScope.frontBack = true;
 	$scope.turn_to_back = function () {
-		//判断往那边转
-		var thisOpacity = 1;
-		if ($rootScope.frontBack) {
-			$rootScope.frontBack = false;
-			thisOpacity = 0;
-		} else {
-			$rootScope.frontBack = true;
-		}
 
 		$(".table-tr").each(function (a) {
 			var thisTr = $(this),
@@ -28,8 +20,12 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 					var thisTd = $(this),
 						thisFront = thisTd.find(".td-front"),
 						thisBack = thisTd.find(".td-back"),
+						isFront = thisTd.hasClass("table-td-front"),
+						thisOpacity = isFront ? 0 : 1,
 						ry = 0,
 						by = 0;
+					
+					thisTd.toggleClass("table-td-front");
 
 					//连点终止之前的动画。
 					thisFront.stop(false, false);
@@ -51,7 +47,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 				}
 			})
 		});
-	}
+	};
 
 	/**
 	 * 切换显示模型（大格子/小个子）
@@ -85,7 +81,10 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
         }
     }
 
-    //滚动加载的参数,受大格子，小格子的影响
+	/**
+	 * desc : 分页加载
+	 */
+	//滚动加载的参数,受大格子，小格子的影响
     $rootScope.pageIndex = 1;//初始页面
     $rootScope.pageNumber = $scope.isSmall ? 40 : 20;//每次加载的条数
     $scope.myPagingFunction = () => {
@@ -144,77 +143,6 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	};
 
 	/**
-	 * 确认保存APS结果
-	 **/
-    $scope.save_aps = function () {
-        //检测的进度条消失
-        $(".cover").hide();
-        $("#progressbar_one").hide();
-
-        let saveLoading = layer.msg('保存中', {
-            icon: 16,
-            shade: 0.3,
-            time: 3000
-        });
-        //点击开始保存按钮
-        http.post({
-            url: $rootScope.restful_api.aps_save,
-            data: JSON.parse(sessionStorage.getItem("cancel_data")),
-            successFn: function (response) {
-                // $(".cover").show();
-                if (response.data) {
-                } else {
-                    layer.alert("保存排程结果失败，返回参数错误,请联系技术人员处理");
-                }
-            },
-            errorFn: function (response) {
-                layer.alert("保存排程结果失败，请联系技术人员处理");
-            }
-        });
-        //进度部分
-        var i = 1; //循环次数
-        var timeCount;
-        function progress() {
-            var progressVal = 0;
-            var sUrl = $rootScope.restful_api.aps_rate_confirm + "?schemeId=" + sessionStorage.schemeId;
-            http.get({
-                url: sUrl,
-                successFn: function (res) {
-                    res = res.data;
-                    //获取接口数据
-                    progressVal = res.rate || 0;
-                    if (progressVal || progressVal == 0) { //数据正确
-                        timeCount = setTimeout(progress, 1000);
-                        if (progressVal == 100) {
-                            // debugger;
-                            layer.close(saveLoading);
-                            clearTimeout(timeCount);
-
-                            // $timeout(function () {
-                                $location.path("/preview");
-                            // });
-
-                        } else {
-                            clearTimeout(timeCount);
-                            layer.alert("保存失败！");
-                        }
-                        //如果时间超过1小时，停止加载 ，弹框提示
-                        if (i > 3600) {
-                            layer.alert("进度查询超时，请联系技术人员处理");
-                            clearTimeout(timeCount);
-                        }
-                    } else { //如果数据错误
-                        layer.alert("进度失败，请联系技术人员处理");
-                        // $(".cover").hide();
-                    }
-                }
-            });
-            i++; //循环加一
-        }
-        setTimeout(progress, 1000); //开始加载
-    };
-
-	/**
 	 * 改变地点重新获取基础数据(锁定期、显示天数、合并规则、默认翻转)
 	 **/
 	$scope.refreshBaseInfo = function () {
@@ -259,7 +187,6 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	//存储选中的单元格的信息
 	$scope.checkBoxArray = [];
 	$scope.check_this = function (cell, $event) {
-		console.log("click");
 		if (cell[0].type == 1) {
 			return;
 		}
@@ -293,7 +220,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	$scope.clean_check = function(){
 		$scope.checkBoxArray = [];
 		$(".table-td-check").removeClass("table-td-check");
-	}
+	};
 
 	/**
 	 *desc:点击左键出现的小目录
@@ -303,6 +230,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 	 *@param: page:"preview","result",判断是排程前页面还是排程后页面
 	 *@return:
 	 **/
+	$scope.cacheInfo = [];
 	$scope.showRightClickSmallNav = function (cell, event, page) {
         $scope.rightClickNavShow = true;//是否显示右键小目录
 		$scope.rightClickNavLiShow = {
@@ -335,7 +263,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 		}
 
 		//判断是否在暂存区里选择了未派工单
-		if($(".cache-window input:checked").parents("tr").length === 0){
+		if($scope.cacheInfo.length === 0){
 			$scope.rightClickNavLiShow.movein = false;
 		}
 
@@ -399,11 +327,13 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 					moveY = (parentWindow.offset().top + moveY > 0 && parentWindow.offset().top + parentWindow.outerHeight() + moveY < $(window).height()) ? oldPosition.split(",")[5] - 0 + moveY : oldPosition.split(",")[5];
 				}
 				//限制不可移出可视区
-				
 				parentWindow.css("transform","translate(" + moveX + "px," + moveY + "px)");
+				//不可选中
+				$("body").css("user-select","none");
 			});
 			//结束位移
 			$(document).on("mouseup.windowmove",function(event){
+				$("body").css("user-select","auto");
 				$(document).off("mousemove.windowmove");
 				$(document).off("mouseup.windowmove");
 			});
@@ -437,16 +367,6 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 //		$event.stopPropagation();
 //	};
 
-    //获得查询框中产线数据
-    $scope.getProductLineSelectedData = (event) => {
-		let thisLi = $(event.target),
-			newText = [];
-        thisLi.toggleClass("active");
-		thisLi.parent().find(".active").each(function(){
-			newText.push($(this).text());
-		});
-		$scope.productLineSelectedData = newText.join();
-    };
 
 	//离开页面时保存AB测试信息
 	//左右键点击次数
@@ -470,7 +390,40 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 				errorFn : 	function(res){}
 			});
 		}
-	}
+	};
+
+	//退出登录
+	$scope.loginOut = function () {
+		$.ajax({
+			type: "post",
+			url: loginOutUrl,
+			data: {},
+			dataType: "json",
+			contentType: "application/json;charset=UTF-8",
+			success: function (res) {
+				if (res.success_response) {
+					localStorage.removeItem("token");
+					window.location.href = res.success_response.loginUrl;
+				} else if (res.error_response && res.error_response.code === 1){
+					window.location.href = res.error_response.sub_msg;
+				} else {
+					layer.alert('退出登录失败！', {
+						skin: 'layer-alert-themecolor' //样式类名
+					});
+				}
+			},
+			error: function (res) {
+				layer.alert('退出登录失败！', {
+					skin: 'layer-alert-themecolor' //样式类名
+				});
+			},
+			headers: {
+				"X-Requested-With": "XMLHttpRequest",
+				"redirectUrl": window.location.origin + window.location.pathname,
+				"Authorization": localStorage.getItem("token") || ""
+			}
+		});
+	};
 
 	//右边栏弹出小提示
 	$(function () {
@@ -503,45 +456,9 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 					$this.removeClass("active");
 				}, 300)
 			})
-			//退出登录
-			.on("click", ".out-login", function () {
-				$.ajax({
-					type: "post",
-					url: loginOutUrl,
-					data: {},
-					dataType: "json",
-					contentType: "application/json;charset=UTF-8",
-					success: function (res) {
-						if (res.success_response) {
-							localStorage.removeItem("token");
-							window.location.href = res.success_response.loginUrl;
-						} else if (res.error_response && res.error_response.code === 1){
-							window.location.href = res.error_response.sub_msg;
-						} else {
-							layer.alert('退出登录失败！', {
-								skin: 'layer-alert-themecolor' //样式类名
-							});
-						}
-					},
-					error: function (res) {
-						layer.alert('退出登录失败！', {
-							skin: 'layer-alert-themecolor' //样式类名
-						});
-					},
-					headers: {
-						"X-Requested-With": "XMLHttpRequest",
-						"redirectUrl": window.location.origin + window.location.pathname,
-						"Authorization": localStorage.getItem("token") || ""
-					}
-				});
-			})
 			//打开和收起右边栏
 			.on("click", ".right-menu-switch", function () {
 				let thisPositionX = $(this).css("background-position-x");
-				// if(!!window.ActiveXObject || "ActiveXObject" in window){
-				// 	var thisPosition = $(this).css("background-position").split(" ");
-				// 	thisPositionX = thisPosition[0];
-				// }
 				$(".right-menu").stop(false, false);
 				if (thisPositionX === "0px") {
 					//向右移动隐藏
@@ -580,14 +497,14 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 			//打开右边栏搜索弹窗
 			.on("click", ".search-btn", function (e) {
 				if ($(this).hasClass("search-btn-click")) {
-					$(".search-box").hide();
-					$(this).removeClass("search-btn-click");
 				} else {
 					$(".search-box").show();
-					$(".to-fact-box").hide();
 					$(this).addClass("search-btn-click");
-					$(".to-fact").removeClass("to-fact-click");
 				}
+			})
+			.on("click", ".search-box .close", function (e) {
+				$(".search-btn").removeClass("search-btn-click");
+				$(".search-box").hide();
 				e.stopPropagation();
 			})
 			//打开预排转实际弹窗
@@ -604,7 +521,7 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 				e.stopPropagation();
 			})
 			//阻止冒泡
-			.on("click", ".search-box,.to-fact-box,.layui-layer,.layui-layer-shade,.equipment-list,.equipment-input", function (e) {
+			.on("click", ".to-fact-box,.layui-layer-shade", function (e) {
 				e.stopPropagation();
 			})
 			//全选全不选
@@ -627,29 +544,19 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
 				}
 			})
 			//地点树点击
-            .on("click", ".jleftLocationTree ul span", function () {
-                if ($(this).next().find("li").length === 0) {
+            .on("click", ".jleftLocationTree ul .tree-item", function () {
+                if ($(this).siblings(".location-tree-ul").find("li").length === 0) {
                     return;
                 } else {
                     $(this).toggleClass("active").toggleClass("open");
-                    $(this).next().toggle();
+                    $(this).siblings(".location-tree-ul").toggle();
                 }
 
                 //改变按钮的位置
                 $(".out-bg").width($(".location-choose").width());
 
-                //设置前面线的高度
-                let li = $(this).parent(),
-                    index = li.index() + 1,
-                    ul = li.parent(),
-                    height = ul.height() - li.height(); //设置线的高度为ul的高度减去li的高度
-                if (index === ul.children().length) {
-                    ul.children("b").height(height + 50);
-                } else {
-                    ul.children("b").height("auto");
-                }
             })
-            .on("click", ".jleftLocationTree ul i", function () {
+            .on("click", ".jleftLocationTree ul .select-status", function () {
                 //配置排程规则的一级地点单选，其他子级车间多选
                 let locationTreeParentDiv = $(this).parent().parent().parent();//获取地点树一级地点的包裹div
                 //判断是否为一级地点，如果为一级地点，表现为单选，将其他的车间取消选中
@@ -659,27 +566,45 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
                 //获取到点击元素的一级车间
                 let firstLevelLocation = getFirstLevelParentLocation($(this));
                 firstLevelLocation.siblings("ul").find("i").attr("class", "select-status unselect");
-                //改变状态
+                //改变点击地点的状态
                 changeSelectStatus($(this));
             });
 
-        //改变地点树状态方法
+		$(document)
+			.on("click", function () {
+				//隐藏预排转实际弹窗
+				$(".to-fact-box").hide();
+				$(".to-fact").removeClass("to-fact-click");
+				//隐藏设备下拉框
+				$(".equipment-list").remove();
+				$(".table-dialog-window .equipment-input").css("border", "1px solid #DEDEDE");
+				//隐藏点击左键出现的目录
+				$("#jLeftClickNav").hide();
+			})
+			.on("mousedown", function () {
+				//表格滚动
+				$(".table-content").on("scroll", function () {
+					$(this).parents(".j-table").find(".table-equipment-head div").eq(0).css("margin-top", -1 * $(this)[0].scrollTop + 1);
+				});
+
+			});
+
         function changeSelectStatus(thisSelect) {
             //本身及所有后代的改变
             if (!thisSelect.hasClass("active")) {
-                thisSelect.attr("class", "select-status selected active");
-                thisSelect.parent("li").find("ul i").attr("class", "select-status selected active");
+                thisSelect.parent("li").find(".select-status").attr("class", "select-status selected active");
             } else {
-                thisSelect.attr("class", "select-status unselect");
-                thisSelect.parent("li").find("ul i").attr("class", "select-status unselect");
+                thisSelect.parent("li").find(".select-status").attr("class", "select-status unselect");
             }
-            //处于其影响范围内的祖先的改变
+            //然后向上寻找所有的父元素判断是否需要改变状态
             thisSelect.parents("ul").each(function () {
                 let thisTree = $(this);
                 let thisStatus = thisTree.siblings(".select-status");
+                //如果一个选中的(".selected")都没有
                 if (thisTree.find(".selected").length < 1) {
                     thisStatus.attr("class", "select-status unselect");
                 } else if (thisTree.find(".unselect").length < 1) {
+					//如果一个未选中的(".unselect")都没有
                     thisStatus.attr("class", "select-status selected active");
                 } else {
                     thisStatus.attr("class", "select-status select-some");
@@ -697,27 +622,6 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
             }
         };
 
-		$(document)
-			.on("click", function () {
-				//隐藏搜索弹窗
-				$(".search-box").hide();
-				$(".search-btn").removeClass("search-btn-click");
-				//隐藏预排转实际弹窗
-				$(".to-fact-box").hide();
-				$(".to-fact").removeClass("to-fact-click");
-				//隐藏设备下拉框
-				$(".equipment-list").remove();
-				$(".table-dialog-window .equipment-input").css("border", "1px solid #DEDEDE");
-				//隐藏点击左键出现的目录
-				$("#jLeftClickNav").hide();
-			})
-			.on("mousedown", function () {
-				//表格滚动
-				$(".table-content").on("scroll", function () {
-					$(this).parents(".j-table").find(".table-equipment-head div").eq(0).css("margin-top", -1 * $(this)[0].scrollTop + 1);
-				});
-
-			});
 
         //所有一级页面全屏显示代码
         $scope.fixedDisplay = function () {
@@ -744,300 +648,28 @@ app.controller('mainCtrl', function ($scope, $rootScope, $http, $window, $locati
                 })
             }
         })
+
+		/************==============合并项==============***********/
+		$(".page-wrapper")
+		//点击出现下拉框
+			.on("click",".combine-menu",function(e){
+				$(this).addClass("active");
+				$(this).children(".combine-drag").addClass("drag");
+				e.stopPropagation();
+				$(this).find("li").click(function(){
+					$(".combine-menu").removeClass("active");
+					$(".combine-menu").children("ul").removeClass("drag");
+				})
+			})
+			//移出下拉框小时
+			.on("mouseleave",".combine-menu",function(e){
+				$(this).removeClass("active");
+				$(this).children("ul").removeClass("drag");
+			});
+
+		/******************/
 	});
 
-    /*************=========================拖拽项目排序js=========================*************/
-    let $id = function (element) {
-        return typeof element === "string" ? document.getElementById(element) : element;
-    };
-    let $find = function (parent, nodeName) {
-        return parent.getElementsByTagName(nodeName);
-    };
-//拖拽项目类
-    function DragNewItem() {
-        this.init.apply(this, arguments);
-    }
-
-//拖拽项目原型
-    DragNewItem.prototype = {
-        _downX: 0,//鼠标按下时的x坐标
-        _downY: 0,//鼠标按下时的y坐标
-        _moveX: 0,//鼠标移动时的x坐标
-        _moveY: 0,//鼠标移动时的y坐标
-        _index: 0,//移动图标的下标
-        //初始化方法
-        init: function (mainDivId, myAppId, otherAppId, config) {
-            this.mainDiv = $id(mainDivId);//获取最外面的div
-            this.myApp = $id(myAppId);//获取第一个div
-            this.otherApp = $id(otherAppId);//获取第二个div
-            this.repeatTransfer();
-            this.addItem().removeItem();
-        },
-        //局部刷新页面时每次需要重复确认操作的区域
-        repeatTransfer : function(){
-            this._OnApp(this.mainDiv);
-            this._moveApp(this.myApp, this.otherApp);
-            this._moveApp(this.otherApp, this.myApp);
-            //
-        },
-        //鼠标移入移出图标
-        _OnApp: function (mainDiv) {
-            let _this = this;
-            //鼠标移入可以移动的li时，加一个出现虚线的class
-            mainDiv.onmouseover = function (event) {
-                let e = event || window.event;//获取鼠标
-                let t = e.target || e.srcElement;//获取鼠标触发源
-                if (t.nodeName.toLowerCase === "li") {
-                    _this.addClass(t, "js-liBorderStyle");
-                } else if (t.parentNode.nodeName.toLowerCase() === "li") {
-                    _this.addClass(t.parentNode, "js-liBorderStyle")
-                }
-            };
-            //鼠标移出可以移动的li时，移除一个出现虚线的lcas
-            mainDiv.onmouseout = function (event) {
-                let e = event || window.event;//获取鼠标
-                let t = e.target || e.srcElement;//获取鼠标触发源
-                if (t.nodeName.toLowerCase === "li") {
-                    _this.removeClass(t, "js-liBorderStyle");
-                } else if (t.parentNode.nodeName.toLowerCase() === "li") {
-                    _this.removeClass(t.parentNode, "js-liBorderStyle")
-                }
-            }
-        },
-        //拖动鼠标改变位置
-        _moveApp: function (dragUl, otherUl) {
-            let _this = this;
-            dragUl.onmousedown = function () {
-                let e = event || window.event;//获取鼠标
-                let t = e.target || e.srcElement;//获取鼠标触发源
-                _this.liList = [];//class不是js-liBorderStyle的li元素集合
-                if (t.nodeName.toLowerCase() === "div" && t.className !== "appDiv") {
-                    let oLi = t.parentNode;
-                    let oCopyLi = oLi.cloneNode(true);
-                    let scrollTop = $(t).parents("nav").scrollTop();
-                    let oNewLi = oCopyLi.cloneNode(true);
-                    _this.removeClass(oNewLi, "js-liBorderStyle");
-                    _this.removeClass(oNewLi, "js-move");
-                    //oNewLi.innerHTML = oCopyLi.innerHTML;
-                    //                    var oSpan = $find(oCopyLi,"span")[0];
-
-                    document.body.appendChild(oCopyLi);
-                    _this.addClass(oCopyLi, "js-newLi");
-                    //                    oSpan.style.display = "none";
-                    oCopyLi.style.left = _this.offset(oLi).left + "px";
-                    oCopyLi.style.top = _this.offset(oLi).top + "px";
-
-                    oLi.parentNode.replaceChild(oNewLi, oLi);//新创建的li替代原来的li
-                    _this.addClass(oNewLi, "js-liBorderStyle");
-
-                    _this._downX = e.clientX;
-                    _this._downY = e.clientY;
-                    _this._offsetLeft = oCopyLi.offsetLeft;//鼠标按下时获取新生成的虚线li的坐标left
-                    _this._offsetTop = oCopyLi.offsetTop;//鼠标按下时获取新生成的虚线li的坐标top
-
-                    _this._liList = $find(_this.mainDiv, "li");//获取要拖拽下的ul里的所有li
-                    for (let i = 0, length = _this._liList.length; i < length; i++) {
-                        let li = _this._liList[i];
-                        if (li.className !== "js-liBorderStyle") {//获取到class不是js-liBorderStyle的li
-                            _this.liList.push(li);
-                        }
-                    }
-                    //鼠标按下时移动图标的位置
-                    _this.getAppLocation(_this._offsetLeft + 80, _this._offsetTop + 80);
-
-
-                    document.onmousemove = function (event) {
-                        let e = event || window.event;//获取鼠标
-                        let t = e.target || e.srcElement;//获取鼠标触发源
-                        let _X = e.clientX, _Y = e.clientY;//获取鼠标的坐标值
-                        let _mLeft = _this._offsetLeft + _X - _this._downX,//获取图标移动时每一次坐标值
-                            _mTop = _this._offsetTop + _Y - _this._downY;
-                        let oSize = _this._overBorder(_mLeft, _mTop);//获取每次移动经过判断后（是否超过box范围）的坐标
-                        _mLeft = oSize.left ? oSize.left : _mLeft;
-                        _mTop = oSize.top ? oSize.top : _mTop;
-                        oCopyLi.style.left = _mLeft + "px";
-                        oCopyLi.style.top = _mTop - scrollTop + "px";
-                        let index = _this.getAppLocation(_mLeft, _mTop);//？？获取需要插入的li的下标
-                        _this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
-                        _this._insertApp(_X, _Y, _this.liList[index], oNewLi, _this.myApp, _this.otherApp);
-                    };
-                    document.onmouseup = function (event) {
-                        let e = event || window.event;//获取鼠标
-                        let t = e.target || e.srcElement;//获取鼠标触发源
-                        let left = _this.offset(oNewLi).left;
-                        let top = _this.offset(oNewLi).top;
-                        //                        var oSpan2;
-                        _this.animate(oCopyLi, {left: left, top: top}, 100, function () {
-                            document.body.removeChild(oCopyLi);
-                            oNewLi.innerHTML = oCopyLi.innerHTML;
-                            _this.removeClass(oNewLi, "js-liBorderStyle");
-                            _this.addClass(oNewLi, "js-move");
-                            //修改bug，清楚暴力乱移时出现在页面上的元素
-                            $("body").children(".js-liBorderStyle").remove();
-                            $(".js-liBorderStyle").removeClass("js-liBorderStyle");
-                        });
-                        document.onmousemove = null;
-                        document.onmouseup = null;
-                    }
-                }
-            }
-        },
-        //添加class
-        addClass: function (node, className) {
-            if (!node.className) {
-                node.className = className;
-            } else {
-                node.className += " " + className;
-            }
-        },
-        //删除class
-        removeClass: function (node, className) {
-            var string = node.className;
-            if (string.indexOf(className) > 0) {
-                node.className = string.replace(" " + className, "");
-            } else if (string.indexOf(className) === 0) {//判断class是否在第一个class，进行删除
-                if (string.indexOf(" ") < 0) {
-                    node.className = string.replace(className, "");
-                } else {
-                    node.className = string.replace(className + "", "");
-                }
-            } else {
-                return;
-            }
-        },
-        //元素在文档中的位置
-        offset: function (obj) {
-            let _offset = {};
-            let node = $id(obj);
-            let left = node.offsetLeft;
-            let top = node.offsetTop;
-            let parent = node.offsetParent;
-            //不断向上获取父元素的offsetLeft，知道获取到与页面的距离
-            while (parent != null) {
-                left += parent.offsetLeft;
-                top += parent.offsetTop;
-                parent = parent.offsetParent;
-            }
-            _offset.left = left;
-            //!!!!!配置页减去对应的滚动条距离
-            _offset.top = top -  $(".config-content").scrollTop();
-            return _offset;
-        },
-        //计算移动图标所处的位置
-        getAppLocation: function (x, y) {
-            let liList = this.liList;
-            let liW = liList[0].offsetWidth;//
-            let liH = liList[0].offsetHeight;//
-            for (let i = 0, length = liList.length; i < length; i++) {
-                let li = liList[i], left = this.offset(li).left, top = this.offset(li).top;
-                if ((x > left - liW && x < left + liW) && (y > top - liH && y < top + liH)) {
-                    this._index = i;
-                    break;
-                }
-            }
-            return this._index;
-        },
-        //图标超出边界处理
-        _overBorder: function (left, top) {
-            let x = 0, y = 0, mainDiv = this.mainDiv, oSize = {};
-            let mainDivLeft = this.offset(document.getElementById("all-item")).left;//因为绝对定位的原因，所有需要通过获取点击按钮的offsetLeft计算出来offsetLeft
-            let mainDivTop = this.offset(document.getElementById("all-item")).top;
-            if (left < mainDivLeft) {
-                x = mainDivLeft
-            }
-            if (left > mainDivLeft + mainDiv.offsetWidth) {
-                x = mainDivLeft + mainDiv.offsetWidth;
-            }
-            if (top < mainDivTop) {
-                y = mainDivTop
-            }
-            if (top > mainDivTop + mainDiv.offsetHeight) {
-                y = mainDivTop + mainDiv.offsetHeight
-            }
-            oSize.left = x;
-            oSize.top = y;
-            return oSize;
-        },
-        //边框随鼠标移动改变位置,然后选择插入到哪个li后面
-        _insertApp: function (x, y, oldElement, newElement,my, other) {
-            let parent;
-            let liList = $id(parent, "li");
-            let selectX =  this.offset(document.getElementsByClassName("middleBtn")[0]).left;
-            ///此段代码中的x大雨的值不同环境需要计算
-            if (x > selectX) {
-                parent = other;
-            } else {
-                parent = my;
-            }
-            //console.log(this.offset(parent).top - $(".config-content").scrollTop());
-            if (y > this.offset(parent).top && y < this.offset(parent).top + parent.offsetHeight) {
-                try {
-                    parent.insertBefore(newElement, oldElement);
-                } catch (error) {
-                    parent.appendChild(newElement)
-                }
-            } else {
-                parent.appendChild(newElement)
-            }
-        },
-        //动画方法，
-        animate: function (obj, params, time, handler) {
-            let node = $id(obj), handlerFlag = true, _style = node.currentStyle ? node.currentStyle : window.getComputedStyle(node, null);
-            time = document.all ? time * 0.6 : time * 0.9;
-            for (let p in params) {
-                (function (n) {
-                    n = p;
-                    if (n === "left" || n === "top") {
-                        let _old = parseInt(_style[n]), _new = parseInt(params[n]), _length = 0, _tt = 10;
-                        if (!isNaN(_old)) {
-                            let count = _old, length = _old <= _new ? (_new - _old) : (_old - _new), speed = length / time * _tt, flag = 0;
-                            let anim = setInterval(function () {
-                                node.style[n] = count + "px";
-                                count = _old <= _new ? count + speed : count - speed;
-                                flag += _tt;
-                                if (flag >= time) {
-                                    node.style[n] = _new + "px";
-                                    clearInterval(anim);
-                                }
-                            }, _tt);
-                        }
-                    }
-                })(p);
-            }
-
-            let timeHandler = setTimeout(function () {
-                if (handler && typeof handler === "function") {
-                    handler();
-                    clearTimeout(timeHandler);
-                }
-            }, time + 100);
-        },
-        //一次性添加所㓟可排序字段
-        addItem: function () {
-            $("body").on("click", ".addAllItem", function () {
-                let elem = $("#provide-item li");
-                for (let i = 0; i < elem.length; i++) {
-                    let cloneElem = $(elem[i]).clone().addClass("js-move");
-                    $(".sort-item ul").append(cloneElem);
-                    elem.remove();
-                }
-            });
-            return this;
-        },
-        //一次性移除所有已排序字段
-        removeItem: function () {
-            $("body").on("click", ".removeAllItem", function () {
-                let elem = $("#sort-item li");
-                for (let i = 0; i < elem.length; i++) {
-                    let cloneElem = $(elem[i]).clone().addClass("js-move");
-                    $(".provide-item ul").append(cloneElem);
-                    elem.remove();
-                }
-            });
-            return this;
-        }
-        //决定单个项目中的升序和降序
-    };
 
 
 });

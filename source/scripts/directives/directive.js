@@ -1570,6 +1570,12 @@ app.directive("apsSwitch",function () {
 	}
 });
 
+/**
+ * desc:拖动条
+ * last:2017-11-27
+ * @param:
+ * @return:
+ **/
 app.directive("apsSlide",["$timeout",function ($timeout) {
 	return {
 		restrict : "E",

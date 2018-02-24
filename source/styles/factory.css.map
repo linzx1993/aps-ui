@@ -1,7 +1,0 @@
-{
-"version": 3,
-"mappings": ";;AAIC,gBAAO;EACN,UAAU,EAAE,kEAAkE",
-"sources": ["factory.scss"],
-"names": [],
-"file": "factory.css"
-}

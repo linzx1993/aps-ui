@@ -1,4 +1,8 @@
 @import "../resetStyle";
+.aps-transfer{
+    //display: flex;
+    width: 506px;
+}
 .aps-transfer-panel{
     box-sizing: border-box;
     position: relative;
@@ -149,6 +153,7 @@
     width: 100%;
     box-sizing: border-box;
     .el-input__icon{
+        position: absolute;
         right: 10px;
     }
     .aps-input{

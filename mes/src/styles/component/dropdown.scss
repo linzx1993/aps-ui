@@ -3,11 +3,11 @@
 /*下拉框-已选内容展示区*/
 .aps-dropdown{
 	position: relative;
-	
+
 	.aps-dropdown-main{
 		position: relative;
 		cursor: pointer;
-		
+
 		.aps-dropdown-input{
 			box-sizing: border-box;
 			width: 180px;
@@ -29,7 +29,7 @@
 				border-color: $themeColor;
 			}
 		}
-		
+
 		.aps-dropdown-clean{
 			display: inline-block;
 			position: absolute;
@@ -40,14 +40,13 @@
 			background: url($gImgBase + "cancel.png") #fff left center no-repeat;
 			z-index: 10;
 		}
-		
+
 		&:after{
 			content: '';
 			position: absolute;
 			top: 13px;
 			right: 12px;
 			border: 7px solid transparent;
-			border-color: transparent;
 			border-top-color: $borderColor;
 			border-radius: 1px;
 			transition: transform .3s;
@@ -82,7 +81,7 @@
 	overflow: hidden;
 	animation: .2s slideIn;
 	animation-fill-mode: forwards;
-	
+
 	.aps-dropdown-placeholder{
 		box-sizing: border-box;
 		width: 180px;
@@ -99,11 +98,11 @@
 		font-weight: bolder;
 		background-color: $dropDownBorderColor;
 		cursor: pointer;
-		
+
 		&:hover{
 			background-color: $liHoverColor
 		}
-		
+
 	}
 	.aps-dropdown-all-checked{
 		color: #ffffff;
@@ -118,7 +117,7 @@
 		padding: 2px 10px;
 		margin: 2px 0;
 		flex: 0 0 30px;
-		
+
 		.aps-dropdown-inner-input{
 			box-sizing: border-box;
 			width: 100%;
@@ -147,18 +146,19 @@
 		max-height: 258px;
 		padding: 6px 0;
 		overflow-y: auto;
-		
+
 		li{
 			box-sizing: border-box;
 			position: relative;
 			line-height: 26px;
 			padding: 2px 10px;
 			overflow: hidden;
+      text-align: left;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 			cursor: pointer;
 		}
-		
+
 		.aps-select-group-title{
 			font-size: 12px;
 			color: #999;
@@ -166,29 +166,29 @@
 			line-height: 30px;
 			cursor: default;
 		}
-		
+
 		.aps-option-li{
 			height: 30px;
 			cursor: pointer;
-			
+
 			&:hover{
 				background-color: $liHoverColor
 			}
 		}
-		
+
 		.dropdown-li-disabled{
 			color: #bfcbd9;
 			cursor: not-allowed;
-			
+
 			&:hover{
 				background-color: #ffffff;
 			}
 		}
-		
+
 		.dropdown-li-checked{
 			color: #ffffff;
 			background-color: #20a0ff;
-			
+
 			&:hover{
 				background-color: #1c8de0;
 			}

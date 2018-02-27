@@ -1,0 +1,59 @@
+@import "../resetStyle.scss";
+.aps-menu{
+    position: relative;
+    padding-left: 0;
+    //background-color: #fff;
+    transition:.3s height ease-in-out,.3s padding-top ease-in-out,.3s padding-bottom ease-in-out;
+    .aps-menu-item {
+        box-sizing: border-box;
+        position: relative;
+        padding: 0 20px;
+        height: 46px;
+        line-height: 46px;
+        font-size: 14px;
+        color: $fontColor;
+        transition: border-color .3s, background-color .3s, color .3s;
+        cursor: pointer;
+        white-space: nowrap;
+        &:hover{
+            color: $themeColor;
+        }
+    }
+    .aps-submenu{
+        .aps-menu-item{
+            height: 40px;
+            line-height: 40px;
+            padding: 0 45px;
+            //min-width: 200px;
+        }
+        &.is-opened .el-submenu__icon-arrow {
+            transform: rotate(180deg);
+        }
+    }
+    .aps-submenu-title{
+        position: relative;
+        box-sizing: border-box;
+        padding: 0 20px;
+        height: 46px;
+        line-height: 46px;
+        font-size: 14px;
+        color: #fff;
+        transition: border-color .3s,background-color .3s,color .3s;
+        cursor: pointer;
+    }
+    .aps-menu-item-group-title{
+        padding: 7px 0 7px 20px;
+        line-height: normal;
+        font-size: 12px;
+        color: #909399;
+    }
+}
+
+.aps-opacity-transition {
+    transition: opacity .3s cubic-bezier(.55, 0, .1, 1)
+}
+
+.collapse-transition {
+    -webkit-transition: .3s height ease-in-out, .3s padding-top ease-in-out, .3s padding-bottom ease-in-out;
+    transition: .3s height ease-in-out, .3s padding-top ease-in-out, .3s padding-bottom ease-in-out
+}

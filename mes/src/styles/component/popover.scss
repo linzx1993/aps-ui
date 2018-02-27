@@ -1,0 +1,38 @@
+.aps-popover{
+    position: absolute;
+    z-index: 20;
+    padding: 12px;
+    color: #606266;
+    line-height: 1.4;
+    text-align: justify;
+    font-size: 14px;
+    //min-width: 150px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ebeef5;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    .popper-arrow{
+      position: absolute;
+      display: block;
+      width: 0;
+      height: 0;
+      border:6px solid transparent;
+    }
+    .aps-popover[x-placement^=top] .popper-arrow{
+        bottom: -6px;
+        border-bottom-width: 0;
+    }
+    .aps-popover[x-placement^=bottom] .popper-arrow{
+        top: -6px;
+        border-top-width: 0;
+        border-bottom-color: #e6ebf5;
+    }
+    .aps-popover[x-placement^=left] .popper-arrow{
+        right: -6px;
+        border-right-width: 0;
+    }
+    .aps-popover[x-placement^=right] .popper-arrow{
+        left: -6px;
+        border-left-width: 0;
+    }
+}

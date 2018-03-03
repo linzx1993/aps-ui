@@ -1,12 +1,12 @@
 <template>
   <div
-    class='el-scrollbar__bar'
+    class='scrollbar__bar'
     :class="vertical ? 'is-vertical' : 'is-horizontal'"
     @mousedown="clickTrackHandle"
   >
     <div
       ref="thumb"
-      class="el-scrollbar__thumb"
+      class="scrollbar__thumb"
       :style="style"
       @mousedown="clickThumbHandle"
     ></div>
@@ -32,6 +32,7 @@
                 return this.$parent.wrap;
             },
             style(){
+            	  console.log(this.size);
                 return renderThumbStyle({size :this.size,move : this.move,bar:this.bar})
             }
         },

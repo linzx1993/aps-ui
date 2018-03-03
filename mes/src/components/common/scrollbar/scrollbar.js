@@ -57,7 +57,7 @@ export default {
         }
 
         const view = h(this.tag,{
-            class : ['el-scrollbar__view',this.viewClass],
+            class : ['scrollbar__view',this.viewClass],
             style : this.viewStyle,
             ref : 'resize',
         },this.$slots.default);
@@ -67,7 +67,7 @@ export default {
                 ref="wrap"
                 style={style}
                 onScroll={this.handleScroll}
-                class={[this.wrapClass, 'el-scrollbar__wrap', gutter ? '' : 'el-scrollbar__wrap--hidden-default']}>
+                class={[this.wrapClass, 'scrollbar__wrap', gutter ? '' : 'scrollbar__wrap--hidden-default']}>
                 {[view]}
             </div>
         );
@@ -89,11 +89,11 @@ export default {
             nodes = ([
                 <div
                     ref="wrap"
-                    class={[this.wrapClass,'el-scrollbar__wrap']}
+                    class={[this.wrapClass,'scrollbar__wrap']}
                     style={style}
                 >{[view]}</div>])
         }
-        return h('div',{class:'el-scrollbar'},nodes)
+        return h('div',{class:'scrollbar'},nodes)
     },
     methods : {
         handleScroll(){
@@ -103,12 +103,14 @@ export default {
             this.moveY = (wrap.scrollTop *100 / wrap.clientHeight);
         },
         update(){
+          console.log(1111111111);
             let heightPercentage, widthPercentage;
             const wrap = this.wrap;
             if(!wrap) return;
 
             heightPercentage = (wrap.clientHeight * 100 / wrap.scrollHeight);
             widthPercentage = (wrap.clientWidth * 100 / wrap.scrollWidth);
+            console.log(wrap.clientHeight,wrap.scrollHeight);
 
             this.sizeHeight = (heightPercentage < 100) ? (heightPercentage + '%') : '';
             this.sizeWidth = (widthPercentage < 100) ? (widthPercentage + '%') : '';

@@ -30,6 +30,7 @@ const cancelFrame = (function () {
 })();
 
 const resetTrigger = function (element) {
+    console.log(45678);
     const trigger = element.__resizeTrigger__;
     const expand = trigger.firstElementChild;
     const contract = trigger.lastElementChild;
@@ -48,6 +49,7 @@ const checkTrigger = function (element) {
 };
 
 const scrollListener = function (event) {
+  console.log(99999999);
     resetTrigger(this);
     if (this.__resizeRAF__) cancelFrame(this.__resizeRAF__);
     this.__resizeRAF__ = requestFrame(() => {

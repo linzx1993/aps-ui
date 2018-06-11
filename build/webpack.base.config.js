@@ -31,13 +31,20 @@ const webpackConfig = {
         rules:[
             {
                 test: /\.html$/,
-                loader: 'html-withimg-loader',
+                loader: 'html-loader',
             },
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
                 //踩坑：使用vue-loader14版本没有报错。一开始使用的13版本编译失败,报错代码:
                 // vue-loader was used without the corresponding plugin. Make sure to include VueLoaderPlugin in your webpack config.
+                options: {
+                    transformToRequire: {
+                        source: 'src',
+                        img: 'src',
+                        image: 'xlink:href'
+                    }
+                }
             },
             // 踩坑：webpack不允许混用import和module.exports，推荐统一改成ES6的方式import和export default
             {
@@ -70,7 +77,7 @@ const webpackConfig = {
                 loader: 'url-loader',
                 options: {
                     limit: 1 * 1024,
-                    name: "assets/svg/[name].[hash:7].[ext]"
+                    name: "assets/svg/[name].[ext]"
                 }
             },
         ]

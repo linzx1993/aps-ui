@@ -52,7 +52,8 @@ const webpackConfig = merge(baseConfig, {
                             sourceMap: true
                         }
                     }],
-                    fallback: "style-loader"
+                    fallback: "style-loader",
+                    publicPath: "../"
                 })
             }
         ]
@@ -64,7 +65,7 @@ const webpackConfig = merge(baseConfig, {
     },
     plugins: [
         new ExtractTextPlugin({
-            filename:"styles/[name].css",
+            filename:"./styles/[name].css",
             allChunks: false,
         }),
         new HtmlWebpackPlugin({
@@ -96,7 +97,7 @@ const webpackConfig = merge(baseConfig, {
             minChunks: 1,   // 被引用次数
             maxAsyncRequests: 5,
             maxInitialRequests: 3,
-            name: true, // 默认由块名和hash值自动生成
+            name: "bundle", // 默认由块名和hash值自动生成
             cacheGroups: {
                 default: {
                     minChunks: 2,

@@ -69,7 +69,7 @@ const webpackConfig = merge(baseConfig, {
             allChunks: false,
         }),
         new HtmlWebpackPlugin({
-            template: path.join(__dirname, "..", "src/index.html"),//new 一个这个插件的实例，并传入相关的参数
+            template: path.join(__dirname, "..", "index.html"),//new 一个这个插件的实例，并传入相关的参数
             inject: 'body', //js插入的位置，true:'head';false:body
             minify: {
                 // removeAttributeQuotes:true, //压缩 去掉引号

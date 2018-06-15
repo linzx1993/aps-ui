@@ -23,6 +23,10 @@ rm(path.resolve(__dirname,"../dist"),function (err) {
 })
 
 process.env.NODE_ENV = config.build.NODE_ENV
+// new webpack.DllReferencePlugin({
+//     context: __dirname,
+//     manifest: require('./dll/vendor-manifest.json'),
+// });
 
 const webpackConfig = merge(baseConfig, {
     devtool: (config.build.productionSourceMap ? config.build.devtool :false),
@@ -77,39 +81,39 @@ const webpackConfig = merge(baseConfig, {
                 collapseWhitespace: false //删除空白符与换行符
             }
         }),
-        new WebpackParallelUglifyPlugin({
-            // 有兴趣可以探究一下使用uglifyES
-            uglifyJS: {
-                output: {
-                    beautify: false, //不需要格式化
-                    comments: false //不保留注释
-                },
-                compress: {
-                    warnings: false, // 在UglifyJs删除没有用到的代码时不输出警告
-                    drop_console: true, // 删除所有的 `console` 语句，可以兼容ie浏览器
-                }
-            }
-        }),
-        //原有分隔代码模块的优化
-        new webpack.optimize.SplitChunksPlugin({
-            chunks: "all",  // initial(初始块)、async(按需加载块)、all(全部块)，默认为all;
-            minSize: 30000, // 压缩前的最小模块大小, 太小体积的代码块被分割，可能还会因为额外的请求，拖慢加载性能
-            minChunks: 1,   // 被引用次数
-            maxAsyncRequests: 5,
-            maxInitialRequests: 3,
-            name: "bundle", // 默认由块名和hash值自动生成
-            cacheGroups: {
-                default: {
-                    minChunks: 2,
-                    priority: -20,
-                    reuseExistingChunk: true,
-                },
-                vendors: {
-                    test: /[\\/]node_modules[\\/]/,
-                    priority: -10
-                }
-            }
-        }),
+        // new WebpackParallelUglifyPlugin({
+        //     // 有兴趣可以探究一下使用uglifyES
+        //     uglifyJS: {
+        //         output: {
+        //             beautify: false, //不需要格式化
+        //             comments: false //不保留注释
+        //         },
+        //         compress: {
+        //             warnings: false, // 在UglifyJs删除没有用到的代码时不输出警告
+        //             drop_console: true, // 删除所有的 `console` 语句，可以兼容ie浏览器
+        //         }
+        //     }
+        // }),
+        // //原有分隔代码模块的优化
+        // new webpack.optimize.SplitChunksPlugin({
+        //     chunks: "all",  // initial(初始块)、async(按需加载块)、all(全部块)，默认为all;
+        //     minSize: 30000, // 压缩前的最小模块大小, 太小体积的代码块被分割，可能还会因为额外的请求，拖慢加载性能
+        //     minChunks: 1,   // 被引用次数
+        //     maxAsyncRequests: 5,
+        //     maxInitialRequests: 3,
+        //     name: "bundle", // 默认由块名和hash值自动生成
+        //     cacheGroups: {
+        //         default: {
+        //             minChunks: 2,
+        //             priority: -20,
+        //             reuseExistingChunk: true,
+        //         },
+        //         vendors: {
+        //             test: /[\\/]node_modules[\\/]/,
+        //             priority: -10
+        //         }
+        //     }
+        // }),
         new CopyWebpackPlugin([
             {
                 from: path.resolve(__dirname, '../src/scripts/lib/vue.js'),
@@ -120,7 +124,7 @@ const webpackConfig = merge(baseConfig, {
             }
         ]),
     ],
-    mode: "production"
+    mode: "none"
 })
 
 if (config.build.bundleAnalyzerReport) {

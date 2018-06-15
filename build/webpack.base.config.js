@@ -10,10 +10,19 @@ function resolve(dir) {
 }
 
 const webpackConfig = {
+    // entry: path.resolve(__dirname, '../src/test.js'),
+    // entry: [path.resolve(__dirname, '../src/test.js'),path.resolve(__dirname, '../src/test2.js')],
     entry: {
-        index: path.resolve(__dirname, '../src/index.js'),
-        reset: path.resolve(__dirname, '../src/styles/reset.scss')
+        index: path.resolve(__dirname, '../src/test.js'),
+        test2: path.resolve(__dirname, '../src/test2.js'),
     },
+    // entry: {
+    //     index: path.resolve(__dirname, '../src/index.js'),
+    //     reset: path.resolve(__dirname, '../src/styles/reset.scss')
+    // },
+    // externals: {
+    //     'element-ui': 'element-ui'
+    // },
     output: {
         path: path.resolve(__dirname, "..", 'dist'),
         filename: 'scripts/[name].[hash].js',

@@ -13,5 +13,8 @@ module.exports = {
         assetPath: "",
         productionSourceMap: true, // 是否需要打包的map文件
         bundleAnalyzerReport: false, // 启动文件分析
+    },
+    test: {
+        NODE_ENV: '"production"',
     }
 }

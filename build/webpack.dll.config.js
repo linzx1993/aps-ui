@@ -12,7 +12,7 @@ module.exports = {
     },
 
     output: {
-        path: path.join(__dirname, 'dist-[hash]'),
+        path: path.join(__dirname, 'dist-dll'),
         filename: '[name].js',
         library: '[name]',
     },

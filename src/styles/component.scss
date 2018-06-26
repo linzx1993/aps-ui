@@ -1,0 +1,10 @@
+
+.test{
+  transform: rotate(180deg);
+  background: url("../assets/toggleBtn.png");
+}
+
+@import "./resetStyle.scss";
+@import "./component/checkbox.scss";
+@import "./component/radio.scss";
+@import "./component/transfer.scss";

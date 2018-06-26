@@ -1,0 +1,63 @@
+.scrollbar{
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.scrollbar__wrap {
+  overflow: scroll;
+  height: 100%;
+}
+
+.scrollbar__view{
+  position: relative;
+}
+
+.scrollbar__bar {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  z-index: 1;
+  border-radius: 4px;
+  opacity: 0;
+  -webkit-transition: opacity 120ms ease-out;
+  transition: opacity 120ms ease-out;
+  &.is-horizontal {
+    height: 6px;
+    left: 2px;
+    div{height: 100%}
+  }
+  &.is-vertical {
+    width: 6px;
+    top: 2px;
+    div{width: 100%}
+  }
+}
+.scrollbar:active>.scrollbar__bar, .scrollbar:focus>.scrollbar__bar, .scrollbar:hover>.scrollbar__bar {
+  opacity: 1;
+  transition: opacity .34s ease-out;
+}
+
+.scrollbar__thumb {
+  position: relative;
+  display: block;
+  width: 0;
+  height: 0;
+  cursor: pointer;
+  border-radius: inherit;
+  background-color: rgba(135, 141, 153, 0.3);
+  -webkit-transition: .3s background-color;
+  transition: .3s background-color;
+}
+
+
+.resize-triggers {visibility: hidden;opacity: 0;}
+.resize-triggers, .resize-triggers > div {content: " ";display: block;position: absolute;top: 0;left: 0;height: 100%;width: 100%;overflow: hidden;}
+
+.resize-triggers > div {
+  overflow: auto;
+}
+
+.contract-trigger:before {
+  width: 200%;
+  height: 200%;
+}

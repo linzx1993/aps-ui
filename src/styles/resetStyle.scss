@@ -1,0 +1,43 @@
+@charset "utf-8";
+/*图片根路径*/
+$gImgBase : "../assets/";
+
+/*常用颜色*/
+$fontColor : #333333;//通用字体颜色
+$themeColor : #409EFF;/*主题色 1E7CD9*/
+
+$btnBgColor : #909399;
+$btnHoverBgColor : #a6a9ad;
+$btnThemeBgColor : $themeColor;
+$btnHoverThemeBgColor : #66b1ff;
+
+$borderColor : #bfcbd9;/*表格灰框颜色*/
+$hoverBorderColor : #8391a5;/*格子灰框hover颜色*/
+$titleBgColor : #f0f0f0;/*标题栏背景灰色*/
+$orange : #ee8f00;//橘色
+$liHoverColor : #e4e8f1;//下拉框li的hover背景色
+$dropDownBorderColor : #d1dbe5;//下拉框、级联下拉框边框颜色
+@mixin scale($n) {
+  -webkit-transform: scale($n);
+  -ms-transform: scale($n);
+  transform: scale($n);
+}
+
+@mixin transform-origin($x,$y) {
+  -webkit-transform-origin: $x $y;
+  -ms-transform-origin: $x $y;
+  transform-origin: $x $y;
+}
+
+@mixin transition($prop,$time) {
+  -webkit-transition: $prop $time;
+  -ms-transition: $prop $time;
+  transition: $prop $time;
+}
+
+@mixin rotate($deg) {
+  -webkit-transform: rotate($deg);
+  -ms-transform: rotate($deg);
+  transform: rotate($deg);
+}
+
